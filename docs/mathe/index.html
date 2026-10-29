@@ -1,0 +1,1372 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#002B36"><meta name="description" content="Mathematik üben, Klasse 5">
+<link rel="manifest" href="../manifest.webmanifest"><link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icons/icon-192.png"><title>Mathematik – LERNWERK</title>
+<style>@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url(../fonts/montserrat-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url(../fonts/montserrat-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url(../fonts/montserrat-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url(../fonts/inter-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;font-display:swap;src:url(../fonts/inter-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url(../fonts/inter-latin-600-normal.woff2) format('woff2')}
+/* LERNWERK Webapp – Cortex-CI (design.md im Hub), kindgerecht: große Schrift, Tippflächen ≥ 48 px */
+:root {
+  --bg-deep: #002B36; --bg-primary: #00343F; --bg-mid: #004D5C; --bg-light: #0A6070; --bg-black: #001820;
+  --gold-dark: #8B6914; --gold-mid: #B8922A; --gold-base: #C9A84C; --gold-warm: #D4AF6A; --gold-light: #E8C97D; --gold-bright: #F0D9A0;
+  --text: #F5F0E8; --text-gold: #E8C97D; --text-secondary: #A89060; --text-muted: #8A9A9A;
+  --ok: #2D9E6B; --ok-hell: #3ECF8E; --fehler: #B84040; --fehler-hell: #E07070;
+  --border: rgba(200, 168, 76, 0.2); --border-strong: rgba(200, 168, 76, 0.5);
+  --gradient-gold: linear-gradient(135deg, #8B6914 0%, #C9A84C 45%, #E8C97D 100%);
+  --card: linear-gradient(135deg, #003B49 0%, #002530 100%);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { min-height: 100%; }
+body {
+  font-family: 'Inter', system-ui, sans-serif; font-size: 17px; line-height: 1.5; color: var(--text);
+  background: radial-gradient(ellipse at top left, var(--bg-mid) 0%, var(--bg-deep) 50%, var(--bg-black) 100%) fixed;
+  -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 16px 16px 40px; }
+.gold { background: linear-gradient(90deg, #B8922A, #E8C97D, #C9A84C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 2px; }
+
+/* Kopf */
+.kopf { display: flex; align-items: center; gap: 10px; margin: 4px 0 18px; }
+.kopf h1 { min-width: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.03em; flex: 1; }
+.zurueck { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; min-height: 48px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--gold-base); text-decoration: none; font-size: 22px; }
+.chips { display: flex; gap: 8px; }
+.chip { white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 12px; border-radius: 20px; font-size: 14px; font-weight: 700; color: var(--gold-light); background: rgba(201, 168, 76, 0.12); border: 1px solid rgba(201, 168, 76, 0.3); }
+
+/* Themenkarten */
+.thema { position: relative; overflow: hidden; padding: 16px; margin-bottom: 14px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(200, 168, 76, 0.1); }
+.thema::after { content: ''; position: absolute; right: 0; bottom: 0; width: 140px; height: 50px; background: var(--gradient-gold); border-radius: 60% 0 0 0; opacity: 0.08; pointer-events: none; }
+.thema-kopf { display: flex; align-items: center; gap: 14px; }
+.thema-icon { font-size: 38px; line-height: 1; }
+.thema h2 { font-size: 18px; font-weight: 700; color: var(--gold-light); line-height: 1.3; }
+.thema .meta { font-size: 14px; color: var(--text-muted); }
+.sterne { color: var(--gold-base); letter-spacing: 2px; }
+.reihe { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; position: relative; z-index: 1; }
+.reihe .btn { flex: 1 1 auto; }
+.reihe-druck { display: flex; gap: 8px; margin-top: 8px; position: relative; z-index: 1; }
+.reihe-druck .btn { flex: 1; font-size: 14px; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid transparent; font-size: 16px; font-weight: 700; text-decoration: none; transition: transform 0.08s, background 0.15s; }
+.btn:active { transform: scale(0.97); }
+.btn-gold { background: var(--gradient-gold); color: #000; }
+.btn-ghost { background: transparent; color: var(--gold-base); border-color: rgba(200, 168, 76, 0.4); }
+.btn-ghost:hover { background: rgba(200, 168, 76, 0.1); }
+.btn[disabled] { opacity: 0.4; cursor: default; transform: none; }
+.btn-breit { width: 100%; }
+
+/* Lektion */
+.lektion { min-height: 100vh; display: flex; flex-direction: column; }
+.lektion-kopf { display: flex; align-items: center; gap: 12px; padding: 12px 16px; max-width: 560px; width: 100%; margin: 0 auto; }
+.schliessen { min-width: 48px; min-height: 48px; border-radius: 12px; border: none; background: transparent; color: var(--text-muted); font-size: 26px; }
+.fortschritt { flex: 1; height: 14px; border-radius: 7px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.fortschritt span { display: block; height: 100%; background: var(--gradient-gold); border-radius: 7px; transition: width 0.3s; }
+.herzen { font-weight: 700; color: var(--fehler-hell); font-size: 18px; white-space: nowrap; }
+.uebung { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 8px 16px 160px; }
+.kontext { font-size: 15px; color: var(--text-secondary); margin-bottom: 6px; overflow-wrap: anywhere; }
+.frage { font-size: 22px; font-weight: 600; line-height: 1.4; margin-bottom: 20px; overflow-wrap: anywhere; hyphens: auto; }
+.frage.lang { font-size: 19px; font-weight: 500; }
+.box { display: inline-block; min-width: 2.2em; padding: 0 6px; border: 2px dashed var(--gold-base); border-radius: 6px; text-align: center; color: var(--gold-light); }
+.eingabe { width: 100%; min-height: 60px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--border-strong); background: rgba(0, 30, 40, 0.6); color: var(--text); font-size: 24px; font-weight: 600; }
+.eingabe:focus { outline: none; border-color: var(--gold-light); box-shadow: 0 0 0 3px rgba(200, 168, 76, 0.15); }
+.wortfeld { min-height: 120px; padding: 12px 16px; font-size: 20px; line-height: 1.4; resize: none; overflow-wrap: anywhere; }
+.eingabe::placeholder { color: var(--text-muted); font-weight: 400; font-size: 18px; }
+.label { display: block; font-size: 15px; color: var(--text-secondary); margin: 0 0 6px; }
+.optionen { display: grid; gap: 10px; }
+.optionen.zwei { grid-template-columns: 1fr 1fr; }
+.optionen.drei { grid-template-columns: 1fr 1fr 1fr; }
+.option { min-width: 0; overflow-wrap: anywhere; min-height: 58px; padding: 10px 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--card); text-align: left; font-size: 19px; font-weight: 600; }
+.option.zeichen { text-align: center; font-size: 30px; }
+.option.gewaehlt { border-color: var(--gold-light); background: rgba(201, 168, 76, 0.15); }
+.option.richtig { border-color: var(--ok-hell); background: rgba(45, 158, 107, 0.2); }
+.option.falsch { border-color: var(--fehler-hell); background: rgba(184, 64, 64, 0.2); }
+.paare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.paare .option { text-align: center; }
+.paare .option.fertig { opacity: 0.45; border-color: var(--ok-hell); }
+.wackeln { animation: wackeln 0.3s; }
+@keyframes wackeln { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.diagramm { width: 100%; margin: 4px 0 18px; padding: 10px; border-radius: 12px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); }
+.diagramm text { fill: var(--text); font-family: Inter, sans-serif; }
+
+/* Feedback-Leiste */
+.leiste { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); background: var(--bg-black); border-top: 1px solid var(--border); }
+.leiste-innen { max-width: 560px; margin: 0 auto; }
+.leiste.ok { background: #0B3B2C; border-top-color: var(--ok); }
+.leiste.fehler { background: #3A1818; border-top-color: var(--fehler); }
+.meldung { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.leiste.ok .meldung { color: var(--ok-hell); }
+.leiste.fehler .meldung { color: var(--fehler-hell); }
+.erklaer { font-size: 15px; margin-bottom: 12px; color: var(--text); }
+
+/* Merke / Ende */
+.karte { padding: 20px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); margin-bottom: 16px; }
+.karte h2 { font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-base); margin-bottom: 10px; }
+.merke p, .merke li { margin-bottom: 8px; }
+.merke ul, .merke ol { padding-left: 22px; }
+.merke strong { color: var(--gold-light); }
+.merke table { border-collapse: collapse; margin: 8px 0 12px; width: 100%; font-size: 15px; }
+.merke th, .merke td { border: 1px solid var(--border-strong); padding: 6px 8px; text-align: center; }
+.merke th { color: var(--gold-light); background: rgba(201, 168, 76, 0.08); }
+.ende { text-align: center; padding-top: 40px; }
+.ende .gross { font-size: 64px; line-height: 1.1; margin-bottom: 8px; }
+.ende h1 { font-size: 30px; margin-bottom: 8px; }
+.ende .sterne { font-size: 40px; margin: 8px 0 16px; }
+.ende .werte { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+.wissen { text-align: left; }
+.stapel { display: grid; gap: 10px; }
+.fuss { margin-top: 28px; text-align: center; font-size: 13px; color: var(--text-muted); }
+.fuss .reihe { justify-content: center; }
+.fuss .btn { min-height: 44px; font-size: 14px; flex: 0 1 auto; }
+.versteckt { display: none !important; }
+</style></head>
+<body><div id="app"><p class="wrap">Die App wird geladen …</p></div>
+<noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
+<script>(function () {
+  var defs = [/* web-einstieg.js */ [function (module, exports, require) {
+// Einstieg für das Browser-Bundle der Webapp (window.LW)
+const { instanz } = require('./generate');
+const { fmt, parseZahl } = require('./lib/zahlen');
+
+module.exports = { instanz, fmt, parseZahl };
+
+}, {"./generate":1,"./lib/zahlen":5}],
+/* generate.js */ [function (module, exports, require) {
+// Macht aus einer Aufgabe der Inhaltsdatei eine konkrete Aufgabe (Instanz) – für Druck und Webapp gleich:
+// { id, typ, be, schwierigkeit, prioritaet, anweisung, teile: [{ label, text, loesung, antwort, eingabe, optionen? }],
+//   daten?, weg?, antwortsatz?, schreibzeilen?, nur? }
+const { makeRng, hashString } = require('./lib/rng');
+const { GENERATOREN } = require('./tasks');
+
+const BUCHSTABEN = 'abcdefghijkl';
+
+function feste(a) {
+  const eingabe = a.typ === 'multiple_choice' ? 'wahl' : a.typ === 'richtig_falsch' ? 'richtig_falsch' : a.paare ? 'paare' : 'text';
+  const antwort = a.typ === 'richtig_falsch' ? (a.loesung ? 'richtig' : 'falsch') : a.paare ? a.paare.map((p) => p.join(' – ')).join('; ') : String(a.loesung);
+  return {
+    anweisung: a.frage,
+    teile: [{ text: '', loesung: a.paare || a.loesung, antwort, eingabe, optionen: a.optionen, paare: a.paare }],
+  };
+}
+
+function instanz(aufgabe, seed) {
+  const basis = { id: aufgabe.id, typ: aufgabe.typ, be: aufgabe.be, schwierigkeit: aufgabe.schwierigkeit, prioritaet: aufgabe.prioritaet || 2, nur: aufgabe.nur };
+  let inhalt;
+  if (aufgabe.generator) {
+    const g = GENERATOREN[aufgabe.generator];
+    if (!g) throw new Error(`Aufgabe "${aufgabe.id}": Generator "${aufgabe.generator}" unbekannt`);
+    const p = { ...(aufgabe.parameter || {}), anzahl: aufgabe.anzahl };
+    g.pruefe(p);
+    inhalt = g.erzeuge(p, makeRng(hashString(`${seed}|${aufgabe.id}`)));
+  } else {
+    inhalt = feste(aufgabe);
+  }
+  const teile = inhalt.teile.map((t, i) => ({ ...t, label: t.label || (inhalt.teile.length > 1 ? `${BUCHSTABEN[i]})` : '') }));
+  return { ...basis, nur: inhalt.nur || basis.nur, ...inhalt, teile };
+}
+
+// alle Aufgaben eines Themas
+function erzeugeThema(doc, seed) {
+  return doc.aufgaben.map((a) => instanz(a, seed));
+}
+
+module.exports = { instanz, erzeugeThema };
+
+}, {"./lib/rng":2,"./tasks":3}],
+/* rng.js */ [function (module, exports, require) {
+// Reproduzierbarer Zufall: gleicher Seed → gleiche Aufgaben (Tests lassen sich wiederholen).
+function hashString(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+// mulberry32
+function makeRng(seed) {
+  let a = (typeof seed === 'string' ? hashString(seed) : seed) >>> 0;
+  const next = () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const rng = {
+    next,
+    int: (min, max) => min + Math.floor(next() * (max - min + 1)),
+    pick: (arr) => arr[Math.floor(next() * arr.length)],
+    shuffle: (arr) => {
+      const a2 = arr.slice();
+      for (let i = a2.length - 1; i > 0; i--) {
+        const j = Math.floor(next() * (i + 1));
+        [a2[i], a2[j]] = [a2[j], a2[i]];
+      }
+      return a2;
+    },
+    // n verschiedene Werte aus [min, max]
+    distinct: (n, min, max) => {
+      if (max - min + 1 < n) throw new Error(`distinct: Bereich ${min}–${max} zu klein für ${n} Werte`);
+      const set = new Set();
+      while (set.size < n) set.add(rng.int(min, max));
+      return [...set];
+    },
+  };
+  return rng;
+}
+
+module.exports = { makeRng, hashString };
+
+}, {}],
+/* index.js */ [function (module, exports, require) {
+// Verzeichnis aller Aufgabengeneratoren: name → { pruefe(parameter), erzeuge(parameter, rng) }
+const MODULE = [
+  require('./math/runden'),
+  require('./math/zahldarstellung'),
+  require('./math/rechnen'),
+  require('./math/sachaufgaben'),
+  require('./math/diagramm'),
+];
+
+const GENERATOREN = {};
+for (const g of MODULE.flat()) {
+  if (GENERATOREN[g.name]) throw new Error(`Generator "${g.name}" doppelt registriert`);
+  GENERATOREN[g.name] = g;
+}
+
+module.exports = { GENERATOREN };
+
+}, {"./math/runden":4,"./math/zahldarstellung":6,"./math/rechnen":7,"./math/sachaufgaben":8,"./math/diagramm":9}],
+/* runden.js */ [function (module, exports, require) {
+const { fmt, runden, STELLEN, STELLEN_NAME } = require('../../lib/zahlen');
+
+const BUCHSTABEN = 'abcdefghij';
+
+function pruefeStellen(p) {
+  if (!Array.isArray(p.stellen) || !p.stellen.length) throw new Error('stellen: Liste fehlt');
+  for (const s of p.stellen) if (STELLEN[s] === undefined) throw new Error(`stellen: unbekannt "${s}"`);
+  if (!Array.isArray(p.ziffern) || !p.ziffern.length) throw new Error('ziffern: Liste fehlt');
+  // Rundungsstelle muss mindestens eine Ziffer links von sich haben
+  const maxK = Math.max(...p.stellen.map((s) => STELLEN[s]));
+  if (Math.min(...p.ziffern) < maxK + 2) throw new Error(`ziffern ${p.ziffern} zu kurz für Stelle mit 10^${maxK}`);
+}
+
+// Zufallszahl mit genau d Ziffern; mit uebertrag wird ein Übertrag über die Rundungsstelle erzwungen
+// (z. B. 34 961 → 35 000 beim Runden auf Hunderter)
+function ziehe(rng, d, k, uebertrag) {
+  const ziffern = [rng.int(1, 9), ...Array.from({ length: d - 1 }, () => rng.int(0, 9))];
+  const pos = d - 1 - k; // Index der Rundungsstelle von links
+  if (uebertrag) {
+    ziffern[pos] = 9;
+    ziffern[pos + 1] = rng.int(5, 9);
+    if (pos > 0 && ziffern[pos - 1] === 9) ziffern[pos - 1] = rng.int(1, 8);
+  } else if (ziffern.slice(pos + 1).every((z) => z === 0)) {
+    ziffern[pos + 1] = rng.int(1, 9); // keine schon gerundete Zahl
+  }
+  return Number(ziffern.join(''));
+}
+
+const rundenEinzeln = {
+  name: 'runden',
+  pruefe: pruefeStellen,
+  erzeuge(p, rng) {
+    const anzahl = p.anzahl || 1;
+    const teile = [];
+    const gesehen = new Set();
+    while (teile.length < anzahl) {
+      const stelle = rng.pick(p.stellen);
+      const n = ziehe(rng, rng.pick(p.ziffern), STELLEN[stelle], p.uebertrag);
+      if (gesehen.has(n)) continue;
+      gesehen.add(n);
+      const r = runden(n, stelle);
+      teile.push({
+        text: `Runde ${fmt(n)} auf ${STELLEN_NAME[stelle]}.`,
+        loesung: r,
+        antwort: `${fmt(n)} ≈ ${fmt(r)}`,
+        eingabe: 'zahl',
+        pruefung: { n, stelle },
+      });
+    }
+    return { anweisung: anzahl > 1 ? 'Runde die Zahlen.' : 'Runde die Zahl.', teile };
+  },
+};
+
+const rundenReihe = {
+  name: 'runden-reihe',
+  pruefe: pruefeStellen,
+  erzeuge(p, rng) {
+    const kMax = Math.max(...p.stellen.map((s) => STELLEN[s]));
+    const n = ziehe(rng, rng.pick(p.ziffern), kMax, false);
+    return {
+      anweisung: `Runde die Zahl ${fmt(n)} auf …`,
+      teile: p.stellen.map((stelle, i) => {
+        const r = runden(n, stelle);
+        return {
+          label: `${BUCHSTABEN[i]})`,
+          text: `${STELLEN_NAME[stelle]}`,
+          frageWeb: `Runde ${fmt(n)} auf ${STELLEN_NAME[stelle]}.`,
+          loesung: r,
+          antwort: `${fmt(n)} ≈ ${fmt(r)}`,
+          eingabe: 'zahl',
+          pruefung: { n, stelle },
+        };
+      }),
+    };
+  },
+};
+
+// Rückwärts denken: kleinste/größte natürliche Zahl, die gerundet einen Wert ergibt (3 400 → 3 350 bzw. 3 449)
+const rundenRueckwaerts = {
+  name: 'runden-rueckwaerts',
+  pruefe(p) {
+    for (const s of p.stellen || []) if (!['zehner', 'hunderter', 'tausender'].includes(s)) throw new Error(`stellen: nur zehner/hunderter/tausender, nicht "${s}"`);
+    if (!p.stellen?.length) throw new Error('stellen: Liste fehlt');
+  },
+  erzeuge(p, rng) {
+    const teile = [];
+    const gesehen = new Set();
+    while (teile.length < (p.anzahl || 1)) {
+      const stelle = rng.pick(p.stellen);
+      const f = 10 ** STELLEN[stelle];
+      const gerundet = rng.int(2, 99) * f;
+      const groesste = rng.next() < 0.5;
+      const loesung = groesste ? gerundet + f / 2 - 1 : gerundet - f / 2;
+      const text = `Nenne die ${groesste ? 'größte' : 'kleinste'} Zahl, die auf ${STELLEN_NAME[stelle]} gerundet ${fmt(gerundet)} ergibt.`;
+      if (gesehen.has(text)) continue;
+      gesehen.add(text);
+      teile.push({ text, loesung, antwort: fmt(loesung), eingabe: 'zahl', pruefung: { gerundet, stelle, groesste } });
+    }
+    return { anweisung: 'Denk rückwärts!', teile };
+  },
+};
+
+module.exports = [rundenEinzeln, rundenReihe, rundenRueckwaerts];
+
+}, {"../../lib/zahlen":5}],
+/* zahlen.js */ [function (module, exports, require) {
+// Zahlen schreiben wie in der Schule: Dreiergruppen mit schmalem Leerzeichen, Zahlwörter nach
+// deutscher Rechtschreibung (unter einer Million zusammen, Million/Milliarde/Billion getrennt).
+const GRUPPE = ' '; // schmales geschütztes Leerzeichen: 34 761
+
+function fmt(n) {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, GRUPPE);
+}
+
+const EINER = ['', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn',
+  'elf', 'zwölf', 'dreizehn', 'vierzehn', 'fünfzehn', 'sechzehn', 'siebzehn', 'achtzehn', 'neunzehn'];
+const ZEHNER = ['', '', 'zwanzig', 'dreißig', 'vierzig', 'fünfzig', 'sechzig', 'siebzig', 'achtzig', 'neunzig'];
+
+// 1–99; alleinstehend am Ende "eins", sonst "ein" (einundzwanzig, eintausend, hunderteins)
+function bis99(n, amEnde) {
+  if (n === 0) return '';
+  if (n === 1) return amEnde ? 'eins' : 'ein';
+  if (n < 20) return EINER[n];
+  const e = n % 10;
+  const z = ZEHNER[Math.floor(n / 10)];
+  return e === 0 ? z : `${e === 1 ? 'ein' : EINER[e]}und${z}`;
+}
+
+function bis999(n, amEnde) {
+  const h = Math.floor(n / 100);
+  const rest = n % 100;
+  const hundert = h === 0 ? '' : `${h === 1 ? 'ein' : EINER[h]}hundert`;
+  return hundert + bis99(rest, amEnde);
+}
+
+const GROSS = [
+  [1e12, 'Billion', 'Billionen'],
+  [1e9, 'Milliarde', 'Milliarden'],
+  [1e6, 'Million', 'Millionen'],
+];
+
+// Zahlwort für 0 ≤ n ≤ 10^12. Blöcke wie 101 Millionen ("hunderteine Million") sind
+// sprachlich uneinheitlich und werden abgelehnt; Generatoren ziehen dann neu.
+function zahlwort(n) {
+  if (!Number.isInteger(n) || n < 0 || n > 1e12) throw new RangeError(`zahlwort: ${n} außerhalb 0–10^12`);
+  if (n === 0) return 'null';
+  const teile = [];
+  let rest = n;
+  for (const [wert, einzahl, mehrzahl] of GROSS) {
+    const block = Math.floor(rest / wert);
+    rest %= wert;
+    if (block === 0) continue;
+    if (block === 1) teile.push(`eine ${einzahl}`);
+    else if (block % 100 === 1) throw new RangeError(`zahlwort: ${block} ${mehrzahl} ist mehrdeutig`);
+    else teile.push(`${bis999(block, false)} ${mehrzahl}`);
+  }
+  const tausender = Math.floor(rest / 1000);
+  const einer = rest % 1000;
+  const klein = (tausender ? `${bis999(tausender, false)}tausend` : '') + (einer ? bis999(einer, true) : '');
+  if (klein) teile.push(klein);
+  return teile.join(' ');
+}
+
+const STELLEN = {
+  einer: 0, zehner: 1, hunderter: 2, tausender: 3, zehntausender: 4, hunderttausender: 5,
+  millionen: 6, zehnmillionen: 7, hundertmillionen: 8, milliarden: 9,
+};
+const STELLEN_NAME = {
+  einer: 'Einer', zehner: 'Zehner', hunderter: 'Hunderter', tausender: 'Tausender',
+  zehntausender: 'Zehntausender', hunderttausender: 'Hunderttausender', millionen: 'Millionen',
+  zehnmillionen: 'Zehnmillionen', hundertmillionen: 'Hundertmillionen', milliarden: 'Milliarden',
+};
+
+// kaufmännisches Runden natürlicher Zahlen auf 10^k
+function runden(n, stelle) {
+  const k = STELLEN[stelle];
+  if (k === undefined) throw new Error(`runden: unbekannte Stelle "${stelle}"`);
+  const f = 10 ** k;
+  return Math.floor((n + f / 2) / f) * f;
+}
+
+// Eingaben tolerant lesen: "34 761", "34.761", "34761" → 34761
+function parseZahl(s) {
+  const t = String(s).replace(/[\s.  ]/g, '');
+  return /^\d+$/.test(t) ? Number(t) : NaN;
+}
+
+module.exports = { fmt, zahlwort, runden, parseZahl, STELLEN, STELLEN_NAME, GRUPPE };
+
+}, {}],
+/* zahldarstellung.js */ [function (module, exports, require) {
+const { fmt, zahlwort, STELLEN_NAME } = require('../../lib/zahlen');
+
+function pruefeBereich(p) {
+  const [min, max] = p.bereich || [];
+  if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max > 1e12 || min >= max) {
+    throw new Error('bereich: [min, max] mit 1 ≤ min < max ≤ 10^12 erwartet');
+  }
+}
+
+// Zahl mit Zahlwort ziehen; mehrdeutige Zahlwörter (z. B. 101 Millionen) werden übersprungen.
+// Gleichverteilt über die Stellenanzahl, damit nicht fast nur 12-stellige Zahlen entstehen.
+function zieheMitWort(rng, [min, max]) {
+  for (;;) {
+    const dMin = String(min).length;
+    const dMax = String(max).length;
+    const d = rng.int(dMin, dMax);
+    const lo = Math.max(min, 10 ** (d - 1));
+    const hi = Math.min(max, 10 ** d - 1);
+    const n = lo + Math.floor(rng.next() * (hi - lo + 1));
+    try {
+      return { n, wort: zahlwort(n) };
+    } catch {
+      /* neu ziehen */
+    }
+  }
+}
+
+// gleiche Aufgabe nicht zweimal; nach Text unterscheiden, weil manche Lösungen nur wenige Werte haben (<, >, =)
+function mehrere(p, rng, baue) {
+  const teile = [];
+  const gesehen = new Set();
+  let versuche = 0;
+  while (teile.length < (p.anzahl || 1)) {
+    const t = baue(rng);
+    if (gesehen.has(t.text) && versuche++ < 50) continue;
+    gesehen.add(t.text);
+    teile.push(t);
+  }
+  return teile;
+}
+
+const inZiffern = {
+  name: 'zahl-in-ziffern',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Schreibe die Zahl in Ziffern.',
+      teile: mehrere(p, rng, () => {
+        const { n, wort } = zieheMitWort(rng, p.bereich);
+        return { text: wort, loesung: n, antwort: fmt(n), eingabe: 'zahl', pruefung: { n, wort } };
+      }),
+    };
+  },
+};
+
+const inWorten = {
+  name: 'zahl-in-worten',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Schreibe die Zahl als Wort.',
+      teile: mehrere(p, rng, () => {
+        const { n, wort } = zieheMitWort(rng, p.bereich);
+        return { text: fmt(n), loesung: wort, antwort: wort, eingabe: 'wort', schreibzeilen: 2, pruefung: { n, wort } };
+      }),
+    };
+  },
+};
+
+const STELLEN_REIHE = ['einer', 'zehner', 'hunderter', 'tausender', 'zehntausender', 'hunderttausender',
+  'millionen', 'zehnmillionen', 'hundertmillionen', 'milliarden'];
+
+// "Welchen Stellenwert hat die Ziffer 7 in 3 758 214?" – die Ziffer kommt nur einmal vor
+const stellenwert = {
+  name: 'stellenwert',
+  pruefe(p) {
+    pruefeBereich(p);
+    if (p.bereich[1] >= 1e10) throw new Error('stellenwert: bereich höchstens bis 9 999 999 999 (Stellen bis Milliarden)');
+  },
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Gib den Stellenwert der Ziffer an.',
+      teile: mehrere(p, rng, () => {
+        for (;;) {
+          const { n } = zieheMitWort(rng, p.bereich);
+          const s = String(n);
+          const idx = rng.int(0, s.length - 1);
+          const ziffer = s[idx];
+          if (ziffer === '0' || s.split(ziffer).length !== 2) continue;
+          const stelle = STELLEN_REIHE[s.length - 1 - idx];
+          // richtige Stelle + die 3 nächstgelegenen Stellen der Zahl als Ablenker
+          const k = s.length - 1 - idx;
+          const nachbarn = STELLEN_REIHE.slice(0, Math.max(s.length, 4))
+            .map((x, j) => ({ x, d: Math.abs(j - k) }))
+            .filter((o) => o.d > 0)
+            .sort((o1, o2) => o1.d - o2.d || rng.next() - 0.5)
+            .slice(0, 3)
+            .map((o) => o.x);
+          const optionen = rng.shuffle([stelle, ...nachbarn].map((x) => STELLEN_NAME[x]));
+          return {
+            text: `Welchen Stellenwert hat die Ziffer ${ziffer} in ${fmt(n)}?`,
+            loesung: STELLEN_NAME[stelle],
+            antwort: STELLEN_NAME[stelle],
+            eingabe: 'wahl',
+            optionen,
+            pruefung: { n, idx },
+          };
+        }
+      }),
+    };
+  },
+};
+
+const vergleichen = {
+  name: 'vergleichen',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Setze <, > oder = ein.',
+      teile: mehrere(p, rng, () => {
+        const a = zieheMitWort(rng, p.bereich).n;
+        // knappe Vergleiche: gleiche Stellenanzahl, nur eine Ziffer verschieden
+        const s = String(a).split('');
+        const i = rng.int(1, s.length - 1);
+        s[i] = String(rng.pick([...'0123456789'].filter((z) => z !== s[i])));
+        const b = rng.next() < 0.1 ? a : Number(s.join(''));
+        const zeichen = a < b ? '<' : a > b ? '>' : '=';
+        return {
+          text: `${fmt(a)} ∎ ${fmt(b)}`,
+          loesung: zeichen,
+          antwort: `${fmt(a)} ${zeichen} ${fmt(b)}`,
+          eingabe: 'wahl',
+          optionen: ['<', '>', '='],
+          pruefung: { a, b },
+        };
+      }),
+    };
+  },
+};
+
+const vorgaengerNachfolger = {
+  name: 'vorgaenger-nachfolger',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Gib den Vorgänger oder Nachfolger an.',
+      teile: mehrere(p, rng, () => {
+        // gern an Stufen wie 40 000 oder 1 299 999, wo es spannend wird
+        let n = zieheMitWort(rng, p.bereich).n;
+        if (rng.next() < 0.5) n = Math.max(2, Math.round(n / 1000) * 1000 - (rng.next() < 0.5 ? 1 : 0));
+        const nach = rng.next() < 0.5;
+        const loesung = nach ? n + 1 : n - 1;
+        return {
+          text: `${nach ? 'Nachfolger' : 'Vorgänger'} von ${fmt(n)}`,
+          loesung,
+          antwort: fmt(loesung),
+          eingabe: 'zahl',
+          pruefung: { n, nach },
+        };
+      }),
+    };
+  },
+};
+
+module.exports = [inZiffern, inWorten, stellenwert, vergleichen, vorgaengerNachfolger];
+
+}, {"../../lib/zahlen":5}],
+/* rechnen.js */ [function (module, exports, require) {
+// Grundrechenarten: Kopfrechnen, Platzhalter, Fachbegriffe, verkettete Aufgaben.
+// Jede Aufgabe trägt ihre Rechnung als { a, op, b, c } in "pruefung", damit Tests sie unabhängig nachrechnen.
+const { fmt } = require('../../lib/zahlen');
+
+const ZEICHEN = { '+': '+', '-': '−', '*': '·', ':': ':' };
+const OPS = Object.keys(ZEICHEN);
+
+function pruefeOps(p) {
+  const ops = p.operationen || OPS;
+  for (const o of ops) if (!OPS.includes(o)) throw new Error(`operationen: unbekannt "${o}"`);
+  const [min, max] = p.bereich || [];
+  if (!Number.isInteger(min) || !Number.isInteger(max) || min < 0 || min >= max) throw new Error('bereich: [min, max] erwartet');
+  if (p.faktor) {
+    const [fmin, fmax] = p.faktor;
+    if (!Number.isInteger(fmin) || !Number.isInteger(fmax) || fmin < 2 || fmin > fmax) throw new Error('faktor: [min, max] mit min ≥ 2 erwartet');
+  }
+}
+
+// a op b = c, alle Zahlen natürlich, Division ohne Rest, Subtraktion ohne negatives Ergebnis
+function zieheRechnung(rng, op, p) {
+  const [min, max] = p.bereich;
+  const [fmin, fmax] = p.faktor || [2, 12];
+  switch (op) {
+    case '+': {
+      const a = rng.int(min, max);
+      const b = rng.int(min, max);
+      return { a, op, b, c: a + b };
+    }
+    case '-': {
+      const a = rng.int(Math.max(min, 1), max);
+      const b = rng.int(min, a);
+      return { a, op, b, c: a - b };
+    }
+    case '*': {
+      const a = rng.int(fmin, fmax);
+      const b = rng.int(Math.max(min, 2), Math.max(Math.min(max, fmax), Math.max(min, 2)));
+      return { a, op, b, c: a * b };
+    }
+    case ':': {
+      const b = rng.int(fmin, fmax);
+      const c = rng.int(Math.max(min, 2), Math.max(Math.min(max, fmax), Math.max(min, 2)));
+      return { a: b * c, op, b, c };
+    }
+    default:
+      throw new Error(op);
+  }
+}
+
+const term = ({ a, op, b }) => `${fmt(a)} ${ZEICHEN[op]} ${fmt(b)}`;
+
+function mehrere(p, rng, baue) {
+  const teile = [];
+  const gesehen = new Set();
+  let versuche = 0;
+  while (teile.length < (p.anzahl || 1)) {
+    const t = baue();
+    if (gesehen.has(t.text) && versuche++ < 50) continue;
+    gesehen.add(t.text);
+    teile.push(t);
+  }
+  return teile;
+}
+
+const kopfrechnen = {
+  name: 'kopfrechnen',
+  pruefe: pruefeOps,
+  erzeuge(p, rng) {
+    const ops = p.operationen || OPS;
+    return {
+      anweisung: 'Berechne.',
+      teile: mehrere(p, rng, () => {
+        const r = zieheRechnung(rng, rng.pick(ops), p);
+        return { text: `${term(r)} =`, loesung: r.c, antwort: `${term(r)} = ${fmt(r.c)}`, eingabe: 'zahl', pruefung: r };
+      }),
+    };
+  },
+};
+
+// 47 − ∎ = 23 – das Kästchen sitzt an Stelle a, b oder c
+const platzhalter = {
+  name: 'platzhalter',
+  pruefe: pruefeOps,
+  erzeuge(p, rng) {
+    const ops = p.operationen || OPS;
+    return {
+      anweisung: 'Nenne die Zahl im Kästchen ∎.',
+      teile: mehrere(p, rng, () => {
+        const r = zieheRechnung(rng, rng.pick(ops), p);
+        const luecke = rng.pick(['a', 'b']);
+        const zeige = (k) => (k === luecke ? '∎' : fmt(r[k]));
+        return {
+          text: `${zeige('a')} ${ZEICHEN[r.op]} ${zeige('b')} = ${fmt(r.c)}`,
+          loesung: r[luecke],
+          antwort: `∎ = ${fmt(r[luecke])}`,
+          eingabe: 'zahl',
+          pruefung: { ...r, luecke },
+        };
+      }),
+    };
+  },
+};
+
+const BEGRIFF = {
+  '+': { wort: 'die Summe', ergebnis: 'Summe' },
+  '-': { wort: 'die Differenz', ergebnis: 'Differenz' },
+  '*': { wort: 'das Produkt', ergebnis: 'Produkt' },
+  ':': { wort: 'den Quotienten', ergebnis: 'Quotient' },
+};
+
+// "Berechne das Produkt aus 17 und 11."
+const fachbegriffe = {
+  name: 'fachbegriffe',
+  pruefe: pruefeOps,
+  erzeuge(p, rng) {
+    const ops = p.operationen || OPS;
+    return {
+      anweisung: 'Berechne.',
+      teile: mehrere(p, rng, () => {
+        const r = zieheRechnung(rng, rng.pick(ops), p);
+        return {
+          text: `Berechne ${BEGRIFF[r.op].wort} aus ${fmt(r.a)} und ${fmt(r.b)}.`,
+          loesung: r.c,
+          antwort: `${term(r)} = ${fmt(r.c)}`,
+          eingabe: 'zahl',
+          pruefung: r,
+        };
+      }),
+    };
+  },
+};
+
+const NACHHER = [
+  { wort: 'verdoppelt', f: (x) => x * 2, geht: () => true },
+  { wort: 'verdreifacht', f: (x) => x * 3, geht: () => true },
+  { wort: 'halbiert', f: (x) => x / 2, geht: (x) => x % 2 === 0 },
+];
+
+// "Berechne die Zahl, die man erhält, wenn man die Summe von 13 und 5 verdoppelt."
+const verkettet = {
+  name: 'verkettet',
+  pruefe: pruefeOps,
+  erzeuge(p, rng) {
+    const ops = (p.operationen || ['+', '-']).filter((o) => o === '+' || o === '-');
+    return {
+      anweisung: 'Berechne.',
+      teile: mehrere(p, rng, () => {
+        for (;;) {
+          const r = zieheRechnung(rng, rng.pick(ops), p);
+          const n = rng.pick(NACHHER);
+          if (!n.geht(r.c) || r.c === 0) continue;
+          const loesung = n.f(r.c);
+          return {
+            text: `Berechne die Zahl, die man erhält, wenn man ${BEGRIFF[r.op].wort} von ${fmt(r.a)} und ${fmt(r.b)} ${n.wort}.`,
+            loesung,
+            antwort: `${term(r)} = ${fmt(r.c)}; ${n.wort}: ${fmt(loesung)}`,
+            eingabe: 'zahl',
+            pruefung: { ...r, nachher: n.wort },
+          };
+        }
+      }),
+    };
+  },
+};
+
+// "Gib an, wie oft die Zahl 13 in die Zahl 156 passt."
+const wieOft = {
+  name: 'wie-oft',
+  pruefe: pruefeOps,
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Gib an, wie oft die erste Zahl in die zweite passt.',
+      teile: mehrere(p, rng, () => {
+        const r = zieheRechnung(rng, ':', p);
+        return {
+          text: `Wie oft passt ${fmt(r.b)} in ${fmt(r.a)}?`,
+          loesung: r.c,
+          antwort: `${fmt(r.a)} : ${fmt(r.b)} = ${fmt(r.c)}, also ${fmt(r.c)}-mal`,
+          eingabe: 'zahl',
+          pruefung: r,
+        };
+      }),
+    };
+  },
+};
+
+module.exports = [kopfrechnen, platzhalter, fachbegriffe, verkettet, wieOft];
+module.exports.ZEICHEN = ZEICHEN;
+
+}, {"../../lib/zahlen":5}],
+/* sachaufgaben.js */ [function (module, exports, require) {
+// Sachaufgaben als Vorlagen: Zahlen werden gezogen, "loese" rechnet die Lösung aus.
+// Eigene Formulierungen im Stil der Klassenarbeiten, keine Aufgaben aus dem Unterricht.
+const { fmt } = require('../../lib/zahlen');
+
+const euro = (x) => `${fmt(x)} €`;
+
+const VORLAGEN = {
+  tierbeine: {
+    ziehe: (rng) => {
+      const tiere = rng.shuffle([
+        ['Schafe', 4], ['Kühe', 4], ['Ziegen', 4], ['Pferde', 4], ['Hühner', 2], ['Gänse', 2], ['Enten', 2],
+      ]).slice(0, 3);
+      return { tiere: tiere.map(([name, beine]) => ({ name, beine, anzahl: rng.int(2, 15) })) };
+    },
+    loese: ({ tiere }) => tiere.reduce((s, t) => s + t.anzahl * t.beine, 0),
+    text: ({ tiere }) => {
+      const liste = tiere.map((t) => `${t.anzahl} ${t.name}`);
+      return `Auf einem Bauernhof leben ${liste.slice(0, -1).join(', ')} und ${liste.at(-1)}. Berechne, wie viele Tierbeine auf dem Hof herumlaufen.`;
+    },
+    weg: ({ tiere }, l) => `${tiere.map((t) => `${t.anzahl} · ${t.beine}`).join(' + ')} = ${fmt(l)}`,
+    satz: (_, l) => `Auf dem Hof laufen ${fmt(l)} Tierbeine herum.`,
+  },
+
+  mitglieder: {
+    // rückwärts rechnen: Anfang = jetzt + verloren − neu
+    ziehe: (rng) => {
+      const verloren = rng.int(10, 60);
+      const neu = rng.int(verloren + 5, 150);
+      const anfang = rng.int(150, 800);
+      return { verloren, neu, jetzt: anfang - verloren + neu, art: rng.pick(['Sportverein', 'Chor', 'Schachclub', 'Wanderverein']) };
+    },
+    loese: ({ verloren, neu, jetzt }) => jetzt + verloren - neu,
+    text: ({ verloren, neu, jetzt, art }) =>
+      `Ein ${art} hat in einem Jahr ${fmt(verloren)} Mitglieder verloren und ${fmt(neu)} neue Mitglieder aufgenommen. Jetzt hat er ${fmt(jetzt)} Mitglieder. Wie viele Mitglieder hatte er am Jahresanfang?`,
+    weg: ({ verloren, neu, jetzt }, l) => `${fmt(jetzt)} + ${fmt(verloren)} − ${fmt(neu)} = ${fmt(l)}`,
+    satz: ({ art }, l) => `Am Jahresanfang hatte der ${art} ${fmt(l)} Mitglieder.`,
+  },
+
+  fahrkarten: {
+    // Kinder zahlen die Hälfte: gesamt = e·p + k·p/2, p gerade
+    ziehe: (rng) => {
+      const erwachsene = rng.int(1, 3);
+      const kinder = rng.int(1, 4);
+      const preis = 2 * rng.int(4, 20);
+      return { erwachsene, kinder, gesamt: erwachsene * preis + (kinder * preis) / 2, mittel: rng.pick(['der Bahn', 'dem Bus', 'dem Schiff']) };
+    },
+    loese: ({ erwachsene, kinder, gesamt }) => {
+      const preis = (2 * gesamt) / (2 * erwachsene + kinder);
+      return { erwachsener: preis, kind: preis / 2 };
+    },
+    text: ({ erwachsene, kinder, gesamt, mittel }) =>
+      `${erwachsene === 1 ? 'Ein Erwachsener' : `${erwachsene} Erwachsene`} und ${kinder === 1 ? 'ein Kind' : `${kinder} Kinder`} fahren mit ${mittel}. Die Fahrt kostet zusammen ${euro(gesamt)}. Kinder zahlen die Hälfte. Berechne, wie viel die Fahrt für einen Erwachsenen und für ein Kind kostet.`,
+    // in Kinderpreisen rechnen, damit keine Kommazahlen entstehen
+    weg: ({ erwachsene, kinder, gesamt }, l) =>
+      `Ein Erwachsener zahlt so viel wie 2 Kinder: ${erwachsene} · 2 + ${kinder} = ${2 * erwachsene + kinder} Kinderpreise; ${euro(gesamt)} : ${2 * erwachsene + kinder} = ${euro(l.kind)} (Kind); ${euro(l.kind)} · 2 = ${euro(l.erwachsener)} (Erwachsener)`,
+    satz: (_, l) => `Ein Erwachsener zahlt ${euro(l.erwachsener)}, ein Kind zahlt ${euro(l.kind)}.`,
+    teile: (l) => [
+      { text: 'Preis für einen Erwachsenen (in €)', loesung: l.erwachsener },
+      { text: 'Preis für ein Kind (in €)', loesung: l.kind },
+    ],
+  },
+
+  rueckgeld: {
+    ziehe: (rng) => {
+      const a = { ding: rng.pick(['Hefte', 'Bleistifte', 'Radiergummis']), anzahl: rng.int(2, 6), preis: rng.int(1, 4) };
+      const [eins, viele] = rng.pick([['Buch', 'Bücher'], ['Malblock', 'Malblöcke'], ['Füller', 'Füller']]);
+      const anzahl = rng.int(1, 3);
+      const b = { ding: anzahl === 1 ? eins : viele, anzahl, preis: rng.int(5, 12) };
+      const kosten = a.anzahl * a.preis + b.anzahl * b.preis;
+      const schein = [20, 50, 100].find((s) => s > kosten);
+      return { a, b, schein };
+    },
+    loese: ({ a, b, schein }) => schein - (a.anzahl * a.preis + b.anzahl * b.preis),
+    text: ({ a, b, schein }) =>
+      `Lena kauft ${a.anzahl} ${a.ding} für je ${euro(a.preis)} und ${b.anzahl} ${b.ding} für je ${euro(b.preis)}. Sie bezahlt mit einem ${schein}‑€‑Schein. Wie viel Geld bekommt sie zurück?`,
+    weg: ({ a, b, schein }, l) => `${a.anzahl} · ${a.preis} + ${b.anzahl} · ${b.preis} = ${schein - l}; ${schein} − ${schein - l} = ${l}`,
+    satz: (_, l) => `Lena bekommt ${euro(l)} zurück.`,
+  },
+
+  busse: {
+    // aufrunden: Rest braucht noch einen Bus
+    ziehe: (rng) => {
+      const plaetze = rng.pick([30, 40, 45, 50]);
+      let kinder;
+      do kinder = rng.int(plaetze + 1, plaetze * 5); while (kinder % plaetze === 0);
+      return { plaetze, kinder };
+    },
+    loese: ({ plaetze, kinder }) => Math.ceil(kinder / plaetze),
+    text: ({ plaetze, kinder }) =>
+      `${fmt(kinder)} Kinder fahren ins Schullandheim. In einen Bus passen ${plaetze} Kinder. Wie viele Busse werden mindestens gebraucht?`,
+    weg: ({ plaetze, kinder }, l) => `${fmt(kinder)} : ${plaetze} = ${Math.floor(kinder / plaetze)} Rest ${kinder % plaetze}; für den Rest braucht man noch einen Bus → ${l}`,
+    satz: (_, l) => `Es werden mindestens ${l} Busse gebraucht.`,
+  },
+
+  sparen: {
+    // Wochen = (Preis − Erspartes) : Rate, geht ohne Rest auf
+    ziehe: (rng) => {
+      const rate = rng.pick([4, 5, 6, 8, 10, 12, 15]);
+      const wochen = rng.int(5, 20);
+      const erspart = rng.int(1, 8) * 5;
+      return { rate, erspart, preis: erspart + rate * wochen, ding: rng.pick(['ein Fahrrad', 'ein Skateboard', 'Inliner', 'ein Zelt']) };
+    },
+    loese: ({ rate, erspart, preis }) => (preis - erspart) / rate,
+    text: ({ rate, erspart, preis, ding }) =>
+      `Mia möchte sich ${ding} für ${euro(preis)} kaufen. Sie hat schon ${euro(erspart)} gespart. Jede Woche legt sie ${euro(rate)} dazu. Nach wie vielen Wochen hat sie genug Geld?`,
+    weg: ({ rate, erspart, preis }, l) => `${preis} − ${erspart} = ${preis - erspart}; ${preis - erspart} : ${rate} = ${l}`,
+    satz: (_, l) => `Mia hat nach ${l} Wochen genug Geld.`,
+  },
+};
+
+const sachaufgabe = {
+  name: 'sachaufgabe',
+  pruefe(p) {
+    const v = p.vorlagen || Object.keys(VORLAGEN);
+    for (const name of v) if (!VORLAGEN[name]) throw new Error(`vorlagen: unbekannt "${name}"`);
+  },
+  erzeuge(p, rng) {
+    const name = rng.pick(p.vorlagen || Object.keys(VORLAGEN));
+    const v = VORLAGEN[name];
+    const daten = v.ziehe(rng);
+    const l = v.loese(daten);
+    const teile = v.teile
+      ? v.teile(l).map((t) => ({ ...t, antwort: fmt(t.loesung), eingabe: 'zahl' }))
+      : [{ text: 'Ergebnis', loesung: l, antwort: fmt(l), eingabe: 'zahl' }];
+    return {
+      anweisung: v.text(daten),
+      teile,
+      weg: v.weg(daten, l),
+      antwortsatz: v.satz(daten, l),
+      schreibzeilen: 4,
+      pruefung: { vorlage: name, daten },
+    };
+  },
+};
+
+module.exports = [sachaufgabe];
+module.exports.VORLAGEN = VORLAGEN;
+
+}, {"../../lib/zahlen":5}],
+/* diagramm.js */ [function (module, exports, require) {
+// Daten erfassen und darstellen: Strichliste/Tabelle → Diagramm zeichnen (Druck) oder ablesen (beides).
+const UMFRAGEN = [
+  { titel: 'Lieblingsfarben in einer Klasse', merkmal: 'Lieblingsfarbe', meist: 'Welche Farbe wurde am häufigsten genannt?', kategorien: ['Rot', 'Blau', 'Grün', 'Gelb', 'Lila', 'Schwarz'] },
+  { titel: 'Anzahl der Geschwister', merkmal: 'Geschwister', meist: 'Wie viele Geschwister haben die meisten Kinder?', kategorien: ['0', '1', '2', '3', '4'] },
+  { titel: 'Lieblingstiere', merkmal: 'Lieblingstier', meist: 'Welches Tier wurde am häufigsten genannt?', kategorien: ['Hund', 'Katze', 'Pferd', 'Hamster', 'Vogel'] },
+  { titel: 'Schulweg', merkmal: 'Verkehrsmittel', meist: 'Wie kommen die meisten Kinder zur Schule?', kategorien: ['zu Fuß', 'Fahrrad', 'Bus', 'Auto', 'Straßenbahn'] },
+  { titel: 'Lieblingssport', merkmal: 'Sportart', meist: 'Welche Sportart wurde am häufigsten genannt?', kategorien: ['Fußball', 'Schwimmen', 'Turnen', 'Reiten', 'Tanzen', 'Handball'] },
+];
+
+function ziehe(rng, p) {
+  const u = rng.pick(UMFRAGEN);
+  const anzahl = Math.min(u.kategorien.length, p.kategorien || 5);
+  const kategorien = u.merkmal === 'Geschwister' ? u.kategorien.slice(0, anzahl) : rng.shuffle(u.kategorien).slice(0, anzahl);
+  // verschiedene Häufigkeiten → eindeutiges Maximum/Minimum
+  const werte = rng.distinct(anzahl, 1, p.max || 12);
+  return { titel: u.titel, merkmal: u.merkmal, meist: u.meist, kategorien, werte };
+}
+
+
+function ablesefragen(d, rng) {
+  const i = rng.int(0, d.kategorien.length - 1);
+  let j;
+  do j = rng.int(0, d.kategorien.length - 1); while (j === i);
+  const [gross, klein] = d.werte[i] > d.werte[j] ? [i, j] : [j, i];
+  const max = d.werte.indexOf(Math.max(...d.werte));
+  const summe = d.werte.reduce((a, b) => a + b, 0);
+  const k = (x) => (d.merkmal === 'Geschwister' ? `${d.kategorien[x]} Geschwister` : d.kategorien[x]);
+  return [
+    { text: `Wie oft wurde „${k(i)}“ genannt?`, loesung: d.werte[i], eingabe: 'zahl' },
+    { text: d.meist, loesung: d.kategorien[max], eingabe: 'wahl', optionen: d.kategorien.slice() },
+    { text: 'Wie viele Kinder wurden insgesamt befragt?', loesung: summe, eingabe: 'zahl' },
+    { text: `Wie oft wurde „${k(gross)}“ öfter genannt als „${k(klein)}“?`, loesung: d.werte[gross] - d.werte[klein], eingabe: 'zahl' },
+  ].map((t) => ({ ...t, antwort: String(t.loesung) }));
+}
+
+const diagramm = {
+  name: 'diagramm',
+  pruefe(p) {
+    if (!['ablesen', 'zeichnen'].includes(p.modus)) throw new Error('modus: "ablesen" oder "zeichnen" erwartet');
+    if (p.art && !['saeule', 'balken'].includes(p.art)) throw new Error('art: "saeule" oder "balken" erwartet');
+    if (p.max && (p.max < 6 || p.max > 20)) throw new Error('max: 6–20');
+  },
+  erzeuge(p, rng) {
+    const d = ziehe(rng, p);
+    const art = p.art || rng.pick(['saeule', 'balken']);
+    const artName = art === 'saeule' ? 'Säulendiagramm' : 'Balkendiagramm';
+    const quelle = p.quelle || rng.pick(['strichliste', 'tabelle']);
+    if (p.modus === 'zeichnen') {
+      return {
+        anweisung: `${d.titel}: Die ${quelle === 'strichliste' ? 'Strichliste' : 'Tabelle'} zeigt das Ergebnis einer Umfrage. Erstelle dazu ein ${artName}.`,
+        daten: { ...d, art, quelle, zeigen: quelle, zeichnen: true },
+        teile: [{ text: artName, loesung: d.werte, antwort: `${artName} mit ${d.kategorien.map((k, i) => `${k}: ${d.werte[i]}`).join(', ')}`, eingabe: 'zeichnung' }],
+        nur: 'druck',
+        pruefung: d,
+      };
+    }
+    const teile = rng.shuffle(ablesefragen(d, rng)).slice(0, p.anzahl || 3);
+    return {
+      anweisung: `${d.titel}: Lies aus dem ${artName} ab.`,
+      daten: { ...d, art, zeigen: 'diagramm' },
+      teile,
+      pruefung: d,
+    };
+  },
+};
+
+module.exports = [diagramm];
+
+}, {}]];
+  var cache = {};
+  function load(id) {
+    if (cache[id]) return cache[id].exports;
+    var m = (cache[id] = { exports: {} });
+    defs[id][0](m, m.exports, function (spec) { return load(defs[id][1][spec]); });
+    return m.exports;
+  }
+  window["LW"] = load(0);
+})();</script>
+<script>window.FACH = {"id":"mathematik","titel":"Mathematik","themen":[{"thema":"grosse-zahlen","titel":"Große Zahlen lesen und schreiben","icon":"🔢","reihenfolge":1,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Dreiergruppen helfen beim Lesen.\u003c/strong> Teile die Zahl von rechts in Dreierpäckchen:\nEiner – Tausender – Millionen – Milliarden – Billionen.\u003c/p>\n\u003ctable>\n\u003cthead>\n\u003ctr>\n\u003cth>Mrd.\u003c/th>\n\u003cth>Mio.\u003c/th>\n\u003cth>Tsd.\u003c/th>\n\u003cth>E\u003c/th>\n\u003c/tr>\n\u003c/thead>\n\u003ctbody>\u003ctr>\n\u003ctd>2\u003c/td>\n\u003ctd>045\u003c/td>\n\u003ctd>300\u003c/td>\n\u003ctd>018\u003c/td>\n\u003c/tr>\n\u003c/tbody>\u003c/table>\n\u003cp>2 045 300 018 = zwei Milliarden fünfundvierzig Millionen dreihunderttausendachtzehn\u003c/p>\n\u003cp>\u003cstrong>Schreibregel:\u003c/strong> Zahlen unter einer Million schreibt man zusammen. \u003cem>Million\u003c/em>, \u003cem>Milliarde\u003c/em> und \u003cem>Billion\u003c/em> stehen als eigene Wörter.\u003c/p>\n","wissenswertes":["Eine Billion hat 12 Nullen: 1 000 000 000 000. Wenn du jede Sekunde eins weiterzählst, brauchst du dafür über 31 000 Jahre!","Auf der Erde leben ungefähr 8 Milliarden Menschen."],"aufgaben":[{"id":"dreiergruppen","typ":"multiple_choice","frage":"Wie viele Nullen hat eine Million?","optionen":["3","6","9","12"],"loesung":"6","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"in-ziffern-mio","typ":"eingabe","generator":"zahl-in-ziffern","parameter":{"bereich":[100000,99999999]},"anzahl":2,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"in-worten","typ":"freitext","generator":"zahl-in-worten","parameter":{"bereich":[10000,9999999]},"anzahl":2,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"stellenwert","typ":"multiple_choice","generator":"stellenwert","parameter":{"bereich":[100000,999999999]},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"vergleichen","typ":"multiple_choice","generator":"vergleichen","parameter":{"bereich":[10000,99999999]},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":2},{"id":"vorgaenger-nachfolger","typ":"eingabe","generator":"vorgaenger-nachfolger","parameter":{"bereich":[1000,9999999]},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":3},{"id":"in-ziffern-mrd","typ":"eingabe","generator":"zahl-in-ziffern","parameter":{"bereich":[1000000000,999999999999]},"anzahl":1,"be":1,"schwierigkeit":3,"prioritaet":3}],"blatt":"../blaetter/mathematik/grosse-zahlen.pdf","loesung":"../blaetter/mathematik/grosse-zahlen_loesung.pdf"},{"thema":"runden","titel":"Natürliche Zahlen runden","icon":"🎯","reihenfolge":2,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>So rundest du:\u003c/strong> Schau auf die Ziffer \u003cstrong>rechts neben\u003c/strong> der Rundungsstelle.\u003c/p>\n\u003cul>\n\u003cli>Ist sie \u003cstrong>0, 1, 2, 3 oder 4\u003c/strong>, wird \u003cstrong>abgerundet\u003c/strong>: Die Rundungsstelle bleibt gleich.\u003c/li>\n\u003cli>Ist sie \u003cstrong>5, 6, 7, 8 oder 9\u003c/strong>, wird \u003cstrong>aufgerundet\u003c/strong>: Die Rundungsstelle wird um 1 größer.\u003c/li>\n\u003cli>Alle Ziffern rechts von der Rundungsstelle werden zu \u003cstrong>0\u003c/strong>.\u003c/li>\n\u003c/ul>\n\u003cp>Beispiel: 34 761 auf Hunderter → die Zehnerziffer ist 6 → aufrunden → \u003cstrong>34 800\u003c/strong>\u003c/p>\n","wissenswertes":["Das Zeichen ≈ bedeutet „ungefähr gleich“. Man schreibt zum Beispiel 34 761 ≈ 34 800.","Auch Zeitungen runden: Wenn dort „rund 2 Millionen Besucher“ steht, waren es nicht genau 2 000 000."],"aufgaben":[{"id":"entscheidende-ziffer","typ":"multiple_choice","frage":"Du rundest auf Hunderter. Auf welche Ziffer musst du schauen?","optionen":["Einerziffer","Zehnerziffer","Hunderterziffer","Tausenderziffer"],"loesung":"Zehnerziffer","be":1,"schwierigkeit":1,"prioritaet":2},{"id":"halb-aufrunden","typ":"richtig_falsch","frage":"4 500 auf Tausender gerundet ergibt 5 000.","loesung":true,"be":1,"schwierigkeit":1,"prioritaet":2},{"id":"runden-einfach","typ":"rechnung","generator":"runden","parameter":{"stellen":["zehner","hunderter","tausender"],"ziffern":[5,6]},"anzahl":3,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"runden-reihe","typ":"rechnung","generator":"runden-reihe","parameter":{"stellen":["zehner","hunderter","tausender","zehntausender","hunderttausender"],"ziffern":[7]},"be":5,"schwierigkeit":2,"prioritaet":1},{"id":"runden-uebertrag","typ":"rechnung","generator":"runden","parameter":{"stellen":["hunderter","tausender"],"ziffern":[5,6],"uebertrag":true},"anzahl":2,"be":1,"schwierigkeit":3,"prioritaet":3},{"id":"welche-zahl","typ":"multiple_choice","frage":"Welche Zahl ergibt auf Zehner gerundet 350?","optionen":["344","349","355","360"],"loesung":"349","be":1,"schwierigkeit":2,"prioritaet":2},{"id":"rueckwaerts","typ":"rechnung","generator":"runden-rueckwaerts","parameter":{"stellen":["zehner","hunderter","tausender"]},"anzahl":2,"be":1,"schwierigkeit":3,"prioritaet":2}],"blatt":"../blaetter/mathematik/runden.pdf","loesung":"../blaetter/mathematik/runden_loesung.pdf"},{"thema":"grundrechenarten","titel":"Rechnen mit natürlichen Zahlen","icon":"➗","reihenfolge":3,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Die Fachbegriffe\u003c/strong>\u003c/p>\n\u003ctable>\n\u003cthead>\n\u003ctr>\n\u003cth>Rechnung\u003c/th>\n\u003cth>Teile\u003c/th>\n\u003cth>Ergebnis\u003c/th>\n\u003c/tr>\n\u003c/thead>\n\u003ctbody>\u003ctr>\n\u003ctd>13 + 5 = 18\u003c/td>\n\u003ctd>Summand + Summand\u003c/td>\n\u003ctd>\u003cstrong>Summe\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>20 − 6 = 14\u003c/td>\n\u003ctd>Minuend − Subtrahend\u003c/td>\n\u003ctd>\u003cstrong>Differenz\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>4 · 7 = 28\u003c/td>\n\u003ctd>Faktor · Faktor\u003c/td>\n\u003ctd>\u003cstrong>Produkt\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>36 : 4 = 9\u003c/td>\n\u003ctd>Dividend : Divisor\u003c/td>\n\u003ctd>\u003cstrong>Quotient\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003c/tbody>\u003c/table>\n\u003cp>\u003cstrong>Kästchen-Trick:\u003c/strong> Rechne mit der Umkehraufgabe. 47 − ∎ = 23 → 47 − 23 = 24, also ∎ = 24. Probe: 47 − 24 = 23 ✓\u003c/p>\n","wissenswertes":["Durch 0 kann man nicht teilen – das ist in der Mathematik verboten!","Jede Zahl mal 1 bleibt sie selbst. Jede Zahl mal 0 ergibt 0."],"aufgaben":[{"id":"begriff-produkt","typ":"multiple_choice","frage":"Wie heißt das Ergebnis einer Multiplikation?","optionen":["Summe","Differenz","Produkt","Quotient"],"loesung":"Produkt","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"begriff-quotient","typ":"multiple_choice","frage":"Wie heißt das Ergebnis einer Division?","optionen":["Summe","Differenz","Produkt","Quotient"],"loesung":"Quotient","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"begriffe-zuordnen","typ":"zuordnung","frage":"Ordne jedem Rechenzeichen den Namen des Ergebnisses zu.","paare":[["+","Summe"],["−","Differenz"],["·","Produkt"],[":","Quotient"]],"be":2,"schwierigkeit":1,"prioritaet":3},{"id":"kopfrechnen","typ":"rechnung","generator":"kopfrechnen","parameter":{"operationen":["+","-","*",":"],"bereich":[10,150],"faktor":[11,25]},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"platzhalter","typ":"rechnung","generator":"platzhalter","parameter":{"operationen":["+","-","*",":"],"bereich":[5,120],"faktor":[6,15]},"anzahl":4,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"fachbegriffe","typ":"rechnung","generator":"fachbegriffe","parameter":{"operationen":["+","-","*",":"],"bereich":[5,60],"faktor":[5,19]},"anzahl":4,"be":2,"schwierigkeit":2,"prioritaet":1},{"id":"verkettet","typ":"rechnung","generator":"verkettet","parameter":{"operationen":["+","-"],"bereich":[5,40]},"anzahl":1,"be":2,"schwierigkeit":3,"prioritaet":2},{"id":"wie-oft","typ":"rechnung","generator":"wie-oft","parameter":{"bereich":[6,15],"faktor":[11,25]},"anzahl":1,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"null-eins","typ":"richtig_falsch","frage":"0 : 5 = 0","loesung":true,"be":1,"schwierigkeit":2,"prioritaet":3}],"blatt":"../blaetter/mathematik/grundrechenarten.pdf","loesung":"../blaetter/mathematik/grundrechenarten_loesung.pdf"},{"thema":"sachaufgaben","titel":"Sachaufgaben lösen","icon":"🧺","reihenfolge":4,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>In 4 Schritten zur Lösung\u003c/strong>\u003c/p>\n\u003col>\n\u003cli>\u003cstrong>Lesen:\u003c/strong> Was ist gegeben? Was ist gesucht? Unterstreiche die Zahlen.\u003c/li>\n\u003cli>\u003cstrong>Planen:\u003c/strong> Welche Rechnung passt? Eine Skizze oder Tabelle hilft.\u003c/li>\n\u003cli>\u003cstrong>Rechnen:\u003c/strong> Schreib den Rechenweg ordentlich auf.\u003c/li>\n\u003cli>\u003cstrong>Antworten:\u003c/strong> Schreib einen ganzen \u003cstrong>Antwortsatz\u003c/strong> und prüfe: Kann das stimmen?\u003c/li>\n\u003c/ol>\n","wissenswertes":["Rückwärts rechnen ist ein Profi-Trick: Wenn du das Ende kennst, gehst du mit den Umkehraufgaben zum Anfang zurück."],"aufgaben":[{"id":"tierbeine","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["tierbeine"]},"be":2,"schwierigkeit":1,"prioritaet":1},{"id":"rueckgeld","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["rueckgeld"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"sparen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["sparen"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"busse","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["busse"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"mitglieder","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["mitglieder"]},"be":2,"schwierigkeit":3,"prioritaet":1},{"id":"fahrkarten","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["fahrkarten"]},"be":2,"schwierigkeit":3,"prioritaet":1}],"blatt":"../blaetter/mathematik/sachaufgaben.pdf","loesung":"../blaetter/mathematik/sachaufgaben_loesung.pdf"},{"thema":"daten-diagramme","titel":"Daten erfassen und darstellen","icon":"📊","reihenfolge":5,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Strichliste:\u003c/strong> Jeder Strich ist eine Nennung. Der 5. Strich wird quer durch die ersten vier gezogen – so zählst du schnell in Fünferpäckchen.\u003c/p>\n\u003cp>\u003cstrong>Säulendiagramm:\u003c/strong> Die Säulen stehen \u003cstrong>senkrecht\u003c/strong> nebeneinander.\n\u003cstrong>Balkendiagramm:\u003c/strong> Die Balken liegen \u003cstrong>waagerecht\u003c/strong> übereinander.\u003c/p>\n\u003cp>So zeichnest du ein Diagramm:\u003c/p>\n\u003col>\n\u003cli>Achsen mit dem Lineal zeichnen\u003c/li>\n\u003cli>Achsen beschriften und gleichmäßig einteilen (z. B. 1 Kästchen = 1 Nennung)\u003c/li>\n\u003cli>Säulen/Balken gleich breit und mit Abstand zeichnen\u003c/li>\n\u003cli>Überschrift nicht vergessen!\u003c/li>\n\u003c/ol>\n","wissenswertes":["Diagramme helfen, viele Zahlen auf einen Blick zu vergleichen. Zeitungen und Nachrichten benutzen sie ständig."],"aufgaben":[{"id":"saeule-waagerecht","typ":"richtig_falsch","frage":"In einem Säulendiagramm liegen die Säulen waagerecht.","loesung":false,"be":1,"schwierigkeit":1,"prioritaet":3},{"id":"strichliste","typ":"multiple_choice","frage":"Eine Strichliste zeigt zwei Fünferpäckchen und drei einzelne Striche. Wie viele Nennungen sind das?","optionen":["8","11","13","15"],"loesung":"13","be":1,"schwierigkeit":1,"prioritaet":2},{"id":"ablesen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"saeule","kategorien":5},"anzahl":3,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"ablesen-balken","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"balken","kategorien":4},"anzahl":2,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"saeulen-zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"saeule","quelle":"strichliste","kategorien":5,"max":10},"be":6,"schwierigkeit":2,"prioritaet":1},{"id":"balken-zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"balken","quelle":"tabelle","kategorien":5,"max":10},"be":6,"schwierigkeit":2,"prioritaet":2}],"blatt":"../blaetter/mathematik/daten-diagramme.pdf","loesung":"../blaetter/mathematik/daten-diagramme_loesung.pdf"}],"sw":"../sw.js","swScope":"../"};</script>
+<script>/* LERNWERK Fach-App (Browser). Erwartet window.LW (Generator-Bundle) und window.FACH (Themen-Daten aus dem Build).
+   Ablauf: Übersicht → (Merke) → Lektion mit 5 Herzen → Abschluss. Lernstand nur in localStorage, Export/Import als JSON. */
+(function () {
+  'use strict';
+  var FACH = window.FACH;
+  var LW = window.LW;
+  var SPEICHER = 'lernwerk_v1';
+  var HERZEN = 5;
+  var MAX_UEBUNGEN = 12;
+  var app = document.getElementById('app');
+
+  // ---------- Lernstand ----------
+  function leer() { return { version: 1, xp: 0, streak: { tage: 0, letzterTag: null }, themen: {} }; }
+  function laden() {
+    try {
+      var s = JSON.parse(localStorage.getItem(SPEICHER));
+      return s && s.version === 1 ? s : leer();
+    } catch (e) { return leer(); }
+  }
+  var stand = laden();
+  function speichern() { try { localStorage.setItem(SPEICHER, JSON.stringify(stand)); } catch (e) { /* privater Modus */ } }
+  function themaStand(id) {
+    var k = FACH.id + '/' + id;
+    stand.themen[k] = stand.themen[k] || { lektionen: 0, sterne: 0 };
+    return stand.themen[k];
+  }
+  function tag(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function streakAktuell() {
+    var s = stand.streak;
+    if (!s.letzterTag) return 0;
+    var gestern = new Date(); gestern.setDate(gestern.getDate() - 1);
+    return s.letzterTag === tag() || s.letzterTag === tag(gestern) ? s.tage : 0;
+  }
+  function streakZaehlen() {
+    var heute = tag();
+    var gestern = new Date(); gestern.setDate(gestern.getDate() - 1);
+    if (stand.streak.letzterTag === heute) return;
+    stand.streak.tage = stand.streak.letzterTag === tag(gestern) ? stand.streak.tage + 1 : 1;
+    stand.streak.letzterTag = heute;
+  }
+
+  // ---------- Hilfen ----------
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function mitBox(s) { return esc(s).replace('∎', '<span class="box">?</span>'); }
+  function sterne(n) { return '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n); }
+  function mischen(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function normWort(s) {
+    var t = String(s).toLowerCase().replace(/[-–]/g, ' ').replace(/\s+/g, ' ').trim();
+    // „einhundert“ = „hundert“, „eintausend“ = „tausend“
+    for (var i = 0; i < 3; i++) t = t.replace(/(^| |tausend)ein(hundert|tausend)/g, '$1$2');
+    return t.replace(/ /g, ''); // „sieben Millionen …“ = „siebenmillionen…“
+  }
+  function abstand(a, b) {
+    var d = [];
+    for (var i = 0; i <= a.length; i++) { d[i] = [i]; }
+    for (var j = 0; j <= b.length; j++) { d[0][j] = j; }
+    for (i = 1; i <= a.length; i++) for (j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    return d[a.length][b.length];
+  }
+
+  // Säulen-/Balkendiagramm für den Bildschirm (Gold auf Teal)
+  function diagrammSvg(d) {
+    var max = Math.max.apply(null, d.werte);
+    var top = Math.ceil((max + 1) / 2) * 2;
+    var n = d.kategorien.length;
+    var teile = [];
+    if (d.art === 'balken') {
+      var lb = 92, zeile = 34, breite = 320, x0 = lb, e = (breite - lb - 12) / top, h = n * zeile + 30;
+      for (var i = 0; i <= top; i += 2) teile.push('<line x1="' + (x0 + i * e) + '" y1="4" x2="' + (x0 + i * e) + '" y2="' + (n * zeile + 4) + '" stroke="rgba(255,255,255,.15)"/><text x="' + (x0 + i * e) + '" y="' + (n * zeile + 20) + '" font-size="12" text-anchor="middle">' + i + '</text>');
+      d.kategorien.forEach(function (k, j) {
+        var y = 4 + j * zeile + 7;
+        teile.push('<text x="' + (x0 - 6) + '" y="' + (y + 15) + '" font-size="13" text-anchor="end">' + esc(k) + '</text><rect x="' + x0 + '" y="' + y + '" width="' + d.werte[j] * e + '" height="20" rx="3" fill="url(#g)"/>');
+      });
+      return '<svg class="diagramm" viewBox="0 0 ' + breite + ' ' + h + '" role="img" aria-label="Balkendiagramm"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#B8922A"/><stop offset="1" stop-color="#E8C97D"/></linearGradient></defs>' + teile.join('') + '<line x1="' + x0 + '" y1="4" x2="' + x0 + '" y2="' + (n * zeile + 4) + '" stroke="#E8C97D" stroke-width="1.5"/></svg>';
+    }
+    var B = 320, H = 210, x0 = 30, yB = 170, e2 = (yB - 14) / top, sp = (B - x0 - 6) / n;
+    for (var k = 0; k <= top; k += 2) teile.push('<line x1="' + x0 + '" y1="' + (yB - k * e2) + '" x2="' + B + '" y2="' + (yB - k * e2) + '" stroke="rgba(255,255,255,.15)"/><text x="' + (x0 - 6) + '" y="' + (yB - k * e2 + 4) + '" font-size="12" text-anchor="end">' + k + '</text>');
+    d.kategorien.forEach(function (kat, j) {
+      var x = x0 + j * sp + sp * 0.2;
+      teile.push('<rect x="' + x + '" y="' + (yB - d.werte[j] * e2) + '" width="' + sp * 0.6 + '" height="' + d.werte[j] * e2 + '" rx="3" fill="url(#g)"/><text x="' + (x + sp * 0.3) + '" y="' + (yB + 18) + '" font-size="12" text-anchor="middle">' + esc(kat) + '</text>');
+    });
+    return '<svg class="diagramm" viewBox="0 0 ' + B + ' ' + H + '" role="img" aria-label="Säulendiagramm"><defs><linearGradient id="g" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#B8922A"/><stop offset="1" stop-color="#E8C97D"/></linearGradient></defs>' + teile.join('') + '<line x1="' + x0 + '" y1="' + yB + '" x2="' + B + '" y2="' + yB + '" stroke="#E8C97D" stroke-width="1.5"/></svg>';
+  }
+
+  // ---------- Übersicht ----------
+  function uebersicht() {
+    window.scrollTo(0, 0);
+    var karten = FACH.themen.map(function (t) {
+      var st = themaStand(t.thema);
+      return '<article class="thema" data-thema="' + t.thema + '">' +
+        '<div class="thema-kopf"><span class="thema-icon" aria-hidden="true">' + t.icon + '</span><div><h2>' + esc(t.titel) + '</h2>' +
+        '<div class="meta"><span class="sterne" aria-label="' + st.sterne + ' von 3 Sternen">' + sterne(st.sterne) + '</span> · ' + st.lektionen + ' ' + (st.lektionen === 1 ? 'Übung' : 'Übungen') + '</div></div></div>' +
+        '<div class="reihe"><button class="btn btn-gold" data-aktion="ueben">▶ Üben</button><button class="btn btn-ghost" data-aktion="merke">💡 Merke</button></div>' +
+        '<div class="reihe-druck"><a class="btn btn-ghost" href="' + t.blatt + '" target="_blank" rel="noopener">🖨 Arbeitsblatt</a><a class="btn btn-ghost" href="' + t.loesung + '" target="_blank" rel="noopener">✓ Lösung</a></div>' +
+        '</article>';
+    }).join('');
+    app.innerHTML = '<div class="wrap">' +
+      '<header class="kopf"><a class="zurueck" href="../" aria-label="Zur Fächerwahl">←</a><h1 class="gold">' + esc(FACH.titel) + '</h1>' +
+      '<div class="chips"><span class="chip" title="Tage in Folge">🔥 ' + streakAktuell() + '</span><span class="chip" title="Erfahrungspunkte">⭐ ' + stand.xp + '</span></div></header>' +
+      karten +
+      '<footer class="fuss"><p>Dein Lernstand bleibt auf diesem Gerät.</p><div class="reihe"><button class="btn btn-ghost" data-aktion="export">Lernstand sichern</button><label class="btn btn-ghost">Lernstand laden<input type="file" accept="application/json" class="versteckt" id="import"></label></div></footer></div>';
+    app.querySelectorAll('[data-aktion]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var karte = b.closest('[data-thema]');
+        var t = karte && FACH.themen.find(function (x) { return x.thema === karte.dataset.thema; });
+        if (b.dataset.aktion === 'ueben') starte(t);
+        else if (b.dataset.aktion === 'merke') merke(t);
+        else if (b.dataset.aktion === 'export') exportieren();
+      });
+    });
+    document.getElementById('import').addEventListener('change', importieren);
+  }
+
+  function merke(t) {
+    window.scrollTo(0, 0);
+    app.innerHTML = '<div class="wrap"><header class="kopf"><button class="zurueck" aria-label="Zurück">←</button><h1>' + t.icon + ' ' + esc(t.titel) + '</h1></header>' +
+      '<section class="karte merke"><h2>Merke</h2>' + t.erklaerungHtml + '</section>' +
+      '<button class="btn btn-gold btn-breit">▶ Los geht’s!</button></div>';
+    app.querySelector('.zurueck').onclick = uebersicht;
+    app.querySelector('.btn-gold').onclick = function () { starte(t); };
+  }
+
+  // ---------- Lektion ----------
+  var L; // aktuelle Lektion
+
+  // jede Instanz-Teilaufgabe wird eine Übung; „zeichnen“ gibt es nur auf Papier
+  function uebungenFuer(t) {
+    var seed = String(Date.now()) + Math.random();
+    var liste = [];
+    t.aufgaben.forEach(function (a) {
+      if (a.nur === 'druck') return;
+      var inst = LW.instanz(a, seed);
+      if (inst.nur === 'druck') return;
+      inst.teile.forEach(function (teil) {
+        if (teil.eingabe === 'zeichnung') return;
+        liste.push({ a: inst, t: teil });
+      });
+    });
+    // gemischt, aber von leicht nach schwer
+    liste = mischen(liste).sort(function (x, y) { return x.a.schwierigkeit - y.a.schwierigkeit; });
+    if (liste.length > MAX_UEBUNGEN) {
+      // aus jeder Aufgabe mindestens eine Übung behalten
+      var proAufgabe = {};
+      var auswahl = [];
+      liste.forEach(function (u) { if (!proAufgabe[u.a.id]) { proAufgabe[u.a.id] = 1; auswahl.push(u); } });
+      liste.forEach(function (u) { if (auswahl.length < MAX_UEBUNGEN && auswahl.indexOf(u) < 0) auswahl.push(u); });
+      liste = auswahl.slice(0, MAX_UEBUNGEN).sort(function (x, y) { return x.a.schwierigkeit - y.a.schwierigkeit; });
+    }
+    return liste;
+  }
+
+  function starte(t) {
+    L = { thema: t, uebungen: uebungenFuer(t), i: 0, herzen: HERZEN, fehler: 0, xp: 0 };
+    zeigeUebung();
+  }
+
+  function frageTexte(u) {
+    var a = u.a, t = u.t;
+    if (t.frageWeb) return { haupt: t.frageWeb, kontext: '' };
+    if (a.weg !== undefined) return { haupt: a.anweisung, kontext: '', label: t.text === 'Ergebnis' ? 'Deine Antwort' : t.text };
+    if (!t.text) return { haupt: a.anweisung, kontext: '' };
+    return { haupt: t.text, kontext: a.anweisung };
+  }
+
+  function zeigeUebung() {
+    window.scrollTo(0, 0);
+    var u = L.uebungen[L.i];
+    var f = frageTexte(u);
+    var t = u.t;
+    var koerper = '';
+    if (u.a.daten && u.a.daten.zeigen === 'diagramm') koerper += diagrammSvg(u.a.daten);
+    if (t.eingabe === 'zahl' || t.eingabe === 'wort') {
+      koerper += (f.label ? '<label class="label" for="antwort">' + esc(f.label) + '</label>' : '') +
+        (t.eingabe === 'zahl'
+          ? '<input id="antwort" class="eingabe" autocomplete="off" inputmode="numeric" placeholder="Zahl eingeben">'
+          // Zahlwörter sind lang: mehrzeilig, damit das ganze Wort sichtbar bleibt
+          : '<textarea id="antwort" class="eingabe wortfeld" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Als Wort schreiben"></textarea>');
+    } else if (t.eingabe === 'wahl' || t.eingabe === 'richtig_falsch') {
+      var opts = t.eingabe === 'richtig_falsch' ? ['richtig', 'falsch'] : t.optionen;
+      var zeichen = opts.every(function (o) { return String(o).length <= 2; });
+      var spalten = zeichen && opts.length === 3 ? ' drei' : opts.length <= 4 && (zeichen || t.eingabe === 'richtig_falsch') ? ' zwei' : '';
+      koerper += '<div class="optionen' + spalten + '">' + opts.map(function (o) {
+        var anzeige = t.eingabe === 'richtig_falsch' ? (o === 'richtig' ? '✓ richtig' : '✗ falsch') : o;
+        return '<button class="option' + (zeichen ? ' zeichen' : '') + '" data-wert="' + esc(o) + '">' + esc(anzeige) + '</button>';
+      }).join('') + '</div>';
+    } else if (t.eingabe === 'paare') {
+      var links = mischen(t.paare.map(function (p) { return p[0]; }));
+      var rechts = mischen(t.paare.map(function (p) { return p[1]; }));
+      koerper += '<div class="paare">' + links.map(function (l, i) {
+        var gross = function (w) { return String(w).length <= 2 ? ' zeichen' : ''; };
+        return '<button class="option' + gross(l) + '" data-seite="l" data-wert="' + esc(l) + '">' + esc(l) + '</button><button class="option' + gross(rechts[i]) + '" data-seite="r" data-wert="' + esc(rechts[i]) + '">' + esc(rechts[i]) + '</button>';
+      }).join('') + '</div>';
+    }
+    var lang = f.haupt.length > 90;
+    app.innerHTML = '<div class="lektion">' +
+      '<div class="lektion-kopf"><button class="schliessen" aria-label="Übung beenden">✕</button>' +
+      '<div class="fortschritt" role="progressbar" aria-valuemin="0" aria-valuemax="' + L.uebungen.length + '" aria-valuenow="' + L.i + '"><span style="width:' + (100 * L.i / L.uebungen.length) + '%"></span></div>' +
+      '<span class="herzen" aria-label="' + L.herzen + ' Herzen">♥ ' + L.herzen + '</span></div>' +
+      '<main class="uebung">' + (f.kontext ? '<p class="kontext">' + mitBox(f.kontext) + '</p>' : '') +
+      '<p class="frage' + (lang ? ' lang' : '') + '">' + mitBox(f.haupt) + '</p>' + koerper + '</main>' +
+      '<div class="leiste" id="leiste"><div class="leiste-innen"><button class="btn btn-gold btn-breit" id="pruefen" disabled>Prüfen</button></div></div></div>';
+
+    app.querySelector('.schliessen').onclick = function () { if (confirm('Übung wirklich beenden? Der Fortschritt dieser Übung geht verloren.')) uebersicht(); };
+    var pruefen = document.getElementById('pruefen');
+    var gewaehlt = null;
+    var feld = document.getElementById('antwort');
+    if (feld) {
+      feld.focus();
+      feld.addEventListener('input', function () { pruefen.disabled = !feld.value.trim(); });
+      feld.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        if (feld.value.trim()) pruefen.click();
+      });
+    }
+    app.querySelectorAll('.optionen .option').forEach(function (b) {
+      b.onclick = function () {
+        app.querySelectorAll('.optionen .option').forEach(function (x) { x.classList.remove('gewaehlt'); });
+        b.classList.add('gewaehlt');
+        gewaehlt = b.dataset.wert;
+        pruefen.disabled = false;
+      };
+    });
+    if (t.eingabe === 'paare') paareSpielen(t);
+    pruefen.onclick = function () {
+      var ergebnis = feld ? bewerte(t, feld.value) : bewerte(t, gewaehlt);
+      if (feld) feld.disabled = true;
+      app.querySelectorAll('.optionen .option').forEach(function (b) {
+        b.disabled = true;
+        if (b.dataset.wert === String(t.eingabe === 'richtig_falsch' ? (t.loesung ? 'richtig' : 'falsch') : t.loesung)) b.classList.add('richtig');
+        else if (b.dataset.wert === gewaehlt) b.classList.add('falsch');
+      });
+      rueckmeldung(ergebnis, u);
+    };
+  }
+
+  function paareSpielen(t) {
+    var richtig = {};
+    t.paare.forEach(function (p) { richtig[p[0]] = p[1]; });
+    var links = null, fertig = 0, fehlerGemacht = false;
+    app.querySelectorAll('.paare .option').forEach(function (b) {
+      b.onclick = function () {
+        if (b.classList.contains('fertig')) return;
+        if (b.dataset.seite === 'l') {
+          app.querySelectorAll('.paare [data-seite="l"]').forEach(function (x) { x.classList.remove('gewaehlt'); });
+          b.classList.add('gewaehlt');
+          links = b;
+          return;
+        }
+        if (!links) return;
+        if (richtig[links.dataset.wert] === b.dataset.wert) {
+          links.classList.remove('gewaehlt');
+          links.classList.add('fertig'); b.classList.add('fertig');
+          links.disabled = b.disabled = true;
+          links = null;
+          if (++fertig === t.paare.length) rueckmeldung({ richtig: !fehlerGemacht }, L.uebungen[L.i]);
+        } else {
+          fehlerGemacht = true;
+          b.classList.add('wackeln'); setTimeout(function () { b.classList.remove('wackeln'); }, 300);
+        }
+      };
+    });
+    document.getElementById('pruefen').classList.add('versteckt');
+  }
+
+  function bewerte(t, eingabe) {
+    if (t.eingabe === 'zahl') return { richtig: LW.parseZahl(eingabe) === Number(t.loesung) };
+    if (t.eingabe === 'wort') {
+      var a = normWort(eingabe), b = normWort(t.loesung);
+      if (a === b) return { richtig: true };
+      if (b.length > 8 && abstand(a, b) === 1) return { richtig: true, hinweis: 'Fast perfekt! Achte auf die Schreibweise: ' + t.antwort };
+      return { richtig: false };
+    }
+    if (t.eingabe === 'richtig_falsch') return { richtig: (eingabe === 'richtig') === t.loesung };
+    return { richtig: String(eingabe) === String(t.loesung) };
+  }
+
+  var LOB = ['Richtig!', 'Super!', 'Klasse!', 'Genau!', 'Stark!', 'Prima!'];
+  function rueckmeldung(erg, u) {
+    var leiste = document.getElementById('leiste');
+    if (erg.richtig) { L.xp += 10; } else { L.herzen--; L.fehler++; }
+    var erklaer = '';
+    if (erg.hinweis) erklaer = erg.hinweis;
+    else if (!erg.richtig) erklaer = 'Richtige Lösung: <b>' + esc(u.t.eingabe === 'richtig_falsch' ? (u.t.loesung ? 'richtig' : 'falsch') : u.t.antwort) + '</b>';
+    if (!erg.richtig && u.a.weg) erklaer += '<br>So geht’s: ' + esc(u.a.weg);
+    leiste.className = 'leiste ' + (erg.richtig ? 'ok' : 'fehler');
+    leiste.innerHTML = '<div class="leiste-innen" role="status"><p class="meldung">' + (erg.richtig ? '✓ ' + LOB[Math.floor(Math.random() * LOB.length)] : '✗ Nicht ganz.') + '</p>' +
+      (erklaer ? '<p class="erklaer">' + erklaer + '</p>' : '') + '<button class="btn btn-gold btn-breit" id="weiter">Weiter</button></div>';
+    app.querySelector('.herzen').textContent = '♥ ' + L.herzen;
+    var weiter = document.getElementById('weiter');
+    weiter.focus();
+    weiter.onclick = function () {
+      if (L.herzen <= 0) return ende(false);
+      L.i++;
+      if (L.i >= L.uebungen.length) return ende(true);
+      zeigeUebung();
+    };
+  }
+
+  function ende(geschafft) {
+    window.scrollTo(0, 0);
+    var t = L.thema;
+    var html;
+    if (geschafft) {
+      var st = L.fehler === 0 ? 3 : L.fehler <= 2 ? 2 : 1;
+      var bonus = 20 + (L.fehler === 0 ? 10 : 0);
+      var gewinn = L.xp + bonus;
+      var ts = themaStand(t.thema);
+      ts.lektionen++; ts.sterne = Math.max(ts.sterne, st); ts.letzte = tag();
+      stand.xp += gewinn;
+      streakZaehlen();
+      speichern();
+      var wissen = t.wissenswertes && t.wissenswertes.length ? t.wissenswertes[Math.floor(Math.random() * t.wissenswertes.length)] : '';
+      html = '<div class="gross" aria-hidden="true">' + (st === 3 ? '🏆' : '🎉') + '</div><h1 class="gold">Geschafft!</h1>' +
+        '<div class="sterne" aria-label="' + st + ' von 3 Sternen">' + sterne(st) + '</div>' +
+        '<div class="werte"><span class="chip">⭐ +' + gewinn + ' XP</span><span class="chip">🔥 ' + streakAktuell() + ' ' + (streakAktuell() === 1 ? 'Tag' : 'Tage') + '</span></div>' +
+        (wissen ? '<section class="karte wissen"><h2>Wusstest du schon?</h2><p>' + esc(wissen) + '</p></section>' : '');
+    } else {
+      html = '<div class="gross" aria-hidden="true">💪</div><h1>Keine Herzen mehr</h1><p style="margin:8px 0 24px">Das war schwer – aber Üben macht stark! Schau dir das Merke an und versuch es noch einmal.</p>';
+    }
+    app.innerHTML = '<div class="wrap ende">' + html + '<div class="stapel"><button class="btn btn-gold btn-breit" id="nochmal">' + (geschafft ? '▶ Nochmal üben' : '▶ Nochmal versuchen') + '</button>' +
+      (geschafft ? '' : '<button class="btn btn-ghost btn-breit" id="merke">💡 Merke ansehen</button>') +
+      '<button class="btn btn-ghost btn-breit" id="uebersicht">Zur Übersicht</button></div></div>';
+    document.getElementById('nochmal').onclick = function () { starte(t); };
+    document.getElementById('uebersicht').onclick = uebersicht;
+    var m = document.getElementById('merke'); if (m) m.onclick = function () { merke(t); };
+  }
+
+  // ---------- Export / Import ----------
+  function exportieren() {
+    var blob = new Blob([JSON.stringify(stand, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'lernwerk-lernstand-' + tag() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  }
+  function importieren(e) {
+    var datei = e.target.files[0];
+    if (!datei) return;
+    datei.text().then(function (text) {
+      var neu = JSON.parse(text);
+      if (!neu || neu.version !== 1 || typeof neu.xp !== 'number' || typeof neu.themen !== 'object') throw new Error('Format');
+      if (!confirm('Lernstand aus der Datei übernehmen? Der aktuelle Stand auf diesem Gerät wird ersetzt.')) return;
+      stand = neu; speichern(); uebersicht();
+    }).catch(function () { alert('Diese Datei ist kein LERNWERK-Lernstand.'); });
+  }
+
+  // Testzugang für den automatischen Mobil-Test (liest nur die aktuelle Lösung)
+  window.LERNWERK_TEST = { loesung: function () { var u = L && L.uebungen[L.i]; return u && u.t; } };
+
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(FACH.sw, { scope: FACH.swScope });
+  uebersicht();
+})();
+</script></body></html>

@@ -3,6 +3,10 @@
 Neueste oben. Format: Datum · Entscheidung · Grund.
 
 ## 2026-10-29
+- **Struktur der App (Vorgabe Nutzer):** Startseite = Fächerwahl. Im Fach eine Karte je Aufgabengebiet mit „Üben“ (interaktiv), „Merke“, „Arbeitsblatt“ und „Lösung“ (PDF zum Drucken). Die Blätter liegen beim Fach, nicht auf der Startseite.
+- **Generatoren laufen im Browser** (`generator/bundle.js` packt sie in die Seite): jede Übung hat neue Zahlen, auch offline. Herzen gelten je Übung (5), XP und Tages-Streak gesamt, Sterne je Thema (bester Durchgang).
+- **Zahlwörter in der App:** „einhundert“ = „hundert“, Leerzeichen egal, ein Tippfehler wird bei langen Wörtern mit Hinweis akzeptiert.
+- **Service Worker** cached alle Dateien in `docs/` inklusive PDFs (≈ 1,2 MB), Cache-Version = Hash über den Inhalt.
 - **Arbeitsblatt:** 6–10 Aufgaben, nach Schwierigkeit sortiert (●○○ statt BE). Reicht die Inhaltsdatei nicht, werden Generator-Aufgaben mit neuen Zahlen wiederholt. Besser ist, die Datei zu ergänzen; der Test prüft das ab 6 Aufgaben. Lösungsblatt ohne Namenszeile, Antworten an der Stelle der Felder.
 - **Kästchenraster als SVG**, weil CSS-Verlaufsraster im Chromium-PDF verschwinden. Diagramme: 4 mm je Einheit, Zeichenraster: 5 mm (Heftkästchen).
 - **PDFs auf der GitHub Page** (`npm run blatt -- --alle --veroeffentlichen` → `docs/blaetter/`), damit vom Handy aus gedruckt werden kann.

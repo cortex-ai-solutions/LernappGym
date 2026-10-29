@@ -1,102 +1,136 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#002B36">
-<title>LERNWERK – Lernen Klasse 5</title>
-<!-- Übergangs-Startseite: verlinkt die bestehenden Apps, bis npm run web diese Seite erzeugt -->
-<style>
-  :root {
-    --bg-deep: #002B36; --bg-mid: #004D5C; --bg-black: #001820;
-    --gold-dark: #8B6914; --gold-base: #C9A84C; --gold-light: #E8C97D;
-    --text-white: #F5F0E8; --text-secondary: #A89060; --text-muted: #8A9A9A;
-    --border: rgba(200, 168, 76, 0.2); --border-strong: rgba(200, 168, 76, 0.5);
-  }
-  * { box-sizing: border-box; margin: 0; }
-  body {
-    min-height: 100vh; padding: 32px 16px 48px;
-    font-family: Montserrat, Inter, system-ui, sans-serif; color: var(--text-white);
-    background: radial-gradient(ellipse at top left, var(--bg-mid) 0%, var(--bg-deep) 50%, var(--bg-black) 100%);
-  }
-  main { max-width: 520px; margin: 0 auto; }
-  h1 {
-    font-size: 30px; font-weight: 700; letter-spacing: 0.05em;
-    background: linear-gradient(90deg, #B8922A, #E8C97D, #C9A84C);
-    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .sub { margin: 6px 0 28px; color: var(--text-secondary); font-size: 16px; }
-  .fach {
-    position: relative; overflow: hidden; display: flex; align-items: center; gap: 18px;
-    min-height: 88px; padding: 18px 22px; margin-bottom: 16px; border-radius: 16px;
-    background: linear-gradient(135deg, #003B49 0%, #002530 100%);
-    border: 1px solid var(--border); color: var(--text-white); text-decoration: none;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(200, 168, 76, 0.1);
-    transition: border-color 0.2s, transform 0.1s;
-  }
-  a.fach:hover, a.fach:focus-visible { border-color: var(--border-strong); outline: none; }
-  a.fach:active { transform: scale(0.98); }
-  .icon { font-size: 40px; line-height: 1; }
-  .name { font-size: 20px; font-weight: 700; color: var(--gold-light); }
-  .info { font-size: 14px; color: var(--text-muted); margin-top: 2px; }
-  .bald { opacity: 0.6; }
-  .badge {
-    margin-left: auto; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-    padding: 3px 10px; border-radius: 20px; color: var(--gold-base);
-    background: rgba(201, 168, 76, 0.15); border: 1px solid rgba(201, 168, 76, 0.3);
-  }
-  .fach::after {
-    content: ""; position: absolute; right: 0; bottom: 0; width: 120px; height: 44px;
-    background: linear-gradient(135deg, var(--gold-dark), var(--gold-base) 50%, var(--gold-light));
-    border-radius: 60% 0 0 0; opacity: 0.1; pointer-events: none;
-  }
-  h2 { margin: 36px 0 4px; font-size: 18px; font-weight: 600; letter-spacing: 0.03em; color: var(--gold-light); }
-  .hinweis { margin-bottom: 14px; font-size: 13px; color: var(--text-muted); }
-  .blaetter { list-style: none; padding: 0; margin: 0; }
-  .blaetter li {
-    display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px 8px 16px; margin-bottom: 10px;
-    border-radius: 12px; border: 1px solid var(--border); background: linear-gradient(135deg, #003B49 0%, #002530 100%);
-  }
-  .blaetter li span { flex: 1; font-size: 15px; }
-  .blaetter a {
-    display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 8px;
-    font-size: 14px; font-weight: 600; text-decoration: none; color: #000;
-    background: linear-gradient(135deg, var(--gold-dark), var(--gold-base));
-  }
-  .blaetter a.sek { color: var(--gold-base); background: transparent; border: 1px solid rgba(200, 168, 76, 0.4); }
-  footer { margin-top: 32px; font-size: 12px; color: var(--text-muted); text-align: center; }
-</style>
-</head>
-<body>
-<main>
-  <h1>LERNWERK</h1>
-  <p class="sub">Üben für Klasse 5 – such dir ein Fach aus!</p>
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#002B36"><meta name="description" content="Üben für Klasse 5: Mathematik, Latein, Geschichte">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png"><title>LERNWERK – Lernen Klasse 5</title>
+<style>@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url(fonts/montserrat-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url(fonts/montserrat-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url(fonts/montserrat-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url(fonts/inter-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;font-display:swap;src:url(fonts/inter-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url(fonts/inter-latin-600-normal.woff2) format('woff2')}
+/* LERNWERK Webapp – Cortex-CI (design.md im Hub), kindgerecht: große Schrift, Tippflächen ≥ 48 px */
+:root {
+  --bg-deep: #002B36; --bg-primary: #00343F; --bg-mid: #004D5C; --bg-light: #0A6070; --bg-black: #001820;
+  --gold-dark: #8B6914; --gold-mid: #B8922A; --gold-base: #C9A84C; --gold-warm: #D4AF6A; --gold-light: #E8C97D; --gold-bright: #F0D9A0;
+  --text: #F5F0E8; --text-gold: #E8C97D; --text-secondary: #A89060; --text-muted: #8A9A9A;
+  --ok: #2D9E6B; --ok-hell: #3ECF8E; --fehler: #B84040; --fehler-hell: #E07070;
+  --border: rgba(200, 168, 76, 0.2); --border-strong: rgba(200, 168, 76, 0.5);
+  --gradient-gold: linear-gradient(135deg, #8B6914 0%, #C9A84C 45%, #E8C97D 100%);
+  --card: linear-gradient(135deg, #003B49 0%, #002530 100%);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { min-height: 100%; }
+body {
+  font-family: 'Inter', system-ui, sans-serif; font-size: 17px; line-height: 1.5; color: var(--text);
+  background: radial-gradient(ellipse at top left, var(--bg-mid) 0%, var(--bg-deep) 50%, var(--bg-black) 100%) fixed;
+  -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 16px 16px 40px; }
+.gold { background: linear-gradient(90deg, #B8922A, #E8C97D, #C9A84C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 2px; }
 
-  <a class="fach" href="latein/">
-    <span class="icon" aria-hidden="true">🦉</span>
-    <span><span class="name">Latein</span><span class="info" style="display:block">Vokabeln, Grammatik, Römer</span></span>
-  </a>
-  <a class="fach" href="geschichte/">
-    <span class="icon" aria-hidden="true">📜</span>
-    <span><span class="name">Geschichte</span><span class="info" style="display:block">Lektionen, Quiz, Karteikarten</span></span>
-  </a>
-  <div class="fach bald" aria-disabled="true">
-    <span class="icon" aria-hidden="true">🧮</span>
-    <span><span class="name">Mathematik</span><span class="info" style="display:block">Lern-App folgt – die Arbeitsblätter gibt es schon</span></span>
-    <span class="badge">Bald</span>
-  </div>
+/* Kopf */
+.kopf { display: flex; align-items: center; gap: 10px; margin: 4px 0 18px; }
+.kopf h1 { min-width: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.03em; flex: 1; }
+.zurueck { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; min-height: 48px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--gold-base); text-decoration: none; font-size: 22px; }
+.chips { display: flex; gap: 8px; }
+.chip { white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 12px; border-radius: 20px; font-size: 14px; font-weight: 700; color: var(--gold-light); background: rgba(201, 168, 76, 0.12); border: 1px solid rgba(201, 168, 76, 0.3); }
 
-  <h2 id="blaetter">Arbeitsblätter zum Drucken</h2>
-  <p class="hinweis">Mathematik · Klasse 5 · A4 · mit Lösungsblatt für Eltern</p>
-  <ul class="blaetter">
-    <li><span>🔢 Große Zahlen lesen und schreiben</span><a href="blaetter/mathematik/grosse-zahlen.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/grosse-zahlen_loesung.pdf">Lösung</a></li>
-    <li><span>🎯 Natürliche Zahlen runden</span><a href="blaetter/mathematik/runden.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/runden_loesung.pdf">Lösung</a></li>
-    <li><span>➗ Rechnen mit natürlichen Zahlen</span><a href="blaetter/mathematik/grundrechenarten.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/grundrechenarten_loesung.pdf">Lösung</a></li>
-    <li><span>🧺 Sachaufgaben lösen</span><a href="blaetter/mathematik/sachaufgaben.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/sachaufgaben_loesung.pdf">Lösung</a></li>
-    <li><span>📊 Daten erfassen und darstellen</span><a href="blaetter/mathematik/daten-diagramme.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/daten-diagramme_loesung.pdf">Lösung</a></li>
-  </ul>
+/* Themenkarten */
+.thema { position: relative; overflow: hidden; padding: 16px; margin-bottom: 14px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(200, 168, 76, 0.1); }
+.thema::after { content: ''; position: absolute; right: 0; bottom: 0; width: 140px; height: 50px; background: var(--gradient-gold); border-radius: 60% 0 0 0; opacity: 0.08; pointer-events: none; }
+.thema-kopf { display: flex; align-items: center; gap: 14px; }
+.thema-icon { font-size: 38px; line-height: 1; }
+.thema h2 { font-size: 18px; font-weight: 700; color: var(--gold-light); line-height: 1.3; }
+.thema .meta { font-size: 14px; color: var(--text-muted); }
+.sterne { color: var(--gold-base); letter-spacing: 2px; }
+.reihe { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; position: relative; z-index: 1; }
+.reihe .btn { flex: 1 1 auto; }
+.reihe-druck { display: flex; gap: 8px; margin-top: 8px; position: relative; z-index: 1; }
+.reihe-druck .btn { flex: 1; font-size: 14px; }
 
-  <footer>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</footer>
-</main>
-</body>
-</html>
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid transparent; font-size: 16px; font-weight: 700; text-decoration: none; transition: transform 0.08s, background 0.15s; }
+.btn:active { transform: scale(0.97); }
+.btn-gold { background: var(--gradient-gold); color: #000; }
+.btn-ghost { background: transparent; color: var(--gold-base); border-color: rgba(200, 168, 76, 0.4); }
+.btn-ghost:hover { background: rgba(200, 168, 76, 0.1); }
+.btn[disabled] { opacity: 0.4; cursor: default; transform: none; }
+.btn-breit { width: 100%; }
+
+/* Lektion */
+.lektion { min-height: 100vh; display: flex; flex-direction: column; }
+.lektion-kopf { display: flex; align-items: center; gap: 12px; padding: 12px 16px; max-width: 560px; width: 100%; margin: 0 auto; }
+.schliessen { min-width: 48px; min-height: 48px; border-radius: 12px; border: none; background: transparent; color: var(--text-muted); font-size: 26px; }
+.fortschritt { flex: 1; height: 14px; border-radius: 7px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.fortschritt span { display: block; height: 100%; background: var(--gradient-gold); border-radius: 7px; transition: width 0.3s; }
+.herzen { font-weight: 700; color: var(--fehler-hell); font-size: 18px; white-space: nowrap; }
+.uebung { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 8px 16px 160px; }
+.kontext { font-size: 15px; color: var(--text-secondary); margin-bottom: 6px; overflow-wrap: anywhere; }
+.frage { font-size: 22px; font-weight: 600; line-height: 1.4; margin-bottom: 20px; overflow-wrap: anywhere; hyphens: auto; }
+.frage.lang { font-size: 19px; font-weight: 500; }
+.box { display: inline-block; min-width: 2.2em; padding: 0 6px; border: 2px dashed var(--gold-base); border-radius: 6px; text-align: center; color: var(--gold-light); }
+.eingabe { width: 100%; min-height: 60px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--border-strong); background: rgba(0, 30, 40, 0.6); color: var(--text); font-size: 24px; font-weight: 600; }
+.eingabe:focus { outline: none; border-color: var(--gold-light); box-shadow: 0 0 0 3px rgba(200, 168, 76, 0.15); }
+.wortfeld { min-height: 120px; padding: 12px 16px; font-size: 20px; line-height: 1.4; resize: none; overflow-wrap: anywhere; }
+.eingabe::placeholder { color: var(--text-muted); font-weight: 400; font-size: 18px; }
+.label { display: block; font-size: 15px; color: var(--text-secondary); margin: 0 0 6px; }
+.optionen { display: grid; gap: 10px; }
+.optionen.zwei { grid-template-columns: 1fr 1fr; }
+.optionen.drei { grid-template-columns: 1fr 1fr 1fr; }
+.option { min-width: 0; overflow-wrap: anywhere; min-height: 58px; padding: 10px 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--card); text-align: left; font-size: 19px; font-weight: 600; }
+.option.zeichen { text-align: center; font-size: 30px; }
+.option.gewaehlt { border-color: var(--gold-light); background: rgba(201, 168, 76, 0.15); }
+.option.richtig { border-color: var(--ok-hell); background: rgba(45, 158, 107, 0.2); }
+.option.falsch { border-color: var(--fehler-hell); background: rgba(184, 64, 64, 0.2); }
+.paare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.paare .option { text-align: center; }
+.paare .option.fertig { opacity: 0.45; border-color: var(--ok-hell); }
+.wackeln { animation: wackeln 0.3s; }
+@keyframes wackeln { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.diagramm { width: 100%; margin: 4px 0 18px; padding: 10px; border-radius: 12px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); }
+.diagramm text { fill: var(--text); font-family: Inter, sans-serif; }
+
+/* Feedback-Leiste */
+.leiste { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); background: var(--bg-black); border-top: 1px solid var(--border); }
+.leiste-innen { max-width: 560px; margin: 0 auto; }
+.leiste.ok { background: #0B3B2C; border-top-color: var(--ok); }
+.leiste.fehler { background: #3A1818; border-top-color: var(--fehler); }
+.meldung { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.leiste.ok .meldung { color: var(--ok-hell); }
+.leiste.fehler .meldung { color: var(--fehler-hell); }
+.erklaer { font-size: 15px; margin-bottom: 12px; color: var(--text); }
+
+/* Merke / Ende */
+.karte { padding: 20px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); margin-bottom: 16px; }
+.karte h2 { font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-base); margin-bottom: 10px; }
+.merke p, .merke li { margin-bottom: 8px; }
+.merke ul, .merke ol { padding-left: 22px; }
+.merke strong { color: var(--gold-light); }
+.merke table { border-collapse: collapse; margin: 8px 0 12px; width: 100%; font-size: 15px; }
+.merke th, .merke td { border: 1px solid var(--border-strong); padding: 6px 8px; text-align: center; }
+.merke th { color: var(--gold-light); background: rgba(201, 168, 76, 0.08); }
+.ende { text-align: center; padding-top: 40px; }
+.ende .gross { font-size: 64px; line-height: 1.1; margin-bottom: 8px; }
+.ende h1 { font-size: 30px; margin-bottom: 8px; }
+.ende .sterne { font-size: 40px; margin: 8px 0 16px; }
+.ende .werte { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+.wissen { text-align: left; }
+.stapel { display: grid; gap: 10px; }
+.fuss { margin-top: 28px; text-align: center; font-size: 13px; color: var(--text-muted); }
+.fuss .reihe { justify-content: center; }
+.fuss .btn { min-height: 44px; font-size: 14px; flex: 0 1 auto; }
+.versteckt { display: none !important; }
+</style></head>
+<body><div class="wrap"><header style="margin:20px 0 22px"><h1 class="gold" style="font-size:32px;letter-spacing:.05em">LERNWERK</h1>
+<p style="color:var(--text-secondary)">Üben für Klasse 5 – such dir ein Fach aus!</p></header>
+<a class="thema" href="mathe/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">🧮</span><div><h2>Mathematik</h2><div class="meta">Üben und Arbeitsblätter je Thema</div></div></div></a>
+<a class="thema" href="latein/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">🦉</span><div><h2>Latein</h2><div class="meta">Vokabeln, Grammatik, Römer</div></div></div></a>
+<a class="thema" href="geschichte/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">📜</span><div><h2>Geschichte</h2><div class="meta">Lektionen, Quiz, Karteikarten</div></div></div></a>
+<footer class="fuss"><p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p></footer></div>
+<script>if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js', { scope: './' });</script></body></html>

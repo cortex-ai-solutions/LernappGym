@@ -22,5 +22,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Schema-Validierung
         run: npm run validate
-      - name: Tests (Mathe-Lösungen, Auswahlaufgaben)
+      - name: Webapp bauen (für den Mobil-Test)
+        run: npm run web
+      - name: Tests (Mathe-Lösungen, Blätter, Webapp mobil + offline)
         run: npm test
