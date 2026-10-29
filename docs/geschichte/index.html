@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Geschichte 5. Klasse – Lern-App</title>
+<style>
+  :root{
+    --bg: #f4efe6;
+    --card: #ffffff;
+    --ink: #2b2420;
+    --ink-soft: #6b6055;
+    --accent: #a6462b;
+    --accent-2: #2f6f5e;
+    --accent-3: #c98a2c;
+    --line: #e4dccd;
+    --good: #2f8f5b;
+    --bad: #c04a3a;
+    --shadow: 0 6px 18px rgba(60,45,30,0.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding-bottom:40px;
+  }
+  .app{max-width:720px;margin:0 auto;padding:18px 16px 8px;}
+
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:14px;
+  }
+  header.top h1{
+    font-size:1.15rem;margin:0;letter-spacing:0.02em;
+    display:flex;align-items:center;gap:8px;
+  }
+  header.top h1 .ico{font-size:1.3rem;}
+  .backbtn{
+    border:none;background:var(--card);color:var(--accent);
+    font-family:inherit;font-weight:bold;font-size:0.95rem;
+    padding:8px 12px;border-radius:10px;box-shadow:var(--shadow);
+  }
+  .subtitle{color:var(--ink-soft);font-size:0.85rem;margin:-8px 0 16px;}
+
+  /* Home: lesson list */
+  .lesson-card{
+    background:var(--card);border-radius:16px;box-shadow:var(--shadow);
+    padding:14px 16px;margin-bottom:12px;
+    display:flex;align-items:center;gap:12px;
+    border-left:6px solid var(--accent-3);
+  }
+  .lesson-card .week{
+    font-size:0.7rem;text-transform:uppercase;letter-spacing:0.08em;
+    color:var(--ink-soft);
+  }
+  .lesson-card h3{margin:2px 0 4px;font-size:1.05rem;}
+  .lesson-card p{margin:0;font-size:0.8rem;color:var(--ink-soft);}
+  .lesson-card .stars{font-size:0.95rem;color:var(--accent-3);white-space:nowrap;}
+  .lesson-card .arrow{margin-left:auto;color:var(--ink-soft);font-size:1.2rem;padding-left:6px;}
+
+  .progress-banner{
+    background:linear-gradient(135deg,var(--accent-2),#1f5346);
+    color:#fff;border-radius:16px;padding:16px;margin-bottom:16px;
+    box-shadow:var(--shadow);
+  }
+  .progress-banner .big{font-size:1.6rem;font-weight:bold;}
+  .progress-banner .label{font-size:0.8rem;opacity:0.85;}
+  .bar-bg{background:rgba(255,255,255,0.25);border-radius:8px;height:8px;margin-top:10px;overflow:hidden;}
+  .bar-fill{background:#fff;height:100%;border-radius:8px;transition:width 0.4s;}
+
+  .note-box{
+    background:#fdf6e8;border:1px dashed var(--accent-3);border-radius:12px;
+    padding:10px 12px;font-size:0.78rem;color:#7a5a1e;margin-bottom:16px;
+  }
+
+  /* Lesson view */
+  .tabs{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;}
+  .tab-btn{
+    flex:none;border:none;padding:8px 14px;border-radius:20px;font-family:inherit;
+    font-size:0.82rem;font-weight:bold;background:var(--card);color:var(--ink-soft);
+    box-shadow:var(--shadow);
+  }
+  .tab-btn.active{background:var(--accent);color:#fff;}
+
+  .card{
+    background:var(--card);border-radius:16px;padding:16px 18px;margin-bottom:14px;
+    box-shadow:var(--shadow);
+  }
+  .card h4{
+    margin:0 0 8px;color:var(--accent);font-size:1.02rem;
+    border-bottom:2px solid var(--line);padding-bottom:6px;
+  }
+  .card p{margin:0 0 8px;line-height:1.5;font-size:0.94rem;}
+  .card p:last-child{margin-bottom:0;}
+  .card ul{margin:6px 0;padding-left:20px;font-size:0.9rem;line-height:1.5;}
+  .example{
+    background:#f6f1e6;border-left:4px solid var(--accent-3);
+    padding:8px 10px;border-radius:8px;font-size:0.86rem;font-style:italic;margin-top:8px;
+  }
+
+  table.src-table{width:100%;border-collapse:collapse;font-size:0.82rem;margin-top:6px;}
+  table.src-table th{background:var(--accent-2);color:#fff;padding:6px 4px;text-align:left;}
+  table.src-table td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.src-table tr:nth-child(even){background:#faf7f0;}
+
+  .timeline{position:relative;margin:18px 4px 6px;padding-left:6px;}
+  .timeline .track{position:relative;height:4px;background:var(--line);border-radius:2px;margin:30px 0 10px;}
+  .timeline .dot{
+    position:absolute;top:-8px;width:16px;height:16px;border-radius:50%;
+    background:var(--accent);transform:translateX(-50%);border:2px solid #fff;box-shadow:0 0 0 1px var(--accent);
+  }
+  .timeline .tlabel{
+    position:absolute;top:-38px;transform:translateX(-50%);font-size:0.68rem;
+    text-align:center;width:90px;color:var(--ink-soft);
+  }
+  .timeline .ylabel{
+    position:absolute;top:10px;transform:translateX(-50%);font-size:0.65rem;
+    color:var(--ink-soft);white-space:nowrap;
+  }
+
+  /* Flashcards */
+  .flash-wrap{perspective:1000px;height:170px;margin-bottom:14px;}
+  .flash{
+    position:relative;width:100%;height:100%;transition:transform 0.5s;
+    transform-style:preserve-3d;cursor:pointer;
+  }
+  .flash.flipped{transform:rotateY(180deg);}
+  .flash-face{
+    position:absolute;inset:0;backface-visibility:hidden;
+    border-radius:16px;box-shadow:var(--shadow);
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:18px;font-size:1rem;line-height:1.4;
+  }
+  .flash-front{background:var(--accent);color:#fff;font-weight:bold;}
+  .flash-back{background:var(--card);color:var(--ink);transform:rotateY(180deg);font-size:0.92rem;}
+  .flash-hint{text-align:center;font-size:0.75rem;color:var(--ink-soft);margin:-6px 0 14px;}
+  .flash-nav{display:flex;justify-content:space-between;align-items:center;margin-top:2px;}
+  .flash-nav button{
+    border:none;background:var(--card);box-shadow:var(--shadow);border-radius:10px;
+    padding:8px 14px;font-family:inherit;font-weight:bold;color:var(--accent);font-size:0.85rem;
+  }
+  .flash-count{font-size:0.8rem;color:var(--ink-soft);}
+
+  /* Match game */
+  .match-cols{display:flex;gap:10px;}
+  .match-col{flex:1;}
+  .match-item{
+    background:var(--card);border:2px solid var(--line);border-radius:10px;
+    padding:8px 10px;margin-bottom:8px;font-size:0.82rem;text-align:center;
+    box-shadow:var(--shadow);
+  }
+  .match-item.selected{border-color:var(--accent);background:#fbeee7;}
+  .match-item.correct{border-color:var(--good);background:#e9f7ee;}
+  .match-item.wrong{border-color:var(--bad);background:#fbeceb;animation:shake 0.3s;}
+  @keyframes shake{25%{transform:translateX(-4px);}75%{transform:translateX(4px);}}
+  .match-status{text-align:center;font-size:0.85rem;margin-top:6px;color:var(--ink-soft);}
+
+  /* Quiz */
+  .q-progress{font-size:0.78rem;color:var(--ink-soft);margin-bottom:6px;}
+  .q-text{font-size:1rem;font-weight:bold;margin-bottom:14px;}
+  .opt{
+    display:block;width:100%;text-align:left;background:var(--card);
+    border:2px solid var(--line);border-radius:12px;padding:11px 14px;
+    margin-bottom:10px;font-family:inherit;font-size:0.9rem;color:var(--ink);
+    box-shadow:var(--shadow);
+  }
+  .opt.correct{border-color:var(--good);background:#e9f7ee;}
+  .opt.wrong{border-color:var(--bad);background:#fbeceb;}
+  .opt:disabled{opacity:0.85;}
+  .feedback{font-size:0.85rem;margin:10px 0;padding:10px 12px;border-radius:10px;}
+  .feedback.good{background:#e9f7ee;color:var(--good);}
+  .feedback.bad{background:#fbeceb;color:var(--bad);}
+  .next-btn{
+    display:block;width:100%;padding:12px;border:none;border-radius:12px;
+    background:var(--accent);color:#fff;font-family:inherit;font-weight:bold;
+    font-size:0.95rem;margin-top:6px;
+  }
+  .quiz-result{text-align:center;padding:20px 10px;}
+  .quiz-result .score{font-size:2.2rem;font-weight:bold;color:var(--accent);}
+  .quiz-result .msg{color:var(--ink-soft);margin:8px 0 18px;font-size:0.9rem;}
+  .restart-btn{
+    border:none;background:var(--accent-2);color:#fff;padding:11px 20px;
+    border-radius:12px;font-family:inherit;font-weight:bold;font-size:0.9rem;
+  }
+
+  .empty{text-align:center;color:var(--ink-soft);padding:40px 10px;font-size:0.9rem;}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+/* ============================================================
+   GESCHICHTE 5. KLASSE — LERN-APP
+   Selbstständige HTML-Datei, keine Installation nötig.
+   ------------------------------------------------------------
+   ERWEITERN: Um eine neue Lektion (Woche) hinzuzufügen, einfach
+   ein weiteres Objekt in das LESSONS-Array unten einfügen. Jede
+   Lektion braucht: id, week, title, intro, sections[], flashcards[],
+   match (optional), quiz[]. Die App zeigt neue Einträge automatisch
+   auf der Startseite an — es muss sonst nichts angepasst werden.
+   ============================================================ */
+
+const LESSONS = [
+  {
+    id: "l1",
+    week: 1,
+    title: "Was ist Geschichte?",
+    icon: "📜",
+    intro: "Was ist eigentlich der Unterschied zwischen einer „Geschichte“ und der „Geschichte“ als Schulfach?",
+    sections: [
+      {
+        heading: "Geschichten ≠ Geschichte",
+        html: `
+          <p><strong>Geschichten</strong> sind Erzählungen, die oft erfunden sind. Sie können ausgedacht sein oder Fantasie enthalten, wie Märchen, Comics oder Filme.</p>
+          <div class="example">Beispiel: „Es war einmal ein Drache, der in einem Schloss lebte …“ – das ist eine <strong>Geschichte</strong>.</div>
+          <p style="margin-top:14px;"><strong>Geschichte</strong> (das Schulfach) beschäftigt sich mit wirklich passiertem Geschehen in der Vergangenheit. Historiker suchen Beweise dafür, was passiert ist – wie ein Detektiv.</p>
+          <div class="example">Beispiel: „Vor 200 Jahren gab es einen Kaiser in Deutschland.“ – das ist <strong>Geschichte</strong>, weil es auf echten Ereignissen beruht.</div>
+        `
+      },
+      {
+        heading: "Was können wir herausfinden?",
+        html: `
+          <ul>
+            <li><strong>Vergangenes Geschehen</strong> – Was ist passiert?</li>
+            <li><strong>Ort, Raum</strong> – Wo ist es passiert?</li>
+            <li><strong>Zeit</strong> – Wann ist es passiert?</li>
+            <li><strong>Handelnde Personen</strong> – Wer hat wie gehandelt?</li>
+            <li><strong>Zusammenhänge</strong> – Warum ist es passiert?</li>
+          </ul>
+          <p>Diese fünf Fragen stellen sich Historikerinnen und Historiker bei jedem Thema — sie sind ein gutes Werkzeug für die Klassenarbeit!</p>
+        `
+      }
+    ],
+    flashcards: [
+      { front: "Was ist eine „Geschichte“?", back: "Eine Erzählung, die oft erfunden ist oder Fantasie enthält (z. B. Märchen, Comics)." },
+      { front: "Was ist „Geschichte“ als Fach?", back: "Die Beschäftigung mit wirklich passiertem Geschehen in der Vergangenheit." },
+      { front: "Wie arbeiten Historiker?", back: "Sie suchen Beweise für das, was passiert ist – wie ein Detektiv." },
+      { front: "Nenne die 5 W-Fragen der Geschichte.", back: "Was? Wo? Wann? Wer (wie gehandelt)? Warum (Zusammenhänge)?" }
+    ],
+    quiz: [
+      {
+        q: "Welcher Satz ist eine „Geschichte“ (keine Geschichte im Fach-Sinn)?",
+        options: ["Vor 200 Jahren gab es einen Kaiser in Deutschland.", "Es war einmal ein Drache, der in einem Schloss lebte.", "Die Pyramiden wurden vor über 4000 Jahren gebaut.", "1789 begann die Französische Revolution."],
+        correct: 1,
+        why: "Der Drache ist frei erfunden – das ist eine Geschichte, keine belegte Vergangenheit."
+      },
+      {
+        q: "Womit vergleicht man die Arbeit von Historikern im Heft?",
+        options: ["Mit einem Gärtner", "Mit einem Detektiv", "Mit einem Koch", "Mit einem Piloten"],
+        correct: 1,
+        why: "Historiker suchen Beweise dafür, was wirklich passiert ist – wie ein Detektiv."
+      },
+      {
+        q: "Welche Frage gehört NICHT zu den fünf W-Fragen der Geschichte?",
+        options: ["Wann ist es passiert?", "Wer hat gehandelt?", "Wie viel kostet das heute?", "Warum ist es passiert?"],
+        correct: 2,
+        why: "Die W-Fragen sind: Was, Wo, Wann, Wer, Warum – nicht der heutige Preis."
+      },
+      {
+        q: "Was macht eine Aussage zu „Geschichte“ statt zu einer bloßen „Geschichte“?",
+        options: ["Sie ist spannend erzählt.", "Sie beruht auf echten Ereignissen.", "Sie hat einen Drachen.", "Sie ist kurz."],
+        correct: 1,
+        why: "Entscheidend ist, dass es auf echten, belegten Ereignissen beruht."
+      }
+    ]
+  },
+  {
+    id: "l2",
+    week: 2,
+    title: "Geschichtsquellen und Quellentypen",
+    icon: "🏺",
+    intro: "Woher wissen wir überhaupt etwas über die Vergangenheit? Durch Überlieferungen – Spuren, die uns erhalten geblieben sind.",
+    sections: [
+      {
+        heading: "Die vier Arten der Überlieferung",
+        html: `
+          <p><strong>Die mündliche Überlieferung (m):</strong> Das sind die oft von Generation zu Generation weiter erzählten Erinnerungen. Durch Zuhören können wir etwas von der Vergangenheit erfahren.</p>
+          <p><strong>Die gegenständliche Überlieferung (g):</strong> Das sind Gegenstände aller Art.</p>
+          <p><strong>Die bildliche Überlieferung (b):</strong> Durch Bilder und Fotos können wir sehen, wie die Menschen ausgesehen und gelebt haben.</p>
+          <p><strong>Die schriftliche Überlieferung (Schr.):</strong> Das sind alle geschriebenen Texte aus früheren Zeiten.</p>
+        `
+      },
+      {
+        heading: "Beispiele im Überblick",
+        html: `
+          <table class="src-table">
+            <tr><th>m – mündlich</th><th>g – gegenständlich</th><th>b – bildlich</th><th>Schr. – schriftlich</th></tr>
+            <tr><td>Lieder</td><td>Münzen</td><td>Zeichnungen</td><td>Zeitungen</td></tr>
+            <tr><td>Erzählungen</td><td>Statuen</td><td>Fotos</td><td>Briefe</td></tr>
+            <tr><td>Radiosendungen</td><td>Möbel</td><td>Malereien</td><td>Tagebücher</td></tr>
+            <tr><td>Reden</td><td>Bauwerke</td><td>Gemälde</td><td>Urkunden</td></tr>
+            <tr><td></td><td>Werkzeuge, Waffen</td><td></td><td></td></tr>
+          </table>
+        `
+      }
+    ],
+    flashcards: [
+      { front: "Was ist mündliche Überlieferung?", back: "Erinnerungen, die von Generation zu Generation weiter erzählt werden (z. B. Lieder, Erzählungen, Reden)." },
+      { front: "Was ist gegenständliche Überlieferung?", back: "Gegenstände aller Art (z. B. Münzen, Statuen, Werkzeuge, Waffen, Bauwerke)." },
+      { front: "Was ist bildliche Überlieferung?", back: "Bilder und Fotos, durch die wir sehen, wie Menschen aussahen und lebten." },
+      { front: "Was ist schriftliche Überlieferung?", back: "Alle geschriebenen Texte aus früheren Zeiten (z. B. Briefe, Tagebücher, Urkunden)." }
+    ],
+    match: {
+      instruction: "Tippe zuerst einen Begriff links, dann das passende Beispiel rechts an.",
+      left: [
+        { id: "m", label: "mündliche Überlieferung" },
+        { id: "g", label: "gegenständliche Überlieferung" },
+        { id: "b", label: "bildliche Überlieferung" },
+        { id: "s", label: "schriftliche Überlieferung" }
+      ],
+      right: [
+        { id: "s", label: "ein altes Tagebuch" },
+        { id: "g", label: "eine römische Münze" },
+        { id: "m", label: "ein altes Volkslied" },
+        { id: "b", label: "ein Gemälde vom Marktplatz" }
+      ]
+    },
+    quiz: [
+      {
+        q: "Zu welcher Überlieferungsart gehört eine alte Ritterrüstung?",
+        options: ["mündlich", "gegenständlich", "bildlich", "schriftlich"],
+        correct: 1,
+        why: "Eine Rüstung ist ein Gegenstand – also gegenständliche Überlieferung."
+      },
+      {
+        q: "Ein Volkslied, das seit 300 Jahren weitergesungen wird, ist ...",
+        options: ["schriftliche Überlieferung", "bildliche Überlieferung", "mündliche Überlieferung", "keine Überlieferung"],
+        correct: 2,
+        why: "Lieder, die weitererzählt/weitergesungen werden, zählen zur mündlichen Überlieferung."
+      },
+      {
+        q: "Welche Beispielgruppe gehört zusammen (schriftliche Überlieferung)?",
+        options: ["Münzen, Statuen, Möbel", "Zeitungen, Briefe, Tagebücher", "Zeichnungen, Fotos, Gemälde", "Lieder, Erzählungen, Reden"],
+        correct: 1,
+        why: "Zeitungen, Briefe, Tagebücher und Urkunden sind geschriebene Texte."
+      },
+      {
+        q: "Ein altes Foto von einer Familie zeigt uns ...",
+        options: ["mündliche Überlieferung", "bildliche Überlieferung", "schriftliche Überlieferung", "gegenständliche Überlieferung"],
+        correct: 1,
+        why: "Fotos gehören zur bildlichen Überlieferung."
+      }
+    ]
+  },
+  {
+    id: "l3",
+    week: 3,
+    title: "Zeitrechnung und Epochen",
+    icon: "⏳",
+    intro: "Wie ordnen wir Ereignisse in der Zeit ein? Und warum zählen manche Kalender ganz anders als unserer?",
+    sections: [
+      {
+        heading: "Der Zeitstrahl: vor und nach Christi Geburt",
+        html: `
+          <p>Unser Kalender zählt die Jahre ab der Geburt von Jesus Christus. Alles davor heißt <strong>„vor Christus“ (v. Chr.)</strong> und wird rückwärts gezählt (je größer die Zahl, desto früher). Alles danach heißt <strong>„nach Christus“ (n. Chr.)</strong> und wird vorwärts gezählt.</p>
+          <div class="timeline">
+            <div class="track">
+              <div class="dot" style="left:2%"></div><div class="tlabel" style="left:2%">2000 v. Chr.<br>Altes Ägypten</div><div class="ylabel" style="left:2%">−2000</div>
+              <div class="dot" style="left:26%"></div><div class="ylabel" style="left:26%">−1000</div>
+              <div class="dot" style="left:50%;background:#c98a2c;box-shadow:0 0 0 1px #c98a2c;"></div><div class="tlabel" style="left:50%">Christi Geburt</div><div class="ylabel" style="left:50%">0</div>
+              <div class="dot" style="left:62%"></div><div class="tlabel" style="left:62%">Antike<br>Griechenland/Rom</div><div class="ylabel" style="left:62%">500</div>
+              <div class="dot" style="left:80%"></div><div class="tlabel" style="left:80%">Mittelalter<br>(Burgen)</div><div class="ylabel" style="left:80%">1000</div>
+              <div class="dot" style="left:98%"></div><div class="ylabel" style="left:98%">heute</div>
+            </div>
+          </div>
+          <p style="margin-top:32px;">Grobe Einteilung: <strong>das Alte Ägypten</strong> und <strong>die Antike</strong> (Griechenland, Rom) liegen größtenteils vor Christi Geburt bzw. in den ersten Jahrhunderten danach. Danach folgt das <strong>Mittelalter</strong>.</p>
+        `
+      },
+      {
+        heading: "Welches ist das älteste Gebäude?",
+        html: `
+          <p>Von alt nach (relativ) jünger:</p>
+          <ul>
+            <li><strong>1. Pyramiden</strong> (Altes Ägypten)</li>
+            <li><strong>2. griechischer Tempel</strong> (Antikes Griechenland)</li>
+            <li><strong>3. Kolosseum</strong> (Römisches Reich)</li>
+            <li><strong>4. Burg</strong> (Mittelalter)</li>
+          </ul>
+          <p>Merksatz: Je weiter ein Gebäude in der Geschichte zurückliegt, desto älter ist es – die Pyramiden sind mit Abstand am ältesten.</p>
+        `
+      },
+      {
+        heading: "Verschiedene Kalender der Welt",
+        html: `
+          <ul>
+            <li><strong>Gregorianischer Kalender:</strong> Jahr 2026 – gezählt ab der Geburt von Jesus Christus.</li>
+            <li><strong>Islamischer Kalender:</strong> Jahr 1447 – gezählt seit dem Auszug Mohammeds aus Mekka (Hidschra).</li>
+            <li><strong>Jüdischer Kalender:</strong> Jahr 5788 – gezählt nach der Erschaffung der Welt durch Gott.</li>
+          </ul>
+          <p>Wichtig: Es gibt nicht nur einen „richtigen“ Kalender – verschiedene Kulturen zählen die Zeit auf ihre eigene Weise.</p>
+        `
+      }
+    ],
+    flashcards: [
+      { front: "Was bedeutet „v. Chr.“?", back: "„vor Christus“ – die Jahre vor der Geburt von Jesus Christus, rückwärts gezählt." },
+      { front: "Was bedeutet „n. Chr.“?", back: "„nach Christus“ – die Jahre nach der Geburt von Jesus Christus, vorwärts gezählt." },
+      { front: "Welches ist das älteste der vier Beispielgebäude?", back: "Die Pyramiden (Altes Ägypten)." },
+      { front: "Ab wann zählt der islamische Kalender?", back: "Seit dem Auszug Mohammeds aus Mekka (der Hidschra)." },
+      { front: "Ab wann zählt der jüdische Kalender?", back: "Ab der Erschaffung der Welt durch Gott." }
+    ],
+    quiz: [
+      {
+        q: "Was bedeutet die Abkürzung „v. Chr.“?",
+        options: ["nach Christus", "vor Christus", "vor Christi Geburt im Mittelalter", "vor Christoph Kolumbus"],
+        correct: 1,
+        why: "„v. Chr.“ steht für „vor Christus“."
+      },
+      {
+        q: "Welches Gebäude ist am ältesten?",
+        options: ["Burg", "Kolosseum", "Pyramiden", "griechischer Tempel"],
+        correct: 2,
+        why: "Die Pyramiden aus dem Alten Ägypten sind das älteste der vier Beispiele."
+      },
+      {
+        q: "Der islamische Kalender zählt seit ...",
+        options: ["der Geburt von Jesus Christus", "der Erschaffung der Welt", "dem Auszug Mohammeds aus Mekka", "dem Bau der Pyramiden"],
+        correct: 2,
+        why: "Der islamische Kalender beginnt mit der Hidschra, dem Auszug Mohammeds aus Mekka."
+      },
+      {
+        q: "In welcher Reihenfolge (alt → jünger) liegen die Epochen?",
+        options: ["Mittelalter – Antike – Altes Ägypten", "Altes Ägypten – Antike – Mittelalter", "Antike – Altes Ägypten – Mittelalter", "Mittelalter – Altes Ägypten – Antike"],
+        correct: 1,
+        why: "Erst das Alte Ägypten, dann die Antike (Griechenland/Rom), dann das Mittelalter."
+      }
+    ]
+  },
+  {
+    id: "l4",
+    week: 4,
+    title: "Das Alte Ägypten – Land am Nil",
+    icon: "𓂀",
+    intro: "Eine der ältesten Hochkulturen der Welt entstand am Fluss Nil in Nordafrika.",
+    sections: [
+      {
+        heading: "Der Nil – Lebensader Ägyptens",
+        html: `
+          <p>Ägypten liegt größtenteils in der Wüste – ohne den <strong>Nil</strong> könnten dort kaum Menschen leben. Einmal im Jahr trat der Fluss über die Ufer und hinterließ fruchtbaren, schwarzen Schlamm auf den Feldern. So konnten die Bauern gut ernten. Ein altes Sprichwort sagt: <em>„Ägypten ist ein Geschenk des Nils.“</em></p>
+        `
+      },
+      {
+        heading: "Der Pharao – König und Gott zugleich",
+        html: `
+          <p>An der Spitze Ägyptens stand der <strong>Pharao</strong>. Er galt nicht nur als mächtigster Herrscher, sondern zugleich als <strong>Sohn eines Gottes</strong> – die Menschen glaubten, er stehe zwischen Göttern und Menschen. Er entschied über Gesetze, Kriege und große Bauprojekte wie die Pyramiden.</p>
+        `
+      },
+      {
+        heading: "Die Pyramiden",
+        html: `
+          <p>Die Pyramiden waren gewaltige <strong>Grabmäler für die Pharaonen</strong>. Die berühmteste ist die Cheops-Pyramide bei Gizeh – über 4500 Jahre alt und jahrhundertelang das höchste Bauwerk der Welt. Tausende Arbeiter schleppten riesige Steinblöcke über Rampen, um sie aufzutürmen.</p>
+          <div class="example">Merke: Die Pyramiden dienten nicht zum Wohnen, sondern als Grabstätten – sie sollten dem Pharao den Weg ins Jenseits sichern.</div>
+        `
+      },
+      {
+        heading: "Hieroglyphen und Mumien",
+        html: `
+          <p><strong>Hieroglyphen</strong> waren die Bilderschrift der alten Ägypter. Lange konnte niemand sie mehr lesen – erst der Fund des <strong>Steins von Rosette</strong> half Forschern, die Schrift zu entziffern.</p>
+          <p>Die Ägypter glaubten an ein Leben nach dem Tod. Deshalb wurden verstorbene Menschen als <strong>Mumien</strong> einbalsamiert und mit Gegenständen für das Jenseits begraben.</p>
+        `
+      }
+    ],
+    flashcards: [
+      { front: "Warum ist der Nil so wichtig für Ägypten?", back: "Seine jährliche Überschwemmung brachte fruchtbaren Schlamm für die Felder – ohne ihn wäre Ackerbau in der Wüste kaum möglich." },
+      { front: "Wer war der Pharao?", back: "Der Herrscher Ägyptens – galt zugleich als König und als Gott (bzw. Sohn eines Gottes)." },
+      { front: "Wozu dienten die Pyramiden?", back: "Als riesige Grabmäler für die Pharaonen." },
+      { front: "Was sind Hieroglyphen?", back: "Die Bilderschrift der alten Ägypter." },
+      { front: "Was ist eine Mumie und warum wurden Tote einbalsamiert?", back: "Ein einbalsamierter, konservierter Leichnam – weil die Ägypter an ein Leben nach dem Tod glaubten." }
+    ],
+    quiz: [
+      {
+        q: "Warum war der Nil so wichtig für die alten Ägypter?",
+        options: ["Er war heilig und durfte nicht befahren werden", "Seine Überschwemmung brachte fruchtbaren Boden", "Er trennte Ägypten von Feinden", "Er wurde als Straße für Pferde genutzt"],
+        correct: 1,
+        why: "Die jährliche Nilüberschwemmung machte die Felder fruchtbar."
+      },
+      {
+        q: "Was glaubten die Menschen über den Pharao?",
+        options: ["Er sei nur ein gewöhnlicher Beamter", "Er sei König und zugleich Gott", "Er dürfe keine Entscheidungen treffen", "Er lebe außerhalb Ägyptens"],
+        correct: 1,
+        why: "Der Pharao galt als König und Gott zugleich."
+      },
+      {
+        q: "Wozu wurden die Pyramiden gebaut?",
+        options: ["Als Wohnhäuser für Bauern", "Als Tempel für Feste", "Als Grabmäler für die Pharaonen", "Als Festungen gegen Feinde"],
+        correct: 2,
+        why: "Die Pyramiden waren Grabstätten für die Pharaonen."
+      },
+      {
+        q: "Was half Forschern, die Hieroglyphen zu entziffern?",
+        options: ["Der Stein von Rosette", "Ein altes Tagebuch", "Die Cheops-Pyramide", "Ein römisches Gesetzbuch"],
+        correct: 0,
+        why: "Der Stein von Rosette enthielt denselben Text in mehreren Schriften und ermöglichte die Entzifferung."
+      },
+      {
+        q: "Warum wurden Verstorbene in Ägypten einbalsamiert?",
+        options: ["Aus hygienischen Gründen", "Weil man an ein Leben nach dem Tod glaubte", "Weil es Vorschrift des Pharaos war für alle Bauern", "Um Platz zu sparen"],
+        correct: 1,
+        why: "Der Glaube an ein Leben nach dem Tod führte zur Mumifizierung."
+      }
+    ]
+  },
+  {
+    id: "l5",
+    week: 5,
+    title: "Antike: Griechenland und Rom (Ausblick)",
+    icon: "🏛️",
+    intro: "Ein erster Ausblick auf die Antike – Griechenland und Rom werden im Unterricht später noch genauer behandelt.",
+    sections: [
+      {
+        heading: "Das antike Griechenland",
+        html: `
+          <p>Griechenland bestand nicht aus einem einzigen Staat, sondern aus vielen kleinen <strong>Stadtstaaten (Poleis)</strong> wie Athen und Sparta – jede mit eigenen Gesetzen und eigenem Heer.</p>
+          <p>In <strong>Athen</strong> entwickelte sich eine frühe Form der <strong>Demokratie</strong>: Freie männliche Bürger durften über wichtige Fragen mitbestimmen (Frauen, Sklaven und Fremde waren jedoch ausgeschlossen).</p>
+          <p>Die Griechen verehrten viele Götter (z. B. Zeus) und feierten alle vier Jahre die <strong>Olympischen Spiele</strong> zu Ehren des Zeus.</p>
+        `
+      },
+      {
+        heading: "Das Römische Reich",
+        html: `
+          <p>Rom begann als kleine Stadt in Italien und wuchs über Jahrhunderte zu einem riesigen Weltreich rund um das Mittelmeer heran. Mit gut ausgebildeten <strong>Legionen</strong> (Soldaten-Einheiten) eroberten die Römer viele Gebiete.</p>
+          <p>Noch heute finden sich Spuren der Römer in Europa: <strong>Straßen</strong>, Wasserleitungen, Städte – und viele Wörter unserer Sprachen stammen aus dem <strong>Latein</strong>, der Sprache der Römer.</p>
+        `
+      },
+      {
+        heading: "Kurzer Vergleich",
+        html: `
+          <ul>
+            <li><strong>Griechenland:</strong> viele kleine Stadtstaaten, Wiege der Demokratie, Olympische Spiele</li>
+            <li><strong>Rom:</strong> ein riesiges, zentral regiertes Weltreich, starke Armee, Straßen und Recht</li>
+          </ul>
+          <p>Dieses Thema wird im Unterricht in einer eigenen, ausführlicheren Einheit vertieft.</p>
+        `
+      }
+    ],
+    flashcards: [
+      { front: "Wie nannte man die griechischen Stadtstaaten?", back: "Poleis (Einzahl: Polis) – z. B. Athen und Sparta." },
+      { front: "Wo entstand eine frühe Demokratie?", back: "In Athen – freie männliche Bürger durften mitbestimmen." },
+      { front: "Was feierten die Griechen zu Ehren des Zeus?", back: "Die Olympischen Spiele, alle vier Jahre." },
+      { front: "Womit eroberten die Römer viele Gebiete?", back: "Mit gut ausgebildeten Legionen (Soldaten-Einheiten)." },
+      { front: "Woher stammen viele Wörter unserer Sprache?", back: "Aus dem Latein, der Sprache der Römer." }
+    ],
+    quiz: [
+      {
+        q: "Wie nannte man die griechischen Stadtstaaten?",
+        options: ["Provinzen", "Poleis", "Legionen", "Kolonien"],
+        correct: 1,
+        why: "Griechische Stadtstaaten hießen Poleis (Einzahl: Polis)."
+      },
+      {
+        q: "Wer durfte in Athen an der frühen Demokratie mitbestimmen?",
+        options: ["Alle Einwohner ohne Ausnahme", "Nur der Pharao", "Freie männliche Bürger", "Nur Frauen"],
+        correct: 2,
+        why: "In der athenischen Demokratie durften nur freie männliche Bürger mitbestimmen."
+      },
+      {
+        q: "Was ist eine römische „Legion“?",
+        options: ["Ein Stadtstaat", "Eine Soldaten-Einheit", "Ein Tempel", "Ein Gesetzbuch"],
+        correct: 1,
+        why: "Eine Legion war eine große Einheit römischer Soldaten."
+      },
+      {
+        q: "Welche Spuren der Römer finden wir noch heute?",
+        options: ["Olympische Spiele", "Straßen und lateinische Wörter", "Hieroglyphen", "Pyramiden"],
+        correct: 1,
+        why: "Römische Straßen und viele lateinische Wortwurzeln sind bis heute erhalten."
+      }
+    ]
+  }
+];
+
+/* ============================================================
+   APP-LOGIK
+   ============================================================ */
+const STORAGE_KEY = "geschichte_lernapp_progress_v1";
+
+function loadProgress(){
+  try{
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  }catch(e){ return {}; }
+}
+function saveProgress(p){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }catch(e){}
+}
+let progress = loadProgress();
+
+function getLessonProgress(id){
+  return progress[id] || { bestScore: 0, total: 0, done: false };
+}
+function setLessonResult(id, score, total){
+  const cur = getLessonProgress(id);
+  if(score > cur.bestScore || cur.total === 0){
+    progress[id] = { bestScore: score, total: total, done: true };
+    saveProgress(progress);
+  }
+}
+
+let state = { view: "home", lessonId: null, tab: "lernen" };
+
+function starString(score, total){
+  if(total === 0) return "☆☆☆";
+  const ratio = score/total;
+  const filled = ratio >= 0.8 ? 3 : ratio >= 0.5 ? 2 : ratio > 0 ? 1 : 0;
+  return "★".repeat(filled) + "☆".repeat(3-filled);
+}
+
+function render(){
+  const root = document.getElementById("app");
+  root.innerHTML = "";
+  if(state.view === "home") renderHome(root);
+  else renderLesson(root);
+  window.scrollTo(0,0);
+}
+
+function renderHome(root){
+  const totalLessons = LESSONS.length;
+  const doneLessons = LESSONS.filter(l => getLessonProgress(l.id).done).length;
+  const pct = totalLessons ? Math.round((doneLessons/totalLessons)*100) : 0;
+
+  const header = document.createElement("header");
+  header.className = "top";
+  header.innerHTML = `<h1><span class="ico">📚</span> Geschichte – 5. Klasse</h1>`;
+  root.appendChild(header);
+
+  const sub = document.createElement("div");
+  sub.className = "subtitle";
+  sub.textContent = "Deine Lernkarten für die erste Geschichtsarbeit";
+  root.appendChild(sub);
+
+  const banner = document.createElement("div");
+  banner.className = "progress-banner";
+  banner.innerHTML = `
+    <div class="label">Fortschritt</div>
+    <div class="big">${doneLessons} / ${totalLessons} Lektionen geschafft</div>
+    <div class="bar-bg"><div class="bar-fill" style="width:${pct}%"></div></div>
+  `;
+  root.appendChild(banner);
+
+  const note = document.createElement("div");
+  note.className = "note-box";
+  note.innerHTML = "💡 Neue Lektionen kommen nach und nach dazu, wenn im Unterricht neue Themen behandelt werden.";
+  root.appendChild(note);
+
+  LESSONS.slice().sort((a,b)=>a.week-b.week).forEach(lesson=>{
+    const p = getLessonProgress(lesson.id);
+    const card = document.createElement("div");
+    card.className = "lesson-card";
+    card.innerHTML = `
+      <div style="font-size:1.6rem;">${lesson.icon || "📘"}</div>
+      <div style="flex:1;">
+        <div class="week">Woche ${lesson.week}</div>
+        <h3>${lesson.title}</h3>
+        <p>${p.done ? "Quiz: " + p.bestScore + "/" + p.total + " richtig" : "Noch nicht bearbeitet"}</p>
+      </div>
+      <div class="stars">${starString(p.bestScore, p.total)}</div>
+      <div class="arrow">›</div>
+    `;
+    card.onclick = () => { state.view = "lesson"; state.lessonId = lesson.id; state.tab = "lernen"; render(); };
+    root.appendChild(card);
+  });
+}
+
+function renderLesson(root){
+  const lesson = LESSONS.find(l => l.id === state.lessonId);
+  if(!lesson){ state.view = "home"; render(); return; }
+
+  const header = document.createElement("header");
+  header.className = "top";
+  header.innerHTML = `<button class="backbtn">‹ Zurück</button><h1>${lesson.title}</h1><span></span>`;
+  header.querySelector(".backbtn").onclick = () => { state.view = "home"; render(); };
+  root.appendChild(header);
+
+  const sub = document.createElement("div");
+  sub.className = "subtitle";
+  sub.textContent = "Woche " + lesson.week;
+  root.appendChild(sub);
+
+  const tabs = document.createElement("div");
+  tabs.className = "tabs";
+  const tabDefs = [
+    { key: "lernen", label: "📖 Lernen" },
+    { key: "karten", label: "🔄 Karteikarten" },
+  ];
+  if(lesson.match) tabDefs.push({ key: "zuordnen", label: "🔗 Zuordnen" });
+  tabDefs.push({ key: "quiz", label: "✏️ Quiz" });
+
+  tabDefs.forEach(t=>{
+    const b = document.createElement("button");
+    b.className = "tab-btn" + (state.tab === t.key ? " active" : "");
+    b.textContent = t.label;
+    b.onclick = () => { state.tab = t.key; render(); };
+    tabs.appendChild(b);
+  });
+  root.appendChild(tabs);
+
+  if(state.tab === "lernen") renderLernen(root, lesson);
+  else if(state.tab === "karten") renderFlashcards(root, lesson);
+  else if(state.tab === "zuordnen") renderMatch(root, lesson);
+  else if(state.tab === "quiz") renderQuiz(root, lesson);
+}
+
+function renderLernen(root, lesson){
+  const introCard = document.createElement("div");
+  introCard.className = "card";
+  introCard.innerHTML = `<p style="font-style:italic;">${lesson.intro}</p>`;
+  root.appendChild(introCard);
+
+  lesson.sections.forEach(sec=>{
+    const c = document.createElement("div");
+    c.className = "card";
+    c.innerHTML = `<h4>${sec.heading}</h4>${sec.html}`;
+    root.appendChild(c);
+  });
+}
+
+/* ---------- Flashcards ---------- */
+let flashIndex = 0;
+let flashFlipped = false;
+
+function renderFlashcards(root, lesson){
+  if(state._flashLesson !== lesson.id){ flashIndex = 0; flashFlipped = false; state._flashLesson = lesson.id; }
+  const cards = lesson.flashcards;
+  const card = cards[flashIndex];
+
+  const wrap = document.createElement("div");
+  wrap.className = "flash-wrap";
+  wrap.innerHTML = `
+    <div class="flash ${flashFlipped ? 'flipped' : ''}">
+      <div class="flash-face flash-front">${card.front}</div>
+      <div class="flash-face flash-back">${card.back}</div>
+    </div>
+  `;
+  wrap.querySelector(".flash").onclick = () => { flashFlipped = !flashFlipped; render(); };
+  root.appendChild(wrap);
+
+  const hint = document.createElement("div");
+  hint.className = "flash-hint";
+  hint.textContent = "Antippen zum Umdrehen";
+  root.appendChild(hint);
+
+  const nav = document.createElement("div");
+  nav.className = "flash-nav";
+  nav.innerHTML = `
+    <button data-dir="-1">‹ Zurück</button>
+    <span class="flash-count">${flashIndex+1} / ${cards.length}</span>
+    <button data-dir="1">Weiter ›</button>
+  `;
+  nav.querySelectorAll("button").forEach(b=>{
+    b.onclick = () => {
+      const dir = parseInt(b.dataset.dir);
+      flashIndex = (flashIndex + dir + cards.length) % cards.length;
+      flashFlipped = false;
+      render();
+    };
+  });
+  root.appendChild(nav);
+}
+
+/* ---------- Match game ---------- */
+let matchState = null;
+
+function renderMatch(root, lesson){
+  if(!matchState || state._matchLesson !== lesson.id){
+    state._matchLesson = lesson.id;
+    matchState = {
+      leftSel: null,
+      solved: new Set(),
+      rightOrder: shuffle(lesson.match.right.map((r,i)=>i)),
+      wrongFlash: null
+    };
+  }
+  const m = lesson.match;
+
+  const info = document.createElement("div");
+  info.className = "card";
+  info.innerHTML = `<p>${m.instruction}</p><div class="match-status" id="matchStatus">${matchState.solved.size} / ${m.left.length} richtig zugeordnet</div>`;
+  root.appendChild(info);
+
+  const cols = document.createElement("div");
+  cols.className = "match-cols";
+
+  const leftCol = document.createElement("div");
+  leftCol.className = "match-col";
+  m.left.forEach((item)=>{
+    const el = document.createElement("div");
+    let cls = "match-item";
+    if(matchState.solved.has(item.id)) cls += " correct";
+    else if(matchState.leftSel === item.id) cls += " selected";
+    el.className = cls;
+    el.textContent = item.label;
+    if(!matchState.solved.has(item.id)){
+      el.onclick = () => { matchState.leftSel = item.id; render(); };
+    }
+    leftCol.appendChild(el);
+  });
+
+  const rightCol = document.createElement("div");
+  rightCol.className = "match-col";
+  matchState.rightOrder.map(i=>m.right[i]).forEach((item)=>{
+    const el = document.createElement("div");
+    let cls = "match-item";
+    if(matchState.solved.has(item.id)) cls += " correct";
+    el.className = cls;
+    el.textContent = item.label;
+    if(!matchState.solved.has(item.id)){
+      el.onclick = () => {
+        if(!matchState.leftSel) return;
+        if(matchState.leftSel === item.id){
+          matchState.solved.add(item.id);
+          matchState.leftSel = null;
+        } else {
+          el.classList.add("wrong");
+          matchState.leftSel = null;
+        }
+        render();
+      };
+    }
+    rightCol.appendChild(el);
+  });
+
+  cols.appendChild(leftCol);
+  cols.appendChild(rightCol);
+  root.appendChild(cols);
+
+  if(matchState.solved.size === m.left.length){
+    const done = document.createElement("div");
+    done.className = "card";
+    done.innerHTML = `<p style="text-align:center;color:var(--good);font-weight:bold;">🎉 Alles richtig zugeordnet!</p>`;
+    root.appendChild(done);
+  }
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* ---------- Quiz ---------- */
+let quizState = null;
+
+function renderQuiz(root, lesson){
+  if(!quizState || state._quizLesson !== lesson.id){
+    state._quizLesson = lesson.id;
+    quizState = { i: 0, score: 0, answered: false, selected: null };
+  }
+
+  if(quizState.i >= lesson.quiz.length){
+    const total = lesson.quiz.length;
+    setLessonResult(lesson.id, quizState.score, total);
+    const card = document.createElement("div");
+    card.className = "card quiz-result";
+    const ratio = quizState.score/total;
+    const msg = ratio >= 0.8 ? "Stark! Das sitzt schon richtig gut." :
+                ratio >= 0.5 ? "Gut gemacht — ein bisschen üben, dann sitzt es sicher." :
+                "Kein Problem — schau dir „Lernen“ und „Karteikarten“ nochmal an und versuch es erneut.";
+    card.innerHTML = `
+      <div class="score">${quizState.score} / ${total}</div>
+      <div class="msg">${msg}</div>
+      <button class="restart-btn">Nochmal versuchen</button>
+    `;
+    card.querySelector(".restart-btn").onclick = () => {
+      quizState = { i: 0, score: 0, answered: false, selected: null };
+      render();
+    };
+    root.appendChild(card);
+    return;
+  }
+
+  const q = lesson.quiz[quizState.i];
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="q-progress">Frage ${quizState.i+1} von ${lesson.quiz.length} · Punkte: ${quizState.score}</div>
+    <div class="q-text">${q.q}</div>
+  `;
+
+  q.options.forEach((opt, idx)=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = opt;
+    if(quizState.answered){
+      if(idx === q.correct) b.classList.add("correct");
+      else if(idx === quizState.selected) b.classList.add("wrong");
+      b.disabled = true;
+    }
+    b.onclick = () => {
+      if(quizState.answered) return;
+      quizState.answered = true;
+      quizState.selected = idx;
+      if(idx === q.correct) quizState.score++;
+      render();
+    };
+    card.appendChild(b);
+  });
+
+  if(quizState.answered){
+    const fb = document.createElement("div");
+    const isCorrect = quizState.selected === q.correct;
+    fb.className = "feedback " + (isCorrect ? "good" : "bad");
+    fb.textContent = (isCorrect ? "Richtig! " : "Nicht ganz. ") + q.why;
+    card.appendChild(fb);
+
+    const next = document.createElement("button");
+    next.className = "next-btn";
+    next.textContent = quizState.i+1 < lesson.quiz.length ? "Nächste Frage ›" : "Ergebnis anzeigen ›";
+    next.onclick = () => {
+      quizState.i++;
+      quizState.answered = false;
+      quizState.selected = null;
+      render();
+    };
+    card.appendChild(next);
+  }
+
+  root.appendChild(card);
+}
+
+render();
+</script>
+</body>
+</html>

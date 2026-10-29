@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#002B36">
+<title>LERNWERK – Lernen Klasse 5</title>
+<!-- Übergangs-Startseite: verlinkt die bestehenden Apps, bis npm run web diese Seite erzeugt -->
+<style>
+  :root {
+    --bg-deep: #002B36; --bg-mid: #004D5C; --bg-black: #001820;
+    --gold-dark: #8B6914; --gold-base: #C9A84C; --gold-light: #E8C97D;
+    --text-white: #F5F0E8; --text-secondary: #A89060; --text-muted: #8A9A9A;
+    --border: rgba(200, 168, 76, 0.2); --border-strong: rgba(200, 168, 76, 0.5);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    min-height: 100vh; padding: 32px 16px 48px;
+    font-family: Montserrat, Inter, system-ui, sans-serif; color: var(--text-white);
+    background: radial-gradient(ellipse at top left, var(--bg-mid) 0%, var(--bg-deep) 50%, var(--bg-black) 100%);
+  }
+  main { max-width: 520px; margin: 0 auto; }
+  h1 {
+    font-size: 30px; font-weight: 700; letter-spacing: 0.05em;
+    background: linear-gradient(90deg, #B8922A, #E8C97D, #C9A84C);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .sub { margin: 6px 0 28px; color: var(--text-secondary); font-size: 16px; }
+  .fach {
+    position: relative; overflow: hidden; display: flex; align-items: center; gap: 18px;
+    min-height: 88px; padding: 18px 22px; margin-bottom: 16px; border-radius: 16px;
+    background: linear-gradient(135deg, #003B49 0%, #002530 100%);
+    border: 1px solid var(--border); color: var(--text-white); text-decoration: none;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(200, 168, 76, 0.1);
+    transition: border-color 0.2s, transform 0.1s;
+  }
+  a.fach:hover, a.fach:focus-visible { border-color: var(--border-strong); outline: none; }
+  a.fach:active { transform: scale(0.98); }
+  .icon { font-size: 40px; line-height: 1; }
+  .name { font-size: 20px; font-weight: 700; color: var(--gold-light); }
+  .info { font-size: 14px; color: var(--text-muted); margin-top: 2px; }
+  .bald { opacity: 0.6; }
+  .badge {
+    margin-left: auto; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 20px; color: var(--gold-base);
+    background: rgba(201, 168, 76, 0.15); border: 1px solid rgba(201, 168, 76, 0.3);
+  }
+  .fach::after {
+    content: ""; position: absolute; right: 0; bottom: 0; width: 120px; height: 44px;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold-base) 50%, var(--gold-light));
+    border-radius: 60% 0 0 0; opacity: 0.1; pointer-events: none;
+  }
+  footer { margin-top: 32px; font-size: 12px; color: var(--text-muted); text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>LERNWERK</h1>
+  <p class="sub">Üben für Klasse 5 – such dir ein Fach aus!</p>
+
+  <a class="fach" href="latein/">
+    <span class="icon" aria-hidden="true">🦉</span>
+    <span><span class="name">Latein</span><span class="info" style="display:block">Vokabeln, Grammatik, Römer</span></span>
+  </a>
+  <a class="fach" href="geschichte/">
+    <span class="icon" aria-hidden="true">📜</span>
+    <span><span class="name">Geschichte</span><span class="info" style="display:block">Lektionen, Quiz, Karteikarten</span></span>
+  </a>
+  <div class="fach bald" aria-disabled="true">
+    <span class="icon" aria-hidden="true">🧮</span>
+    <span><span class="name">Mathematik</span><span class="info" style="display:block">Natürliche Zahlen, Runden, Diagramme</span></span>
+    <span class="badge">Bald</span>
+  </div>
+
+  <footer>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</footer>
+</main>
+</body>
+</html>

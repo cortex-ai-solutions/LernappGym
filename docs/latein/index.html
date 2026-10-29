@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#8B2500">
+<title>LATINA 🦉 Latein lernen</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --terra: #C4622D;
+    --terra-dark: #8B2500;
+    --terra-light: #E8936A;
+    --gold: #D4A017;
+    --gold-light: #F2C94C;
+    --marble: #F5F0E8;
+    --marble-dark: #EDE4D0;
+    --deep: #2C1810;
+    --green: #4CAF50;
+    --red: #E53935;
+    --blue: #1565C0;
+    --purple: #6A1B9A;
+    --shadow: rgba(44,24,16,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--marble);
+    color: var(--deep);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--terra-dark);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+  }
+  .topbar-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-light);
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  .topbar-stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255,255,255,0.15);
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: white;
+    font-weight: 800;
+    font-size: 0.9rem;
+  }
+
+  /* ── HOME SCREEN ── */
+  #home {
+    background: linear-gradient(180deg, #8B2500 0%, #C4622D 40%, #F5F0E8 100%);
+  }
+  .home-header {
+    padding: 30px 20px 20px;
+    text-align: center;
+  }
+  .mascot { font-size: 5rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .home-title {
+    font-family: 'Cinzel', serif;
+    color: var(--gold-light);
+    font-size: 2.2rem;
+    font-weight: 900;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    letter-spacing: 3px;
+  }
+  .home-subtitle { color: rgba(255,255,255,0.85); font-size: 1rem; margin-top: 5px; }
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 15px 20px;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-weight: 800;
+    font-size: 0.95rem;
+    backdrop-filter: blur(4px);
+  }
+  .units-container {
+    padding: 10px 16px 80px;
+    flex: 1;
+  }
+  .unit-card {
+    background: white;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px var(--shadow);
+    border: 3px solid transparent;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .unit-card:active { transform: scale(0.98); }
+  .unit-header {
+    padding: 16px 18px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .unit-icon { font-size: 2.2rem; }
+  .unit-info { flex: 1; }
+  .unit-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--deep);
+  }
+  .unit-desc { color: #888; font-size: 0.85rem; margin-top: 2px; }
+  .unit-progress-bar {
+    height: 8px;
+    background: #f0f0f0;
+    margin: 0 18px;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .unit-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--terra), var(--gold));
+    transition: width 0.5s ease;
+  }
+  .lessons-list { padding: 12px 14px 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .lesson-btn {
+    flex: 1;
+    min-width: 80px;
+    background: var(--marble-dark);
+    border: none;
+    border-radius: 14px;
+    padding: 10px 8px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    position: relative;
+    font-family: 'Nunito', sans-serif;
+  }
+  .lesson-btn.completed { background: linear-gradient(135deg, #4CAF50, #2E7D32); color: white; }
+  .lesson-btn.active { background: linear-gradient(135deg, var(--terra), var(--terra-dark)); color: white; box-shadow: 0 4px 12px rgba(196,98,45,0.4); }
+  .lesson-btn.locked { opacity: 0.45; cursor: not-allowed; }
+  .lesson-icon { font-size: 1.5rem; display: block; }
+  .lesson-name { font-size: 0.72rem; font-weight: 700; margin-top: 4px; display: block; }
+  .checkmark { position: absolute; top: -5px; right: -5px; background: #4CAF50; color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+
+  /* ── LESSON INTRO ── */
+  #lesson-intro {
+    background: linear-gradient(180deg, var(--terra-dark) 0%, var(--terra) 50%, var(--marble) 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+  }
+  .intro-icon { font-size: 5rem; margin-bottom: 20px; filter: drop-shadow(0 4px 16px rgba(0,0,0,0.3)); }
+  .intro-title { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 1.8rem; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .intro-desc { color: rgba(255,255,255,0.9); font-size: 1rem; margin: 12px 0 30px; max-width: 320px; line-height: 1.5; }
+  .intro-topics { background: rgba(255,255,255,0.15); border-radius: 16px; padding: 16px; margin-bottom: 30px; width: 100%; max-width: 360px; }
+  .intro-topic { color: white; font-size: 0.9rem; padding: 5px 0; font-weight: 600; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), #E5A020);
+    color: var(--deep);
+    border: none;
+    border-radius: 16px;
+    padding: 16px 48px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(212,160,23,0.4);
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .btn-primary:active { transform: scale(0.97); }
+
+  /* ── EXERCISE SCREEN ── */
+  #exercise {
+    background: var(--marble);
+    flex-direction: column;
+  }
+  .ex-progress-bar {
+    height: 10px;
+    background: var(--marble-dark);
+    margin: 0;
+    border-radius: 0;
+    overflow: hidden;
+  }
+  .ex-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--terra), var(--gold));
+    transition: width 0.4s ease;
+  }
+  .ex-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: white;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .hearts-display { display: flex; gap: 4px; }
+  .heart { font-size: 1.3rem; transition: all 0.3s; }
+  .heart.lost { opacity: 0.2; transform: scale(0.8); }
+  .ex-counter { color: #888; font-size: 0.85rem; font-weight: 700; }
+  .xp-badge { background: var(--gold-light); color: var(--deep); padding: 4px 12px; border-radius: 12px; font-weight: 900; font-size: 0.85rem; }
+  .ex-body { flex: 1; padding: 20px 16px; display: flex; flex-direction: column; }
+  .ex-instruction { color: #888; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+
+  /* Flashcard */
+  .flashcard-wrap { perspective: 1000px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .flashcard {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px var(--shadow);
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    position: relative;
+    border: 3px solid var(--marble-dark);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .fc-front, .fc-back {
+    backface-visibility: hidden;
+    width: 100%;
+  }
+  .fc-back { transform: rotateY(180deg); position: absolute; top: 0; left: 0; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; }
+  .fc-latin { font-family: 'Cinzel', serif; font-size: 2.2rem; font-weight: 700; color: var(--terra-dark); }
+  .fc-type { color: #aaa; font-size: 0.8rem; margin-top: 6px; font-style: italic; }
+  .fc-german { font-size: 1.8rem; font-weight: 800; color: var(--deep); }
+  .fc-example { color: #888; font-size: 0.9rem; margin-top: 10px; font-style: italic; }
+  .fc-hint { color: #bbb; font-size: 0.85rem; margin-top: 20px; }
+  .fc-flip-btn {
+    margin-top: 20px;
+    background: var(--marble-dark);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 24px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--deep);
+    transition: all 0.2s;
+  }
+  .fc-flip-btn:active { background: var(--terra-light); }
+  .fc-knew-btns { display: flex; gap: 12px; margin-top: 16px; }
+  .btn-knew, .btn-didnt {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-knew { background: var(--green); color: white; }
+  .btn-didnt { background: var(--red); color: white; }
+
+  /* Multiple Choice */
+  .mc-question {
+    background: white;
+    border-radius: 20px;
+    padding: 28px 24px;
+    text-align: center;
+    box-shadow: 0 4px 20px var(--shadow);
+    margin-bottom: 20px;
+    border: 3px solid var(--marble-dark);
+  }
+  .mc-latin { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; color: var(--terra-dark); }
+  .mc-type { color: #bbb; font-size: 0.8rem; margin-top: 4px; font-style: italic; }
+  .mc-options { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .mc-option {
+    background: white;
+    border: 3px solid var(--marble-dark);
+    border-radius: 16px;
+    padding: 16px 20px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    color: var(--deep);
+  }
+  .mc-option:active { transform: scale(0.98); }
+  .mc-option.correct { background: #E8F5E9; border-color: var(--green); color: #1B5E20; }
+  .mc-option.wrong { background: #FFEBEE; border-color: var(--red); color: #B71C1C; }
+  .mc-option.selected { border-color: var(--terra); background: #FFF3E0; }
+  .mc-option.disabled { cursor: not-allowed; }
+
+  /* Matching */
+  .match-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1; }
+  .match-item {
+    background: white;
+    border: 3px solid var(--marble-dark);
+    border-radius: 16px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px;
+  }
+  .match-item.latin { font-family: 'Cinzel', serif; color: var(--terra-dark); font-size: 1rem; }
+  .match-item.selected { border-color: var(--terra); background: #FFF3E0; box-shadow: 0 0 0 2px var(--terra-light); }
+  .match-item.matched { background: #E8F5E9; border-color: var(--green); color: #1B5E20; cursor: default; }
+  .match-item.wrong-flash { animation: wrongFlash 0.5s ease; }
+  @keyframes wrongFlash { 0%,100%{background:white} 50%{background:#FFEBEE;border-color:var(--red)} }
+
+  /* Fill blank */
+  .fill-sentence {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px var(--shadow);
+    margin-bottom: 20px;
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    color: var(--deep);
+    line-height: 2;
+    border: 3px solid var(--marble-dark);
+  }
+  .fill-blank {
+    display: inline-block;
+    border-bottom: 3px solid var(--terra);
+    min-width: 100px;
+    padding: 0 8px;
+    color: var(--terra);
+    font-style: italic;
+  }
+  .fill-options { display: flex; flex-direction: column; gap: 10px; }
+
+  /* ── FEEDBACK OVERLAY ── */
+  .feedback-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px 20px 30px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 200;
+    border-radius: 24px 24px 0 0;
+  }
+  .feedback-bar.show { transform: translateY(0); }
+  .feedback-bar.correct-fb { background: #E8F5E9; border-top: 4px solid var(--green); }
+  .feedback-bar.wrong-fb { background: #FFEBEE; border-top: 4px solid var(--red); }
+  .fb-content { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .fb-icon { font-size: 2rem; }
+  .fb-title { font-size: 1.1rem; font-weight: 900; }
+  .fb-title.correct { color: #1B5E20; }
+  .fb-title.wrong { color: #B71C1C; }
+  .fb-answer { font-size: 0.9rem; color: #555; margin-top: 3px; }
+  .btn-continue {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-continue.correct { background: var(--green); color: white; }
+  .btn-continue.wrong { background: var(--red); color: white; }
+
+  /* ── RESULTS SCREEN ── */
+  #results {
+    background: linear-gradient(180deg, var(--terra-dark) 0%, var(--terra) 60%, var(--marble) 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    text-align: center;
+  }
+  .results-icon { font-size: 6rem; margin-bottom: 15px; animation: celebrate 1s ease; }
+  @keyframes celebrate { 0%{transform:scale(0) rotate(-180deg)} 80%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  .results-title { font-family: 'Cinzel', serif; color: var(--gold-light); font-size: 2rem; font-weight: 900; }
+  .results-subtitle { color: rgba(255,255,255,0.85); margin: 8px 0 24px; }
+  .results-stats {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 360px;
+  }
+  .rs-item { text-align: center; }
+  .rs-val { font-size: 2rem; font-weight: 900; color: white; }
+  .rs-label { font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-top: 3px; }
+  .fun-fact {
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 24px;
+    max-width: 360px;
+    text-align: left;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+  .ff-title { font-size: 0.75rem; font-weight: 900; color: var(--terra); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .ff-text { font-size: 0.9rem; color: var(--deep); line-height: 1.5; }
+
+  /* ── VOCAB SCREEN ── */
+  #vocab { background: var(--marble); }
+  .vocab-filter {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: white;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .vocab-filter-btn {
+    white-space: nowrap;
+    padding: 7px 14px;
+    border: 2px solid var(--marble-dark);
+    border-radius: 20px;
+    background: none;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--deep);
+  }
+  .vocab-filter-btn.active { background: var(--terra); border-color: var(--terra); color: white; }
+  .vocab-list { padding: 12px 16px 80px; }
+  .vocab-item {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 10px var(--shadow);
+    border-left: 4px solid var(--terra);
+  }
+  .vi-latin { font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700; color: var(--terra-dark); flex: 1; }
+  .vi-german { font-size: 1rem; font-weight: 600; color: var(--deep); flex: 1; }
+  .vi-type { background: var(--marble-dark); padding: 3px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; color: #888; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    display: flex;
+    box-shadow: 0 -3px 16px var(--shadow);
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 4px 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Nunito', sans-serif;
+  }
+  .nav-btn.active .nav-icon { transform: scale(1.2); }
+  .nav-icon { font-size: 1.5rem; }
+  .nav-label { font-size: 0.68rem; font-weight: 700; color: #999; margin-top: 2px; }
+  .nav-btn.active .nav-label { color: var(--terra); }
+
+  /* ── GRAMMAR SCREEN ── */
+  #grammar { background: var(--marble); }
+  .grammar-list { padding: 12px 16px 80px; }
+  .grammar-card {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 16px var(--shadow);
+    border-top: 5px solid var(--terra);
+  }
+  .gc-title { font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700; color: var(--terra-dark); margin-bottom: 10px; }
+  .gc-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .gc-table th { background: var(--terra-dark); color: white; padding: 7px 10px; text-align: left; font-family: 'Cinzel', serif; }
+  .gc-table td { padding: 7px 10px; border-bottom: 1px solid var(--marble-dark); }
+  .gc-table tr:last-child td { border-bottom: none; }
+  .gc-table td:first-child { font-weight: 700; color: #888; font-size: 0.8rem; text-transform: uppercase; }
+  .gc-table td:nth-child(2) { font-family: 'Cinzel', serif; color: var(--terra-dark); font-weight: 600; }
+  .gc-tip { background: #FFF8E1; border-left: 4px solid var(--gold); padding: 10px 14px; border-radius: 0 10px 10px 0; margin-top: 12px; font-size: 0.85rem; color: #555; line-height: 1.5; }
+
+  /* ── ANIMATIONS ── */
+  .bounce-in { animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes bounceIn { 0%{transform:scale(0.3);opacity:0} 100%{transform:scale(1);opacity:1} }
+  .slide-up { animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .xp-pop {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background: var(--gold-light);
+    color: var(--deep);
+    font-size: 1.5rem;
+    font-weight: 900;
+    padding: 12px 24px;
+    border-radius: 20px;
+    pointer-events: none;
+    z-index: 999;
+    animation: xpPop 1s ease forwards;
+  }
+  @keyframes xpPop { 0%{transform:translate(-50%,-50%) scale(0.5);opacity:0} 30%{transform:translate(-50%,-80%) scale(1.2);opacity:1} 70%{transform:translate(-50%,-120%) scale(1);opacity:1} 100%{transform:translate(-50%,-180%) scale(0.8);opacity:0} }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HOME ═══════════════════════════════ -->
+<div id="home" class="screen active">
+  <div class="home-header">
+    <div class="mascot">🦉</div>
+    <div class="home-title">LATINA</div>
+    <div class="home-subtitle">Latein für Klasse 5 • Thüringen</div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat-pill">🔥 <span id="streak-home">0</span> Tage</div>
+    <div class="stat-pill">⭐ <span id="xp-home">0</span> XP</div>
+    <div class="stat-pill">🏅 <span id="lessons-done">0</span> Lektionen</div>
+  </div>
+  <div class="units-container" id="units-container"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="showScreen('home')"><div class="nav-icon">🏛️</div><div class="nav-label">Lernen</div></button>
+    <button class="nav-btn" onclick="showScreen('vocab')"><div class="nav-icon">📖</div><div class="nav-label">Vokabeln</div></button>
+    <button class="nav-btn" onclick="showScreen('grammar')"><div class="nav-icon">📐</div><div class="nav-label">Grammatik</div></button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ LESSON INTRO ═══════════════════════════════ -->
+<div id="lesson-intro" class="screen">
+  <div class="intro-icon" id="intro-icon">🏛️</div>
+  <div class="intro-title" id="intro-title">Lektion</div>
+  <div class="intro-desc" id="intro-desc">Beschreibung</div>
+  <div class="intro-topics" id="intro-topics"></div>
+  <button class="btn-primary" onclick="startExercises()">Los geht's! 🚀</button>
+</div>
+
+<!-- ═══════════════════════════════ EXERCISE ═══════════════════════════════ -->
+<div id="exercise" class="screen">
+  <div class="ex-progress-bar"><div class="ex-progress-fill" id="ex-progress" style="width:0%"></div></div>
+  <div class="ex-header">
+    <div class="hearts-display" id="hearts-display"></div>
+    <div class="ex-counter" id="ex-counter">1 / 8</div>
+    <div class="xp-badge">+<span id="xp-gain">0</span> XP</div>
+  </div>
+  <div class="ex-body" id="ex-body"></div>
+  <div class="feedback-bar" id="feedback-bar">
+    <div class="fb-content">
+      <div class="fb-icon" id="fb-icon"></div>
+      <div>
+        <div class="fb-title" id="fb-title"></div>
+        <div class="fb-answer" id="fb-answer"></div>
+      </div>
+    </div>
+    <button class="btn-continue" id="btn-continue" onclick="nextExercise()">Weiter →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ RESULTS ═══════════════════════════════ -->
+<div id="results" class="screen">
+  <div class="results-icon" id="results-icon">🏆</div>
+  <div class="results-title" id="results-title">Super gemacht!</div>
+  <div class="results-subtitle" id="results-subtitle">Lektion abgeschlossen!</div>
+  <div class="results-stats">
+    <div class="rs-item"><div class="rs-val" id="rs-xp">0</div><div class="rs-label">⭐ XP</div></div>
+    <div class="rs-item"><div class="rs-val" id="rs-correct">0</div><div class="rs-label">✅ Richtig</div></div>
+    <div class="rs-item"><div class="rs-val" id="rs-hearts">3</div><div class="rs-label">❤️ Herzen</div></div>
+  </div>
+  <div class="fun-fact" id="fun-fact"></div>
+  <button class="btn-primary" onclick="backToHome()" style="background: linear-gradient(135deg, var(--gold), #E5A020); max-width:320px; width:100%;">Zurück zum Kurs 🏛️</button>
+</div>
+
+<!-- ═══════════════════════════════ VOCAB ═══════════════════════════════ -->
+<div id="vocab" class="screen">
+  <div class="topbar">
+    <div class="topbar-title">📖 VOKABELN</div>
+    <div class="topbar-stat">⭐ <span id="xp-vocab">0</span></div>
+  </div>
+  <div class="vocab-filter" id="vocab-filter"></div>
+  <div class="vocab-list" id="vocab-list"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showScreen('home')"><div class="nav-icon">🏛️</div><div class="nav-label">Lernen</div></button>
+    <button class="nav-btn active" onclick="showScreen('vocab')"><div class="nav-icon">📖</div><div class="nav-label">Vokabeln</div></button>
+    <button class="nav-btn" onclick="showScreen('grammar')"><div class="nav-icon">📐</div><div class="nav-label">Grammatik</div></button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ GRAMMAR ═══════════════════════════════ -->
+<div id="grammar" class="screen">
+  <div class="topbar">
+    <div class="topbar-title">📐 GRAMMATIK</div>
+    <div class="topbar-stat">⭐ <span id="xp-gram">0</span></div>
+  </div>
+  <div class="grammar-list" id="grammar-list"></div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showScreen('home')"><div class="nav-icon">🏛️</div><div class="nav-label">Lernen</div></button>
+    <button class="nav-btn" onclick="showScreen('vocab')"><div class="nav-icon">📖</div><div class="nav-label">Vokabeln</div></button>
+    <button class="nav-btn active" onclick="showScreen('grammar')"><div class="nav-icon">📐</div><div class="nav-label">Grammatik</div></button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════ DATA ═══════════════════
+const VOCAB = [
+  // Unit 1 - Roma
+  {id:'v1',lat:'Roma',gen:'Roma, -ae',type:'f.',ger:'Rom',unit:1,example:'Roma magna est. (Rom ist groß.)'},
+  {id:'v2',lat:'Italia',gen:'Italiae',type:'f.',ger:'Italien',unit:1,example:'Italia est patria Romanorum.'},
+  {id:'v3',lat:'terra',gen:'terrae',type:'f.',ger:'Land, Erde',unit:1,example:'Terra pulchra est.'},
+  {id:'v4',lat:'aqua',gen:'aquae',type:'f.',ger:'Wasser',unit:1,example:'Aqua bona est.'},
+  {id:'v5',lat:'via',gen:'viae',type:'f.',ger:'Straße, Weg',unit:1,example:'Via longa est.'},
+  {id:'v6',lat:'porta',gen:'portae',type:'f.',ger:'Tor, Tür',unit:1,example:'Porta alta est.'},
+  {id:'v7',lat:'insula',gen:'insulae',type:'f.',ger:'Insel; Wohnblock',unit:1,example:'Insula magna est.'},
+  {id:'v8',lat:'magnus',gen:'-a, -um',type:'Adj.',ger:'groß',unit:1,example:'Roma magna est.'},
+  {id:'v9',lat:'bonus',gen:'-a, -um',type:'Adj.',ger:'gut',unit:1,example:'Aqua bona est.'},
+  {id:'v10',lat:'est',gen:'esse',type:'Vb.',ger:'ist (er/sie/es)',unit:1,example:'Roma magna est.'},
+  // Unit 2 - Familia
+  {id:'v11',lat:'pater',gen:'patris',type:'m.',ger:'Vater',unit:2,example:'Pater bonus est.'},
+  {id:'v12',lat:'mater',gen:'matris',type:'f.',ger:'Mutter',unit:2,example:'Mater pulchra est.'},
+  {id:'v13',lat:'filius',gen:'filii',type:'m.',ger:'Sohn',unit:2,example:'Filius parvus est.'},
+  {id:'v14',lat:'filia',gen:'filiae',type:'f.',ger:'Tochter',unit:2,example:'Filia laeta est.'},
+  {id:'v15',lat:'frater',gen:'fratris',type:'m.',ger:'Bruder',unit:2,example:'Frater meus laetus est.'},
+  {id:'v16',lat:'soror',gen:'sororis',type:'f.',ger:'Schwester',unit:2,example:'Soror mea bona est.'},
+  {id:'v17',lat:'servus',gen:'servi',type:'m.',ger:'Sklave',unit:2,example:'Servus laborat.'},
+  {id:'v18',lat:'ancilla',gen:'ancillae',type:'f.',ger:'Sklavin',unit:2,example:'Ancilla portat.'},
+  {id:'v19',lat:'dominus',gen:'domini',type:'m.',ger:'Herr, Hausherr',unit:2,example:'Dominus bonus est.'},
+  {id:'v20',lat:'familia',gen:'familiae',type:'f.',ger:'Familie',unit:2,example:'Familia Romana magna est.'},
+  {id:'v21',lat:'parvus',gen:'-a, -um',type:'Adj.',ger:'klein',unit:2,example:'Filius parvus est.'},
+  {id:'v22',lat:'laetus',gen:'-a, -um',type:'Adj.',ger:'fröhlich, froh',unit:2,example:'Filia laeta est.'},
+  // Unit 3 - Verba
+  {id:'v23',lat:'amare',gen:'amat',type:'Vb.',ger:'lieben',unit:3,example:'Mater filiam amat.'},
+  {id:'v24',lat:'laudare',gen:'laudat',type:'Vb.',ger:'loben',unit:3,example:'Magister discipulum laudat.'},
+  {id:'v25',lat:'vocare',gen:'vocat',type:'Vb.',ger:'rufen, nennen',unit:3,example:'Mater filiam vocat.'},
+  {id:'v26',lat:'portare',gen:'portat',type:'Vb.',ger:'tragen',unit:3,example:'Servus aquam portat.'},
+  {id:'v27',lat:'habitare',gen:'habitat',type:'Vb.',ger:'wohnen',unit:3,example:'Familia in Roma habitat.'},
+  {id:'v28',lat:'narrare',gen:'narrat',type:'Vb.',ger:'erzählen',unit:3,example:'Pater fabulam narrat.'},
+  {id:'v29',lat:'intrare',gen:'intrat',type:'Vb.',ger:'eintreten, betreten',unit:3,example:'Magister intrat.'},
+  {id:'v30',lat:'laborare',gen:'laborat',type:'Vb.',ger:'arbeiten',unit:3,example:'Servus laborat.'},
+  {id:'v31',lat:'esse',gen:'est/sunt',type:'Vb.',ger:'sein',unit:3,example:'Puella laeta est.'},
+  {id:'v32',lat:'stare',gen:'stat',type:'Vb.',ger:'stehen',unit:3,example:'Statua in via stat.'},
+  // Unit 4 - Kasus
+  {id:'v33',lat:'puella',gen:'puellae',type:'f.',ger:'Mädchen',unit:4,example:'Puella cantat.'},
+  {id:'v34',lat:'puer',gen:'pueri',type:'m.',ger:'Junge',unit:4,example:'Puer ludit.'},
+  {id:'v35',lat:'magister',gen:'magistri',type:'m.',ger:'Lehrer',unit:4,example:'Magister docet.'},
+  {id:'v36',lat:'discipulus',gen:'discipuli',type:'m.',ger:'Schüler',unit:4,example:'Discipulus legit.'},
+  {id:'v37',lat:'liber',gen:'libri',type:'m.',ger:'Buch',unit:4,example:'Discipulus librum portat.'},
+  {id:'v38',lat:'ludus',gen:'ludi',type:'m.',ger:'Schule; Spiel',unit:4,example:'Puer in ludo est.'},
+  {id:'v39',lat:'docere',gen:'docet',type:'Vb.',ger:'lehren, unterrichten',unit:4,example:'Magister discipulos docet.'},
+  {id:'v40',lat:'legere',gen:'legit',type:'Vb.',ger:'lesen',unit:4,example:'Discipulus librum legit.'},
+  {id:'v41',lat:'scribere',gen:'scribit',type:'Vb.',ger:'schreiben',unit:4,example:'Puella scribit.'},
+  {id:'v42',lat:'videre',gen:'videt',type:'Vb.',ger:'sehen',unit:4,example:'Puer aquilam videt.'},
+  // Unit 5 - Roma antiqua
+  {id:'v43',lat:'forum',gen:'fori',type:'n.',ger:'Marktplatz, Forum',unit:5,example:'Forum Romanum magnum est.'},
+  {id:'v44',lat:'templum',gen:'templi',type:'n.',ger:'Tempel',unit:5,example:'Templum altum est.'},
+  {id:'v45',lat:'gladiator',gen:'gladiatoris',type:'m.',ger:'Gladiator',unit:5,example:'Gladiator pugnat.'},
+  {id:'v46',lat:'circus',gen:'circi',type:'m.',ger:'Zirkus, Rennbahn',unit:5,example:'In circo equi currunt.'},
+  {id:'v47',lat:'senator',gen:'senatoris',type:'m.',ger:'Senator',unit:5,example:'Senator in foro stat.'},
+  {id:'v48',lat:'aquila',gen:'aquilae',type:'f.',ger:'Adler (Heeresmotto)',unit:5,example:'Aquila Romanorum est.'},
+  {id:'v49',lat:'pugna',gen:'pugnae',type:'f.',ger:'Kampf',unit:5,example:'Pugna longa est.'},
+  {id:'v50',lat:'pugnare',gen:'pugnat',type:'Vb.',ger:'kämpfen',unit:5,example:'Gladiator pugnat.'},
+  {id:'v51',lat:'vincere',gen:'vincit',type:'Vb.',ger:'siegen, besiegen',unit:5,example:'Gladiator vincit.'},
+  {id:'v52',lat:'altus',gen:'-a, -um',type:'Adj.',ger:'hoch, tief',unit:5,example:'Templum altum est.'},
+  // Unit 6 - Schule & Grundwörter
+  {id:'v53',lat:'schola',gen:'scholae',type:'f.',ger:'Schule',unit:6,example:'Discipuli in schola sunt.'},
+  {id:'v54',lat:'tabula',gen:'tabulae',type:'f.',ger:'Schreibtafel; Tafel',unit:6,example:'Magister in tabula scribit.'},
+  {id:'v55',lat:'stylus',gen:'styli',type:'m.',ger:'Griffel, Schreibstift',unit:6,example:'Discipulus stylo scribit.'},
+  {id:'v56',lat:'littera',gen:'litterae',type:'f.',ger:'Buchstabe; pl.: Brief, Literatur',unit:6,example:'Discipuli litteras discunt.'},
+  {id:'v57',lat:'sententia',gen:'sententiae',type:'f.',ger:'Satz; Meinung',unit:6,example:'Sententia magistri bona est.'},
+  {id:'v58',lat:'discere',gen:'discit',type:'Vb.',ger:'lernen',unit:6,example:'Discipula diligenter discit.'},
+  {id:'v59',lat:'intellegere',gen:'intellegit',type:'Vb.',ger:'verstehen, begreifen',unit:6,example:'Puer sententiam intellegit.'},
+  {id:'v60',lat:'respondere',gen:'respondet',type:'Vb.',ger:'antworten',unit:6,example:'Discipula recte respondet.'},
+  {id:'v61',lat:'interrogare',gen:'interrogat',type:'Vb.',ger:'fragen, befragen',unit:6,example:'Magister discipulum interrogat.'},
+  {id:'v62',lat:'recitare',gen:'recitat',type:'Vb.',ger:'vorlesen, vortragen',unit:6,example:'Puella sententiam recitat.'},
+  {id:'v63',lat:'severus',gen:'-a, -um',type:'Adj.',ger:'streng',unit:6,example:'Magister severus est.'},
+  {id:'v64',lat:'diligenter',gen:'(Adv.)',type:'Adv.',ger:'fleißig, sorgfältig',unit:6,example:'Discipula diligenter laborat.'},
+  {id:'v65',lat:'bene',gen:'(Adv.)',type:'Adv.',ger:'gut, wohl',unit:6,example:'Puer bene scribit.'},
+  {id:'v66',lat:'saepe',gen:'(Adv.)',type:'Adv.',ger:'oft',unit:6,example:'Magister saepe interrogat.'},
+  {id:'v67',lat:'semper',gen:'(Adv.)',type:'Adv.',ger:'immer',unit:6,example:'Discipuli semper discunt.'},
+  {id:'v68',lat:'non',gen:'(Adv.)',type:'Adv.',ger:'nicht (Verneinung)',unit:6,example:'Discipulus non intellegit.'},
+  // Unit 7 - Domus
+  {id:'v69',lat:'domus',gen:'domus, -us',type:'f.',ger:'Haus, Zuhause',unit:7,example:'Familia in domo habitat.'},
+  {id:'v70',lat:'atrium',gen:'atrii',type:'n.',ger:'Atrium (Eingangshalle)',unit:7,example:'Atrium domus pulchrum est.'},
+  {id:'v71',lat:'triclinium',gen:'triclinii',type:'n.',ger:'Speisezimmer',unit:7,example:'In triclinio cenamus.'},
+  {id:'v72',lat:'hortus',gen:'horti',type:'m.',ger:'Garten',unit:7,example:'In horto flores sunt.'},
+  {id:'v73',lat:'cubiculum',gen:'cubiculi',type:'n.',ger:'Schlafzimmer',unit:7,example:'Puer in cubiculo dormit.'},
+  {id:'v74',lat:'culina',gen:'culinae',type:'f.',ger:'Küche',unit:7,example:'Ancilla in culina laborat.'},
+  {id:'v75',lat:'mensa',gen:'mensae',type:'f.',ger:'Tisch',unit:7,example:'Cibus in mensa est.'},
+  {id:'v76',lat:'lectus',gen:'lecti',type:'m.',ger:'Bett, Liege',unit:7,example:'Puer in lecto dormit.'},
+  {id:'v77',lat:'ianua',gen:'ianuae',type:'f.',ger:'Haustür',unit:7,example:'Servus ianuam aperit.'},
+  {id:'v78',lat:'aperire',gen:'aperit',type:'Vb.',ger:'öffnen',unit:7,example:'Puella ianuam aperit.'},
+  {id:'v79',lat:'claudere',gen:'claudit',type:'Vb.',ger:'schließen',unit:7,example:'Servus ianuam claudit.'},
+  {id:'v80',lat:'dormire',gen:'dormit',type:'Vb.',ger:'schlafen',unit:7,example:'Familia nocte dormit.'},
+  // Unit 8 - Cibus et Potus
+  {id:'v81',lat:'cibus',gen:'cibi',type:'m.',ger:'Speise, Essen',unit:8,example:'Cibus bonus est.'},
+  {id:'v82',lat:'panis',gen:'panis',type:'m.',ger:'Brot',unit:8,example:'Ancilla panem portat.'},
+  {id:'v83',lat:'vinum',gen:'vini',type:'n.',ger:'Wein',unit:8,example:'Pater vinum bibit.'},
+  {id:'v84',lat:'lac',gen:'lactis',type:'n.',ger:'Milch',unit:8,example:'Pueri lac bibunt.'},
+  {id:'v85',lat:'piscis',gen:'piscis',type:'m.',ger:'Fisch',unit:8,example:'Pisces in mari natant.'},
+  {id:'v86',lat:'oleum',gen:'olei',type:'n.',ger:'Öl (Olivenöl)',unit:8,example:'Romani oleum amant.'},
+  {id:'v87',lat:'convivium',gen:'convivii',type:'n.',ger:'Gastmahl, Fest',unit:8,example:'Convivium laetum est.'},
+  {id:'v88',lat:'cenare',gen:'cenat',type:'Vb.',ger:'zu Abend essen',unit:8,example:'Familia in triclinio cenat.'},
+  {id:'v89',lat:'bibere',gen:'bibit',type:'Vb.',ger:'trinken',unit:8,example:'Puer aquam bibit.'},
+  {id:'v90',lat:'edere',gen:'edit',type:'Vb.',ger:'essen',unit:8,example:'Discipuli libenter edunt.'},
+  {id:'v91',lat:'esurire',gen:'esurit',type:'Vb.',ger:'hungrig sein',unit:8,example:'Servus esurit.'},
+  {id:'v92',lat:'gustare',gen:'gustat',type:'Vb.',ger:'kosten, probieren',unit:8,example:'Puer cibum gustat.'},
+  // Unit 9 - Amici et Ludi
+  {id:'v93',lat:'amicus',gen:'amici',type:'m.',ger:'Freund',unit:9,example:'Amicus meus bonus est.'},
+  {id:'v94',lat:'amica',gen:'amicae',type:'f.',ger:'Freundin',unit:9,example:'Amica laeta est.'},
+  {id:'v95',lat:'ludere',gen:'ludit',type:'Vb.',ger:'spielen',unit:9,example:'Pueri in via ludunt.'},
+  {id:'v96',lat:'currere',gen:'currit',type:'Vb.',ger:'laufen, rennen',unit:9,example:'Puer celeriter currit.'},
+  {id:'v97',lat:'canere',gen:'canit',type:'Vb.',ger:'singen, spielen (Instrument)',unit:9,example:'Puella laete canit.'},
+  {id:'v98',lat:'ridere',gen:'ridet',type:'Vb.',ger:'lachen',unit:9,example:'Amici rident.'},
+  {id:'v99',lat:'gaudere',gen:'gaudet',type:'Vb.',ger:'sich freuen',unit:9,example:'Puer gaudet.'},
+  {id:'v100',lat:'certamen',gen:'certaminis',type:'n.',ger:'Wettkampf',unit:9,example:'Certamen magnum est.'},
+  {id:'v101',lat:'victoria',gen:'victoriae',type:'f.',ger:'Sieg',unit:9,example:'Victoria laeta est.'},
+  {id:'v102',lat:'felix',gen:'felicis',type:'Adj.',ger:'glücklich, erfolgreich',unit:9,example:'Discipulus felix est.'},
+  {id:'v103',lat:'celeriter',gen:'(Adv.)',type:'Adv.',ger:'schnell, rasch',unit:9,example:'Puer celeriter currit.'},
+  {id:'v104',lat:'fama',gen:'famae',type:'f.',ger:'Ruhm, Ruf',unit:9,example:'Fama Romae magna est.'},
+  // Unit 10 - Animalia
+  {id:'v105',lat:'canis',gen:'canis',type:'m./f.',ger:'Hund',unit:10,example:'Canis in domo est.'},
+  {id:'v106',lat:'equus',gen:'equi',type:'m.',ger:'Pferd',unit:10,example:'Equus celeriter currit.'},
+  {id:'v107',lat:'leo',gen:'leonis',type:'m.',ger:'Löwe',unit:10,example:'Leo in Africa habitat.'},
+  {id:'v108',lat:'lupus',gen:'lupi',type:'m.',ger:'Wolf',unit:10,example:'Lupus in silva habitat.'},
+  {id:'v109',lat:'avis',gen:'avis',type:'f.',ger:'Vogel',unit:10,example:'Avis in caelo volat.'},
+  {id:'v110',lat:'serpens',gen:'serpentis',type:'m./f.',ger:'Schlange',unit:10,example:'Serpens in herba latet.'},
+  {id:'v111',lat:'elephantus',gen:'elephanti',type:'m.',ger:'Elefant',unit:10,example:'Elephantus magnus est.'},
+  {id:'v112',lat:'taurus',gen:'tauri',type:'m.',ger:'Stier',unit:10,example:'Taurus fortis est.'},
+  {id:'v113',lat:'fortis',gen:'forte',type:'Adj.',ger:'stark, tapfer, mutig',unit:10,example:'Miles fortis pugnat.'},
+  {id:'v114',lat:'ferus',gen:'-a, -um',type:'Adj.',ger:'wild',unit:10,example:'Leo ferus est.'},
+  {id:'v115',lat:'timere',gen:'timet',type:'Vb.',ger:'fürchten, Angst haben',unit:10,example:'Puer leonem timet.'},
+  {id:'v116',lat:'volare',gen:'volat',type:'Vb.',ger:'fliegen',unit:10,example:'Avis alte volat.'},
+  // Unit 11 - Numeri
+  {id:'v117',lat:'unus',gen:'-a, -um',type:'Num.',ger:'eins (1)',unit:11,example:'Unus discipulus legit.'},
+  {id:'v118',lat:'duo',gen:'duae, duo',type:'Num.',ger:'zwei (2)',unit:11,example:'Duo pueri ludunt.'},
+  {id:'v119',lat:'tres',gen:'tria',type:'Num.',ger:'drei (3)',unit:11,example:'Tres puellae cantant.'},
+  {id:'v120',lat:'quattuor',gen:'—',type:'Num.',ger:'vier (4)',unit:11,example:'Quattuor servi laborant.'},
+  {id:'v121',lat:'quinque',gen:'—',type:'Num.',ger:'fünf (5)',unit:11,example:'Quinque equi currunt.'},
+  {id:'v122',lat:'sex',gen:'—',type:'Num.',ger:'sechs (6)',unit:11,example:'Sex libri in mensa sunt.'},
+  {id:'v123',lat:'septem',gen:'—',type:'Num.',ger:'sieben (7)',unit:11,example:'Septem stellae lucent.'},
+  {id:'v124',lat:'octo',gen:'—',type:'Num.',ger:'acht (8)',unit:11,example:'Octo discipuli adsunt.'},
+  {id:'v125',lat:'novem',gen:'—',type:'Num.',ger:'neun (9)',unit:11,example:'Novem horae sunt.'},
+  {id:'v126',lat:'decem',gen:'—',type:'Num.',ger:'zehn (10)',unit:11,example:'Decem milites stant.'},
+  {id:'v127',lat:'centum',gen:'—',type:'Num.',ger:'hundert (100)',unit:11,example:'Centum milites adsunt.'},
+  {id:'v128',lat:'numerare',gen:'numerat',type:'Vb.',ger:'zählen',unit:11,example:'Discipulus numerat.'},
+  // Unit 12 - Tempus
+  {id:'v129',lat:'dies',gen:'diei',type:'m./f.',ger:'Tag',unit:12,example:'Dies longus est.'},
+  {id:'v130',lat:'nox',gen:'noctis',type:'f.',ger:'Nacht',unit:12,example:'Nox obscura est.'},
+  {id:'v131',lat:'hora',gen:'horae',type:'f.',ger:'Stunde',unit:12,example:'Una hora transit.'},
+  {id:'v132',lat:'annus',gen:'anni',type:'m.',ger:'Jahr',unit:12,example:'Annus longus est.'},
+  {id:'v133',lat:'mensis',gen:'mensis',type:'m.',ger:'Monat',unit:12,example:'Mensis Iulius calidus est.'},
+  {id:'v134',lat:'hodie',gen:'(Adv.)',type:'Adv.',ger:'heute',unit:12,example:'Hodie discimus.'},
+  {id:'v135',lat:'cras',gen:'(Adv.)',type:'Adv.',ger:'morgen',unit:12,example:'Cras magister venit.'},
+  {id:'v136',lat:'mane',gen:'(Adv.)',type:'Adv.',ger:'morgens, am Morgen',unit:12,example:'Mane discipuli intrant.'},
+  {id:'v137',lat:'nunc',gen:'(Adv.)',type:'Adv.',ger:'jetzt, nun',unit:12,example:'Nunc legimus.'},
+  {id:'v138',lat:'diu',gen:'(Adv.)',type:'Adv.',ger:'lange (Zeit)',unit:12,example:'Diu laboramus.'},
+  {id:'v139',lat:'olim',gen:'(Adv.)',type:'Adv.',ger:'einst, früher',unit:12,example:'Olim Romani magni erant.'},
+  {id:'v140',lat:'iam',gen:'(Adv.)',type:'Adv.',ger:'schon, bereits, jetzt',unit:12,example:'Puer iam dormit.'},
+  // Unit 13 - Natura
+  {id:'v141',lat:'flumen',gen:'fluminis',type:'n.',ger:'Fluss',unit:13,example:'Flumen latum est.'},
+  {id:'v142',lat:'mons',gen:'montis',type:'m.',ger:'Berg',unit:13,example:'Mons altus est.'},
+  {id:'v143',lat:'silva',gen:'silvae',type:'f.',ger:'Wald',unit:13,example:'In silva lupi habitant.'},
+  {id:'v144',lat:'campus',gen:'campi',type:'m.',ger:'Feld, Ebene',unit:13,example:'Miles in campo stat.'},
+  {id:'v145',lat:'caelum',gen:'caeli',type:'n.',ger:'Himmel',unit:13,example:'Caelum caeruleum est.'},
+  {id:'v146',lat:'sol',gen:'solis',type:'m.',ger:'Sonne',unit:13,example:'Sol lucet.'},
+  {id:'v147',lat:'luna',gen:'lunae',type:'f.',ger:'Mond',unit:13,example:'Luna nocte lucet.'},
+  {id:'v148',lat:'stella',gen:'stellae',type:'f.',ger:'Stern',unit:13,example:'Multae stellae in caelo sunt.'},
+  {id:'v149',lat:'ventus',gen:'venti',type:'m.',ger:'Wind',unit:13,example:'Ventus frigidus flat.'},
+  {id:'v150',lat:'pluvia',gen:'pluviae',type:'f.',ger:'Regen',unit:13,example:'Pluvia cadit.'},
+  {id:'v151',lat:'flos',gen:'floris',type:'m.',ger:'Blume, Blüte',unit:13,example:'Flores in horto sunt.'},
+  {id:'v152',lat:'arbor',gen:'arboris',type:'f.',ger:'Baum',unit:13,example:'Arbor alta in silva stat.'},
+  // Unit 14 - Corpus
+  {id:'v153',lat:'caput',gen:'capitis',type:'n.',ger:'Kopf',unit:14,example:'Caput magnum est.'},
+  {id:'v154',lat:'oculus',gen:'oculi',type:'m.',ger:'Auge',unit:14,example:'Oculi puellae pulchri sunt.'},
+  {id:'v155',lat:'auris',gen:'auris',type:'f.',ger:'Ohr',unit:14,example:'Aures magnae sunt.'},
+  {id:'v156',lat:'nasus',gen:'nasi',type:'m.',ger:'Nase',unit:14,example:'Nasus parvus est.'},
+  {id:'v157',lat:'manus',gen:'manus',type:'f.',ger:'Hand',unit:14,example:'Discipulus manum tollit.'},
+  {id:'v158',lat:'pes',gen:'pedis',type:'m.',ger:'Fuß',unit:14,example:'Pedes pueri parvi sunt.'},
+  {id:'v159',lat:'corpus',gen:'corporis',type:'n.',ger:'Körper, Leib',unit:14,example:'Corpus sanum est.'},
+  {id:'v160',lat:'aeger',gen:'aegra, aegrum',type:'Adj.',ger:'krank',unit:14,example:'Puer aeger est.'},
+  {id:'v161',lat:'sanus',gen:'-a, -um',type:'Adj.',ger:'gesund',unit:14,example:'Discipula sana est.'},
+  {id:'v162',lat:'medicus',gen:'medici',type:'m.',ger:'Arzt',unit:14,example:'Medicus aegrum sanat.'},
+  {id:'v163',lat:'sanare',gen:'sanat',type:'Vb.',ger:'heilen',unit:14,example:'Medicus puerum sanat.'},
+  {id:'v164',lat:'dolere',gen:'dolet',type:'Vb.',ger:'schmerzen, leiden',unit:14,example:'Caput dolet.'},
+  // Unit 15 - Urbs Romana
+  {id:'v165',lat:'urbs',gen:'urbis',type:'f.',ger:'Stadt',unit:15,example:'Urbs Romana magna est.'},
+  {id:'v166',lat:'vicus',gen:'vici',type:'m.',ger:'Straße, Stadtviertel',unit:15,example:'In vico multi homines sunt.'},
+  {id:'v167',lat:'taberna',gen:'tabernae',type:'f.',ger:'Laden, Taverne',unit:15,example:'In taberna cibum emimus.'},
+  {id:'v168',lat:'thermae',gen:'thermarum',type:'f.pl.',ger:'Thermen, öffentliche Bäder',unit:15,example:'Cives in thermis lavantur.'},
+  {id:'v169',lat:'theatrum',gen:'theatri',type:'n.',ger:'Theater',unit:15,example:'In theatro fabulam spectamus.'},
+  {id:'v170',lat:'pons',gen:'pontis',type:'m.',ger:'Brücke',unit:15,example:'Pons longus super flumen est.'},
+  {id:'v171',lat:'populus',gen:'populi',type:'m.',ger:'Volk, Bevölkerung',unit:15,example:'Populus Romanus magnus est.'},
+  {id:'v172',lat:'civis',gen:'civis',type:'m./f.',ger:'Bürger(in)',unit:15,example:'Cives in foro sunt.'},
+  {id:'v173',lat:'clamor',gen:'clamoris',type:'m.',ger:'Lärm, Geschrei',unit:15,example:'Clamor in via magnus est.'},
+  {id:'v174',lat:'spectare',gen:'spectat',type:'Vb.',ger:'schauen, betrachten',unit:15,example:'Cives gladiatores spectant.'},
+  {id:'v175',lat:'festinare',gen:'festinat',type:'Vb.',ger:'eilen, sich beeilen',unit:15,example:'Mercator festinat.'},
+  {id:'v176',lat:'homo',gen:'hominis',type:'m.',ger:'Mensch, Mann',unit:15,example:'Multi homines in via sunt.'},
+  // Unit 16 - Iter
+  {id:'v177',lat:'iter',gen:'itineris',type:'n.',ger:'Reise, Weg',unit:16,example:'Iter longum est.'},
+  {id:'v178',lat:'navis',gen:'navis',type:'f.',ger:'Schiff',unit:16,example:'Navis in mari navigat.'},
+  {id:'v179',lat:'mare',gen:'maris',type:'n.',ger:'Meer',unit:16,example:'Mare magnum est.'},
+  {id:'v180',lat:'navigare',gen:'navigat',type:'Vb.',ger:'segeln, fahren (zu Wasser)',unit:16,example:'Nauta in mari navigat.'},
+  {id:'v181',lat:'ambulare',gen:'ambulat',type:'Vb.',ger:'gehen, spazieren',unit:16,example:'Puella in via ambulat.'},
+  {id:'v182',lat:'venire',gen:'venit',type:'Vb.',ger:'kommen',unit:16,example:'Magister venit.'},
+  {id:'v183',lat:'ire',gen:'it',type:'Vb.',ger:'gehen',unit:16,example:'Discipuli in scholam eunt.'},
+  {id:'v184',lat:'redire',gen:'redit',type:'Vb.',ger:'zurückkehren',unit:16,example:'Pater domum redit.'},
+  {id:'v185',lat:'portus',gen:'portus',type:'m.',ger:'Hafen',unit:16,example:'Naves in portu stant.'},
+  {id:'v186',lat:'nauta',gen:'nautae',type:'m.',ger:'Seemann, Matrose',unit:16,example:'Nauta fortis est.'},
+  {id:'v187',lat:'longe',gen:'(Adv.)',type:'Adv.',ger:'weit (entfernt)',unit:16,example:'Roma longe est.'},
+  {id:'v188',lat:'prope',gen:'(Präp.)',type:'Präp.',ger:'nahe (bei) + Akk.',unit:16,example:'Schola prope forum est.'},
+  // Unit 17 - Dei Romani
+  {id:'v189',lat:'deus',gen:'dei',type:'m.',ger:'Gott',unit:17,example:'Romani multos deos colunt.'},
+  {id:'v190',lat:'dea',gen:'deae',type:'f.',ger:'Göttin',unit:17,example:'Minerva dea sapientiae est.'},
+  {id:'v191',lat:'Iuppiter',gen:'Iovis',type:'m.',ger:'Jupiter — Göttervater',unit:17,example:'Iuppiter rex deorum est.'},
+  {id:'v192',lat:'Mars',gen:'Martis',type:'m.',ger:'Mars — Gott des Krieges',unit:17,example:'Mars deus belli est.'},
+  {id:'v193',lat:'Minerva',gen:'Minervae',type:'f.',ger:'Minerva — Göttin der Weisheit',unit:17,example:'Minerva sapiens est.'},
+  {id:'v194',lat:'Venus',gen:'Veneris',type:'f.',ger:'Venus — Göttin der Liebe',unit:17,example:'Venus pulcherrima est.'},
+  {id:'v195',lat:'Neptunus',gen:'Neptuni',type:'m.',ger:'Neptun — Gott des Meeres',unit:17,example:'Neptunus mare regit.'},
+  {id:'v196',lat:'Mercurius',gen:'Mercurii',type:'m.',ger:'Merkur — Götterbote',unit:17,example:'Mercurius celeriter volat.'},
+  {id:'v197',lat:'sacrificium',gen:'sacrificii',type:'n.',ger:'Opfer (religiöses Opfer)',unit:17,example:'Romani sacrificium faciunt.'},
+  {id:'v198',lat:'orare',gen:'orat',type:'Vb.',ger:'beten, sprechen',unit:17,example:'Cives deos orant.'},
+  {id:'v199',lat:'pius',gen:'-a, -um',type:'Adj.',ger:'fromm, pflichtbewusst',unit:17,example:'Aeneas pius est.'},
+  {id:'v200',lat:'colere',gen:'colit',type:'Vb.',ger:'verehren, pflegen, anbauen',unit:17,example:'Romani deos colunt.'},
+  // Unit 18 - Bellum et Milites
+  {id:'v201',lat:'bellum',gen:'belli',type:'n.',ger:'Krieg',unit:18,example:'Bellum longum est.'},
+  {id:'v202',lat:'miles',gen:'militis',type:'m.',ger:'Soldat',unit:18,example:'Miles fortiter pugnat.'},
+  {id:'v203',lat:'dux',gen:'ducis',type:'m.',ger:'Anführer, Feldherr',unit:18,example:'Dux milites ducit.'},
+  {id:'v204',lat:'legio',gen:'legionis',type:'f.',ger:'Legion (röm. Heereseinheit)',unit:18,example:'Legio Romana magna est.'},
+  {id:'v205',lat:'castra',gen:'castrorum',type:'n.pl.',ger:'Militärlager',unit:18,example:'Milites in castris dormiunt.'},
+  {id:'v206',lat:'gladius',gen:'gladii',type:'m.',ger:'Schwert',unit:18,example:'Miles gladium portat.'},
+  {id:'v207',lat:'scutum',gen:'scuti',type:'n.',ger:'Schild',unit:18,example:'Miles scutum tenet.'},
+  {id:'v208',lat:'pax',gen:'pacis',type:'f.',ger:'Frieden',unit:18,example:'Pax bona est.'},
+  {id:'v209',lat:'hostis',gen:'hostis',type:'m.',ger:'Feind (Staatsfeind)',unit:18,example:'Hostes fugiunt.'},
+  {id:'v210',lat:'imperare',gen:'imperat',type:'Vb.',ger:'befehlen, herrschen',unit:18,example:'Dux militibus imperat.'},
+  {id:'v211',lat:'defendere',gen:'defendit',type:'Vb.',ger:'verteidigen',unit:18,example:'Milites urbem defendunt.'},
+  {id:'v212',lat:'fugere',gen:'fugit',type:'Vb.',ger:'fliehen',unit:18,example:'Hostes fugiunt.'},
+  // Unit 19 - Mercatura
+  {id:'v213',lat:'pecunia',gen:'pecuniae',type:'f.',ger:'Geld',unit:19,example:'Mercator multam pecuniam habet.'},
+  {id:'v214',lat:'pretium',gen:'pretii',type:'n.',ger:'Preis, Wert',unit:19,example:'Pretium magnum est.'},
+  {id:'v215',lat:'emere',gen:'emit',type:'Vb.',ger:'kaufen',unit:19,example:'Civis panem emit.'},
+  {id:'v216',lat:'vendere',gen:'vendit',type:'Vb.',ger:'verkaufen',unit:19,example:'Mercator merces vendit.'},
+  {id:'v217',lat:'dare',gen:'dat',type:'Vb.',ger:'geben',unit:19,example:'Pater filio pecuniam dat.'},
+  {id:'v218',lat:'accipere',gen:'accipit',type:'Vb.',ger:'empfangen, annehmen',unit:19,example:'Puer donum accipit.'},
+  {id:'v219',lat:'merx',gen:'mercis',type:'f.',ger:'Ware, Handelsware',unit:19,example:'Merces in navi sunt.'},
+  {id:'v220',lat:'aurum',gen:'auri',type:'n.',ger:'Gold',unit:19,example:'Aurum pretiosum est.'},
+  {id:'v221',lat:'argentum',gen:'argenti',type:'n.',ger:'Silber; Geld',unit:19,example:'Mercator argentum habet.'},
+  {id:'v222',lat:'dives',gen:'divitis',type:'Adj.',ger:'reich',unit:19,example:'Mercator dives est.'},
+  {id:'v223',lat:'pauper',gen:'pauperis',type:'Adj.',ger:'arm, mittellos',unit:19,example:'Servus pauper est.'},
+  {id:'v224',lat:'mercator',gen:'mercatoris',type:'m.',ger:'Händler, Kaufmann',unit:19,example:'Mercator in foro stat.'},
+  // Unit 20 - Perfectum (Vergangenheit)
+  {id:'v225',lat:'dicere',gen:'dicit / dixit',type:'Vb.',ger:'sagen, sprechen',unit:20,example:'Magister veritatem dixit.'},
+  {id:'v226',lat:'facere',gen:'facit / fecit',type:'Vb.',ger:'machen, tun',unit:20,example:'Discipulus opus fecit.'},
+  {id:'v227',lat:'habere',gen:'habet / habuit',type:'Vb.',ger:'haben, besitzen',unit:20,example:'Dominus multos servos habuit.'},
+  {id:'v228',lat:'fui',gen:'(esse, Perf.)',type:'Perf.',ger:'ich war / ich bin gewesen',unit:20,example:'Roma magna fuit.'},
+  {id:'v229',lat:'amavi',gen:'(amare, Perf.)',type:'Perf.',ger:'ich liebte / ich habe geliebt',unit:20,example:'Puer puellam amavit.'},
+  {id:'v230',lat:'vidi',gen:'(videre, Perf.)',type:'Perf.',ger:'ich sah / ich habe gesehen',unit:20,example:'Puella leonem vidit.'},
+  {id:'v231',lat:'venit',gen:'(venire, Perf.)',type:'Perf.',ger:'er kam / er ist gekommen',unit:20,example:'Magister venit.'},
+  {id:'v232',lat:'scripsi',gen:'(scribere, Perf.)',type:'Perf.',ger:'ich schrieb / ich habe geschrieben',unit:20,example:'Discipulus sententiam scripsit.'},
+  {id:'v233',lat:'laudavit',gen:'(laudare, Perf.)',type:'Perf.',ger:'er lobte / er hat gelobt',unit:20,example:'Magister discipulum laudavit.'},
+  {id:'v234',lat:'narravit',gen:'(narrare, Perf.)',type:'Perf.',ger:'er erzählte / er hat erzählt',unit:20,example:'Pater fabulam narravit.'},
+  {id:'v235',lat:'itaque',gen:'(Konj.)',type:'Konj.',ger:'und so, daher, also',unit:20,example:'Itaque discipulus laudatur.'},
+  {id:'v236',lat:'tum',gen:'(Adv.)',type:'Adv.',ger:'dann, damals',unit:20,example:'Tum omnes riserunt.'},
+  // Unit 21 - Mores Romani (Römische Sitten)
+  {id:'v237',lat:'toga',gen:'togae',type:'f.',ger:'Toga (Bürgergewand)',unit:21,example:'Civis togam gerit.'},
+  {id:'v238',lat:'stola',gen:'stolae',type:'f.',ger:'Stola (Frauengewand)',unit:21,example:'Femina stolam pulchram gerit.'},
+  {id:'v239',lat:'cena',gen:'cenae',type:'f.',ger:'Abendessen (Hauptmahlzeit)',unit:21,example:'Cena longa et laeta est.'},
+  {id:'v240',lat:'salutare',gen:'salutat',type:'Vb.',ger:'grüßen, begrüßen',unit:21,example:'Discipulus magistrum salutat.'},
+  {id:'v241',lat:'valere',gen:'valet',type:'Vb.',ger:'gesund sein; vale = leb wohl!',unit:21,example:'Vale, amice! Valete, amici!'},
+  {id:'v242',lat:'femina',gen:'feminae',type:'f.',ger:'Frau',unit:21,example:'Femina Romana bona est.'},
+  {id:'v243',lat:'vir',gen:'viri',type:'m.',ger:'Mann, Ehemann',unit:21,example:'Vir bonus est.'},
+  {id:'v244',lat:'pulcher',gen:'pulchra, pulchrum',type:'Adj.',ger:'schön',unit:21,example:'Roma pulchra est.'},
+  {id:'v245',lat:'antiquus',gen:'-a, -um',type:'Adj.',ger:'alt, antik',unit:21,example:'Templum antiquum est.'},
+  {id:'v246',lat:'Romanus',gen:'-a, -um',type:'Adj.',ger:'römisch',unit:21,example:'Mos Romanus antiquus est.'},
+  {id:'v247',lat:'clarus',gen:'-a, -um',type:'Adj.',ger:'berühmt, hell',unit:21,example:'Caesar clarus est.'},
+  {id:'v248',lat:'gerere',gen:'gerit',type:'Vb.',ger:'tragen (Kleidung); führen',unit:21,example:'Senator togam gerit.'},
+];
+
+const UNITS = [
+  {
+    id:1, title:'Roma', icon:'🏛️', color:'#C4622D',
+    desc:'Lerne die ersten lateinischen Wörter über die Stadt Rom!',
+    topics:['Erste Vokabeln', 'Roma & Italia', 'Einfache Sätze mit "est"'],
+    lessons:[
+      {id:'1a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v1','v2','v3','v4','v5']},
+      {id:'1b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v1','v2','v3','v4','v5','v6','v7','v8','v9','v10']},
+      {id:'1c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v1','v3','v4','v5','v6']},
+    ]
+  },
+  {
+    id:2, title:'Familia', icon:'👨‍👩‍👧', color:'#6A1B9A',
+    desc:'Lerne die Mitglieder einer römischen Familie kennen!',
+    topics:['Familienmitglieder', 'a-Deklination (Nom.)', 'Adjektive: bonus, parvus, laetus'],
+    lessons:[
+      {id:'2a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v11','v12','v13','v14','v15']},
+      {id:'2b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v11','v12','v13','v14','v15','v16','v17','v18','v19','v20']},
+      {id:'2c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v11','v12','v13','v14','v17']},
+    ]
+  },
+  {
+    id:3, title:'Verba', icon:'🏃', color:'#1565C0',
+    desc:'Die wichtigsten lateinischen Verben und ihre Formen!',
+    topics:['a-Konjugation: Präsens', '3. Person Singular (-at)', 'Subjekt + Prädikat'],
+    lessons:[
+      {id:'3a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v23','v24','v25','v26','v27']},
+      {id:'3b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v23','v24','v25','v26','v27','v28','v29','v30','v31','v32']},
+      {id:'3c',name:'Lückensatz',icon:'✏️',type:'fill_blank',vocabIds:['v23','v24','v25','v26','v28']},
+    ]
+  },
+  {
+    id:4, title:'Schola', icon:'📚', color:'#2E7D32',
+    desc:'Im Klassenzimmer — Schüler, Bücher und der Lehrer!',
+    topics:['Nominativ & Akkusativ', 'e-Konjugation: docere, legere', 'Satzglieder: Subjekt + Objekt'],
+    lessons:[
+      {id:'4a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v33','v34','v35','v36','v37']},
+      {id:'4b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v33','v34','v35','v36','v37','v38','v39','v40','v41','v42']},
+      {id:'4c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v33','v35','v37','v39','v40']},
+    ]
+  },
+  {
+    id:5, title:'Roma antiqua', icon:'⚔️', color:'#B71C1C',
+    desc:'Das alte Rom: Forum, Gladiatoren und Tempel!',
+    topics:['Forum Romanum', 'Gladiatoren & Circus', 'n-Deklination (templum)'],
+    lessons:[
+      {id:'5a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v43','v44','v45','v46','v47']},
+      {id:'5b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v43','v44','v45','v46','v47','v48','v49','v50','v51','v52']},
+      {id:'5c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v43','v44','v45','v49','v51']},
+    ]
+  },
+  {
+    id:6, title:'In Schola', icon:'🏫', color:'#00695C',
+    desc:'In der römischen Schule: Lernen, Lesen und Grundwörter!',
+    topics:['Schule im alten Rom', 'e-Konjugation: discere, respondere', 'Adverbien & Verneinung mit non'],
+    lessons:[
+      {id:'6a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v53','v54','v55','v56','v57']},
+      {id:'6b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v53','v54','v55','v56','v57','v58','v59','v60','v61','v62']},
+      {id:'6c',name:'Verben',icon:'✏️',type:'fill_blank',vocabIds:['v58','v59','v60','v61','v62']},
+      {id:'6d',name:'Grundwörter',icon:'🔗',type:'matching',vocabIds:['v63','v64','v65','v66','v68']},
+    ]
+  },
+  {
+    id:7, title:'Domus', icon:'🏠', color:'#E65100',
+    desc:'Das römische Haus: vom Atrium bis zum Garten!',
+    topics:['Räume der domus', 'i-Konjugation: dormire, aperire', 'Akkusativ als Objekt'],
+    lessons:[
+      {id:'7a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v69','v70','v71','v72','v73']},
+      {id:'7b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v69','v70','v71','v72','v73','v74','v75','v76','v77','v80']},
+      {id:'7c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v69','v72','v74','v75','v77']},
+      {id:'7d',name:'Verben',icon:'✏️',type:'fill_blank',vocabIds:['v78','v79','v80','v28','v29']},
+    ]
+  },
+  {
+    id:8, title:'Cibus et Potus', icon:'🍞', color:'#F57F17',
+    desc:'Essen und Trinken beim römischen Gastmahl!',
+    topics:['Speisen & Getränke', 'Verben: edere, bibere, cenare', 'Das Gastmahl (convivium)'],
+    lessons:[
+      {id:'8a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v81','v82','v83','v84','v85']},
+      {id:'8b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v81','v82','v83','v84','v85','v86','v87','v88','v89','v90']},
+      {id:'8c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v81','v82','v83','v86','v87']},
+      {id:'8d',name:'Verben',icon:'✏️',type:'fill_blank',vocabIds:['v88','v89','v90','v91','v92']},
+    ]
+  },
+  {
+    id:9, title:'Amici et Ludi', icon:'🎮', color:'#AD1457',
+    desc:'Freunde, Spiele und Wettkämpfe im alten Rom!',
+    topics:['Freizeit & Spiele', 'Verben: ludere, currere, ridere', 'Adjektiv felix'],
+    lessons:[
+      {id:'9a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v93','v94','v95','v96','v97']},
+      {id:'9b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v93','v94','v95','v96','v97','v98','v99','v100','v101','v102']},
+      {id:'9c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v93','v95','v98','v101','v102']},
+      {id:'9d',name:'Lückensatz',icon:'✏️',type:'fill_blank',vocabIds:['v95','v96','v97','v99','v103']},
+    ]
+  },
+  {
+    id:10, title:'Animalia', icon:'🦁', color:'#558B2F',
+    desc:'Die Tiere Roms: vom Haushund bis zum Löwen!',
+    topics:['Tiere in Rom & Colosseum', 'Adjektive: fortis, ferus', 'Verb: timere (fürchten)'],
+    lessons:[
+      {id:'10a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v105','v106','v107','v108','v109']},
+      {id:'10b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v105','v106','v107','v108','v109','v110','v111','v112','v113','v114']},
+      {id:'10c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v105','v106','v107','v108','v111']},
+      {id:'10d',name:'Lückensatz',icon:'✏️',type:'fill_blank',vocabIds:['v113','v114','v115','v116','v112']},
+    ]
+  },
+  {
+    id:11, title:'Numeri', icon:'🔢', color:'#1A237E',
+    desc:'Lateinische Zahlen von 1 bis 100!',
+    topics:['Kardinalzahlen 1–10', 'centum = 100', 'numerare — zählen'],
+    lessons:[
+      {id:'11a',name:'Zahlen 1–5',icon:'📝',type:'flashcard',vocabIds:['v117','v118','v119','v120','v121']},
+      {id:'11b',name:'Zahlen 6–10',icon:'📝',type:'flashcard',vocabIds:['v122','v123','v124','v125','v126']},
+      {id:'11c',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v117','v118','v119','v120','v121','v122','v123','v124','v125','v126']},
+      {id:'11d',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v117','v119','v121','v123','v126']},
+    ]
+  },
+  {
+    id:12, title:'Tempus', icon:'⏰', color:'#37474F',
+    desc:'Zeit, Tage und Adverbien der Zeit!',
+    topics:['Dies, nox, hora, annus', 'Zeitadverbien: hodie, cras, nunc', 'olim & iam — Zeitebenen'],
+    lessons:[
+      {id:'12a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v129','v130','v131','v132','v133']},
+      {id:'12b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v129','v130','v131','v132','v133','v134','v135','v136','v137','v138']},
+      {id:'12c',name:'Zeitwörter',icon:'🔗',type:'matching',vocabIds:['v134','v135','v137','v139','v140']},
+      {id:'12d',name:'Lückensatz',icon:'✏️',type:'fill_blank',vocabIds:['v129','v130','v134','v135','v136']},
+    ]
+  },
+  {
+    id:13, title:'Natura', icon:'🌿', color:'#2E7D32',
+    desc:'Die Natur: Berge, Wälder, Sonne und Sterne!',
+    topics:['Landschaft: mons, silva, flumen', 'Himmelskörper: sol, luna, stella', 'Wetter: ventus, pluvia'],
+    lessons:[
+      {id:'13a',name:'Landschaft',icon:'📝',type:'flashcard',vocabIds:['v141','v142','v143','v144','v145']},
+      {id:'13b',name:'Himmel & Wetter',icon:'📝',type:'flashcard',vocabIds:['v146','v147','v148','v149','v150']},
+      {id:'13c',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v141','v142','v143','v144','v145','v146','v147','v148','v149','v150']},
+      {id:'13d',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v141','v142','v146','v147','v151']},
+    ]
+  },
+  {
+    id:14, title:'Corpus', icon:'🏃', color:'#6A1B9A',
+    desc:'Der menschliche Körper und Gesundheit auf Latein!',
+    topics:['Körperteile: caput, oculus, manus', 'Adjektive: aeger, sanus', 'Der Arzt (medicus)'],
+    lessons:[
+      {id:'14a',name:'Körperteile',icon:'📝',type:'flashcard',vocabIds:['v153','v154','v155','v156','v157']},
+      {id:'14b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v153','v154','v155','v156','v157','v158','v159','v160','v161','v162']},
+      {id:'14c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v153','v154','v157','v158','v162']},
+      {id:'14d',name:'Lückensatz',icon:'✏️',type:'fill_blank',vocabIds:['v160','v161','v162','v163','v164']},
+    ]
+  },
+  {
+    id:15, title:'Urbs Romana', icon:'🏙️', color:'#4E342E',
+    desc:'Die römische Stadt: vom Theater bis zur Therme!',
+    topics:['Stadtgebäude: theatrum, thermae', 'urbs, civis, populus', 'Verb: spectare, festinare'],
+    lessons:[
+      {id:'15a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v165','v166','v167','v168','v169']},
+      {id:'15b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v165','v166','v167','v168','v169','v170','v171','v172','v173','v176']},
+      {id:'15c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v165','v167','v169','v171','v172']},
+      {id:'15d',name:'Verben',icon:'✏️',type:'fill_blank',vocabIds:['v174','v175','v181','v182','v183']},
+    ]
+  },
+  {
+    id:16, title:'Iter', icon:'⛵', color:'#00838F',
+    desc:'Reisen und Wege im Römischen Reich!',
+    topics:['Schiff, Meer, Hafen', 'Verben: navigare, ire, redire, venire', 'Präposition prope'],
+    lessons:[
+      {id:'16a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v177','v178','v179','v180','v185']},
+      {id:'16b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v177','v178','v179','v180','v181','v182','v183','v184','v185','v186']},
+      {id:'16c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v177','v178','v179','v185','v186']},
+      {id:'16d',name:'Verben',icon:'✏️',type:'fill_blank',vocabIds:['v180','v181','v182','v183','v184']},
+    ]
+  },
+  {
+    id:17, title:'Dei Romani', icon:'⚡', color:'#7B1FA2',
+    desc:'Die Götter Roms: Jupiter, Mars, Venus und mehr!',
+    topics:['Die 6 Hauptgötter', 'sacrificium & orare', 'Adjektiv: pius'],
+    lessons:[
+      {id:'17a',name:'Götter I',icon:'📝',type:'flashcard',vocabIds:['v189','v190','v191','v192','v193']},
+      {id:'17b',name:'Götter II',icon:'📝',type:'flashcard',vocabIds:['v194','v195','v196','v197','v199']},
+      {id:'17c',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v189','v190','v191','v192','v193','v194','v195','v196','v197','v200']},
+      {id:'17d',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v191','v192','v193','v194','v195']},
+    ]
+  },
+  {
+    id:18, title:'Bellum et Milites', icon:'⚔️', color:'#B71C1C',
+    desc:'Krieg und Soldaten im Römischen Reich!',
+    topics:['miles, dux, legio', 'Waffen: gladius, scutum', 'Verben: defendere, fugere'],
+    lessons:[
+      {id:'18a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v201','v202','v203','v204','v205']},
+      {id:'18b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v201','v202','v203','v204','v205','v206','v207','v208','v209','v210']},
+      {id:'18c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v201','v202','v206','v207','v208']},
+      {id:'18d',name:'Verben',icon:'✏️',type:'fill_blank',vocabIds:['v210','v211','v212','v50','v51']},
+    ]
+  },
+  {
+    id:19, title:'Mercatura', icon:'💰', color:'#F9A825',
+    desc:'Handel und Markt im alten Rom — Kaufen und Verkaufen!',
+    topics:['pecunia, merx, pretium', 'Verben: emere, vendere, dare', 'aurum & argentum'],
+    lessons:[
+      {id:'19a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v213','v214','v219','v220','v221']},
+      {id:'19b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v213','v214','v215','v216','v217','v218','v219','v220','v221','v224']},
+      {id:'19c',name:'Zuordnung',icon:'🔗',type:'matching',vocabIds:['v213','v220','v221','v222','v223']},
+      {id:'19d',name:'Verben',icon:'✏️',type:'fill_blank',vocabIds:['v215','v216','v217','v218','v214']},
+    ]
+  },
+  {
+    id:20, title:'Perfectum', icon:'🕰️', color:'#5D4037',
+    desc:'Die Vergangenheit auf Latein — was schon geschehen ist!',
+    topics:['Perfekt: amavi, dixit, vidit', 'Verben: dicere, facere, habere', 'itaque & tum'],
+    lessons:[
+      {id:'20a',name:'Neue Verben',icon:'📝',type:'flashcard',vocabIds:['v225','v226','v227','v229','v230']},
+      {id:'20b',name:'Perfektformen',icon:'📝',type:'flashcard',vocabIds:['v228','v229','v230','v232','v233']},
+      {id:'20c',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v225','v226','v227','v228','v229','v230','v231','v232','v233','v234']},
+      {id:'20d',name:'Lückensatz',icon:'✏️',type:'fill_blank',vocabIds:['v225','v226','v227','v232','v234']},
+    ]
+  },
+  {
+    id:21, title:'Mores Romani', icon:'🏺', color:'#C62828',
+    desc:'Römische Sitten und Kultur: Kleidung, Grüßen und mehr!',
+    topics:['Toga & Stola', 'salutare & valere', 'Adjektive: pulcher, antiquus, clarus'],
+    lessons:[
+      {id:'21a',name:'Vokabeln',icon:'📝',type:'flashcard',vocabIds:['v237','v238','v239','v242','v243']},
+      {id:'21b',name:'Quiz',icon:'❓',type:'multiple_choice',vocabIds:['v237','v238','v239','v240','v241','v242','v243','v244','v245','v246']},
+      {id:'21c',name:'Adjektive',icon:'🔗',type:'matching',vocabIds:['v244','v245','v246','v247','v113']},
+      {id:'21d',name:'Lückensatz',icon:'✏️',type:'fill_blank',vocabIds:['v240','v241','v248','v244','v246']},
+    ]
+  },
+];
+
+const FUN_FACTS = [
+  {icon:'🦅', text:'Der Adler (aquila) war das Symbol der römischen Legionen. Jede Legion trug stolz ihren Adler als heiliges Zeichen!'},
+  {icon:'🏟️', text:'Im Kolosseum in Rom kämpften Gladiatoren vor bis zu 50.000 Zuschauern. Es wurde im Jahr 80 n. Chr. eröffnet!'},
+  {icon:'🛁', text:'Die Römer liebten Bäder (thermae). Es gab öffentliche Bäder, wo man schwimmen, Sport treiben und Freunde treffen konnte.'},
+  {icon:'🍕', text:'Viele deutsche und englische Wörter kommen aus dem Lateinischen! "Material" kommt von "materia", "Senior" von "senex" (alt).'},
+  {icon:'🗓️', text:'Unsere Monatsnamen kommen aus dem Lateinischen: Julius = Julius Caesar, Augustus = Kaiser Augustus!'},
+  {icon:'🏛️', text:'Das Forum Romanum war das Herz Roms: Hier wurden Gesetze beschlossen, Händler verkauften ihre Waren und Redner hielten Reden.'},
+  {icon:'📜', text:'Latein ist nicht "tot"! Es ist die Grundlage von Französisch, Spanisch, Italienisch, Portugiesisch und Rumänisch.'},
+  {icon:'🦁', text:'Im Circus Maximus in Rom fanden Wagenrennen statt. Bis zu 250.000 Zuschauer schauten zu!'},
+  {icon:'✏️', text:'Römische Schüler schrieben mit einem Griffel (stylus) auf Wachstafeln (tabulae ceratae). Fehler ließ sich einfach glattstreichen!'},
+  {icon:'🏫', text:'Reiche Römer schickten ihre Söhne zur Schule. Manchmal unterrichtete ein Sklave (paedagogus) die Kinder zu Hause.'},
+  {icon:'🏠', text:'Das Herzstück eines römischen Hauses war das Atrium — eine offene Halle mit einem Wasserbecken (impluvium) in der Mitte!'},
+  {icon:'🍷', text:'Beim römischen Gastmahl (convivium) lagen die Gäste auf Sofas — Stühle waren unüblich! Gegessen wurde mit den Fingern.'},
+  {icon:'🎲', text:'Römer liebten Spiele! Besonders beliebt war "tali" (Knöchelspiel) — eine Art Würfelspiel mit Tierknochen.'},
+  {icon:'🦁', text:'Im Kolosseum wurden nicht nur Gladiatoren gezeigt — auch exotische Tiere aus Afrika und Asien: Löwen, Elefanten, sogar Nashörner!'},
+  {icon:'🔢', text:'Die Römer benutzten Buchstaben als Zahlen: I=1, V=5, X=10, L=50, C=100, D=500, M=1000 — das sind die römischen Ziffern!'},
+  {icon:'📅', text:'Die Wochentage sind nach Göttern und Planeten benannt: Sonntag = Sol, Montag = Luna, Dienstag = Mars, Mittwoch = Merkur!'},
+  {icon:'🌊', text:'Das Mittelmeer nannten die Römer "Mare Nostrum" — "unser Meer". Sie beherrschten fast die gesamte Küste!'},
+  {icon:'💪', text:'Römische Soldaten marschierten täglich bis zu 30 km — mit voller Rüstung! Eine Legion hatte etwa 5.000 Soldaten.'},
+  {icon:'🏛️', text:'Die Aquädukte der Römer waren Meisterwerke der Ingenieurskunst. Manche davon sind bis heute erhalten und führen noch Wasser!'},
+  {icon:'⚡', text:'Jupiter war der mächtigste Gott Roms. Er war der Donnergott und sein heiliges Tier war der Adler — darum war der Adler auch Symbol der Legionen!'},
+  {icon:'💰', text:'Im alten Rom gab es echte Münzen mit Kaiserporträt — die "denarius" war eine Silbermünze, die Soldaten und Händler benutzten.'},
+  {icon:'🏺', text:'Die Toga war das typische Kleidungsstück römischer Bürger. Nur echte cives Romani durften sie tragen — es war ein Zeichen der Zugehörigkeit!'},
+  {icon:'🌺', text:'Viele Pflanzennamen kommen aus dem Lateinischen: Rosa = Rose, Viola = Veilchen, Iris = Schwertlilie. Botaniker nutzen Latein noch heute!'},
+];
+
+const GRAMMAR_CARDS = [
+  {
+    title: 'a-Deklination (Nominativ & Akkusativ)',
+    content: 'Substantive wie puella (Mädchen), ancilla (Sklavin), via (Straße)',
+    table: [
+      ['Kasus','Singular','Bedeutung'],
+      ['Nominativ (Subj.)','puell-a','Das Mädchen (tut etwas)'],
+      ['Akkusativ (Obj.)','puell-am','Das Mädchen (wird etwas getan)'],
+      ['Genitiv','puell-ae','des Mädchens'],
+      ['Dativ','puell-ae','dem/für das Mädchen'],
+      ['Ablativ','puell-ā','von dem Mädchen'],
+    ],
+    tip: '💡 Merke: -a = Nominativ, -am = Akkusativ! "Puella portat" = Das Mädchen trägt. "Puer puellam videt" = Der Junge sieht das Mädchen.'
+  },
+  {
+    title: 'o-Deklination (Nominativ & Akkusativ)',
+    content: 'Substantive wie puer (Junge), servus (Sklave), liber (Buch)',
+    table: [
+      ['Kasus','Singular','Bedeutung'],
+      ['Nominativ (Subj.)','serv-us','Der Sklave (tut etwas)'],
+      ['Akkusativ (Obj.)','serv-um','Den Sklaven (wird etwas getan)'],
+      ['Genitiv','serv-i','des Sklaven'],
+      ['Dativ','serv-o','dem Sklaven'],
+      ['Ablativ','serv-o','von dem Sklaven'],
+    ],
+    tip: '💡 Merke: -us = Nominativ, -um = Akkusativ! "Servus laborat" = Der Sklave arbeitet.'
+  },
+  {
+    title: 'a-Konjugation: Präsens',
+    content: 'Verben wie amare (lieben), laudare (loben), vocare (rufen)',
+    table: [
+      ['Person','Form','Bedeutung'],
+      ['1. Pers. Sg.','am-o','ich liebe'],
+      ['2. Pers. Sg.','am-as','du liebst'],
+      ['3. Pers. Sg.','am-at','er/sie/es liebt'],
+      ['1. Pers. Pl.','am-amus','wir lieben'],
+      ['2. Pers. Pl.','am-atis','ihr liebt'],
+      ['3. Pers. Pl.','am-ant','sie lieben'],
+    ],
+    tip: '💡 Im Schultext trifft man am häufigsten die 3. Person: "Mater filiam amat" = Die Mutter liebt die Tochter.'
+  },
+  {
+    title: 'esse (sein) — Unregelmäßig!',
+    content: 'Das wichtigste lateinische Verb — auswendig lernen!',
+    table: [
+      ['Person','Form','Bedeutung'],
+      ['1. Pers. Sg.','sum','ich bin'],
+      ['2. Pers. Sg.','es','du bist'],
+      ['3. Pers. Sg.','est','er/sie/es ist'],
+      ['1. Pers. Pl.','sumus','wir sind'],
+      ['2. Pers. Pl.','estis','ihr seid'],
+      ['3. Pers. Pl.','sunt','sie sind'],
+    ],
+    tip: '💡 "Roma magna est" = Rom ist groß. "Pueri laeti sunt" = Die Jungen sind fröhlich.'
+  },
+  {
+    title: 'Die 5 Kasus (Fälle)',
+    content: 'Im Lateinischen zeigt die Endung die Rolle im Satz an!',
+    table: [
+      ['Kasus','Frage','Funktion'],
+      ['Nominativ','Wer/Was?','Subjekt (tut etwas)'],
+      ['Genitiv','Wessen?','Besitz, Zugehörigkeit'],
+      ['Dativ','Wem?','indirektes Objekt'],
+      ['Akkusativ','Wen/Was?','direktes Objekt'],
+      ['Ablativ','Womit/Von wem?','Umstandsangabe'],
+    ],
+    tip: '💡 "Pater filiam amat" — pater = Nom. (Vater tut), filiam = Akk. (Tochter wird geliebt)'
+  },
+  {
+    title: 'e-Konjugation & konson. Konjugation: Präsens',
+    content: 'Verben wie discere (lernen), respondere (antworten), intellegere (verstehen)',
+    table: [
+      ['Person','discere','respondere'],
+      ['1. Sg.','disc-o','respond-eo'],
+      ['2. Sg.','disc-is','respond-es'],
+      ['3. Sg.','disc-it','respond-et'],
+      ['1. Pl.','disc-imus','respond-emus'],
+      ['2. Pl.','disc-itis','respond-etis'],
+      ['3. Pl.','disc-unt','respond-ent'],
+    ],
+    tip: '💡 Merke: Beim 3. Stamm (discere) kein -e- im Stammvokal! "Discipula diligenter discit" = Die Schülerin lernt fleißig.'
+  },
+  {
+    title: 'Wichtige Adverbien & Grundwörter',
+    content: 'Diese kleinen Wörter kommen in fast jedem lateinischen Satz vor!',
+    table: [
+      ['Latein','Deutsch','Beispiel'],
+      ['non','nicht','Non intellego = Ich verstehe nicht.'],
+      ['semper','immer','Semper discimus = Wir lernen immer.'],
+      ['saepe','oft','Magister saepe interrogat.'],
+      ['bene','gut','Discipula bene respondet.'],
+      ['diligenter','fleißig','Puer diligenter scribit.'],
+      ['et','und','Pater et mater adsunt.'],
+      ['sed','aber','Discipulus laborat, sed errat.'],
+    ],
+    tip: '💡 "non" steht meistens direkt vor dem Verb: "Discipulus non intellegit" = Der Schüler versteht nicht.'
+  },
+  {
+    title: 'i-Konjugation: Präsens (dormire, aperire)',
+    content: 'Verben wie dormire (schlafen), aperire (öffnen), venire (kommen)',
+    table: [
+      ['Person','dormire','venire'],
+      ['1. Sg.','dorm-io','ven-io'],
+      ['2. Sg.','dorm-is','ven-is'],
+      ['3. Sg.','dorm-it','ven-it'],
+      ['1. Pl.','dorm-imus','ven-imus'],
+      ['2. Pl.','dorm-itis','ven-itis'],
+      ['3. Pl.','dorm-iunt','ven-iunt'],
+    ],
+    tip: '💡 Erkennungszeichen: -i- vor den Endungen! "Familia nocte dormit" = Die Familie schläft nachts.'
+  },
+  {
+    title: 'Kardinalzahlen 1–10 (Numeri)',
+    content: 'Die Grundzahlen auf Latein — Basis für alle weiteren Zahlen',
+    table: [
+      ['Zahl','Latein','Röm. Ziffer'],
+      ['1','unus / una / unum','I'],
+      ['2','duo / duae / duo','II'],
+      ['3','tres / tria','III'],
+      ['4','quattuor','IV'],
+      ['5','quinque','V'],
+      ['6','sex','VI'],
+      ['7','septem','VII'],
+      ['8','octo','VIII'],
+      ['9','novem','IX'],
+      ['10','decem','X'],
+    ],
+    tip: '💡 100 = centum, 1000 = mille. Röm. Ziffern: I V X L C D M. "Octo horae" = acht Stunden.'
+  },
+  {
+    title: 'Zeitadverbien (Adverbia temporis)',
+    content: 'Mit diesen Wörtern beschreibst du WANN etwas passiert',
+    table: [
+      ['Latein','Deutsch','Latein','Deutsch'],
+      ['hodie','heute','heri','gestern'],
+      ['cras','morgen','nunc','jetzt'],
+      ['mane','morgens','vespere','abends'],
+      ['iam','schon/jetzt','olim','einst/früher'],
+      ['semper','immer','saepe','oft'],
+      ['diu','lange','tum','dann/damals'],
+    ],
+    tip: '💡 "Olim Romani magni erant" = Einst waren die Römer groß. "Nunc discimus" = Jetzt lernen wir.'
+  },
+  {
+    title: 'Das Perfekt (Perfectum) — die Vergangenheit',
+    content: 'Das Perfekt beschreibt abgeschlossene Handlungen. Endungen: -i, -isti, -it, -imus, -istis, -erunt',
+    table: [
+      ['Person','Präsens','Perfekt'],
+      ['ich (1. Sg.)','amo — ich liebe','amavi — ich liebte'],
+      ['du (2. Sg.)','amas','amavisti'],
+      ['er/sie (3. Sg.)','amat — er liebt','amavit — er liebte'],
+      ['wir (1. Pl.)','amamus','amavimus'],
+      ['ihr (2. Pl.)','amatis','amavistis'],
+      ['sie (3. Pl.)','amant','amaverunt'],
+    ],
+    tip: '💡 Perfekt-Stamm: meist -av- (a-Konj.), -ev-/-u- (e-Konj.), unregelmäßig (esse → fui, videre → vidi, scribere → scripsi).'
+  },
+  {
+    title: 'Unregelmäßige Perfektstämme (wichtigste)',
+    content: 'Diese Verben bilden ihr Perfekt völlig unregelmäßig — muss man auswendig lernen!',
+    table: [
+      ['Infinitiv','Präsens 3.Sg.','Perfekt 3.Sg.','Bedeutung'],
+      ['esse','est','fuit','sein → war'],
+      ['videre','videt','vidit','sehen → sah'],
+      ['venire','venit','venit','kommen → kam'],
+      ['scribere','scribit','scripsit','schreiben → schrieb'],
+      ['dicere','dicit','dixit','sagen → sagte'],
+      ['facere','facit','fecit','machen → machte'],
+      ['currere','currit','cucurrit','laufen → lief'],
+    ],
+    tip: '💡 Tipp: Viele dt. Fremdwörter zeigen den Perfektstamm: "vidit" → Video = "ich habe gesehen"!'
+  },
+  {
+    title: 'Deklination: Zusammenfassung Nom. & Akk.',
+    content: 'Überblick über die wichtigsten Deklinationen — Singular',
+    table: [
+      ['Dekl.','Beispiel','Nominativ','Akkusativ'],
+      ['1. (a-)','puella, -ae, f.','puell-a','puell-am'],
+      ['2. (o-, m.)','servus, -i, m.','serv-us','serv-um'],
+      ['2. (o-, n.)','templum, -i, n.','templ-um','templ-um'],
+      ['3. (kons.)','miles, -itis, m.','miles','milit-em'],
+      ['3. (kons., n.)','corpus, -oris, n.','corpus','corpus'],
+      ['4. (u-)','domus, -us, f.','domus','domum'],
+    ],
+    tip: '💡 Neutrum-Regel: Bei n-Substantiven sind Nominativ und Akkusativ immer gleich!'
+  },
+];
+
+// ═══════════════════ STATE ═══════════════════
+let state = {
+  xp: 0,
+  streak: 0,
+  lastDate: null,
+  completedLessons: [],
+};
+
+let currentLesson = null;
+let exercises = [];
+let currentExIdx = 0;
+let hearts = 3;
+let xpGained = 0;
+let correctCount = 0;
+let feedbackShowing = false;
+let matchSelected = null;
+let matchCorrect = 0;
+let matchTotal = 0;
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('latina_state');
+    if (s) state = { ...state, ...JSON.parse(s) };
+    // streak logic
+    const today = new Date().toDateString();
+    if (state.lastDate !== today) {
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      if (state.lastDate !== yesterday) state.streak = 0;
+    }
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem('latina_state', JSON.stringify(state)); } catch(e) {}
+}
+
+// ═══════════════════ SCREENS ═══════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'home') renderHome();
+  if (id === 'vocab') renderVocab();
+  if (id === 'grammar') renderGrammar();
+}
+
+// ═══════════════════ HOME ═══════════════════
+function renderHome() {
+  document.getElementById('streak-home').textContent = state.streak;
+  document.getElementById('xp-home').textContent = state.xp;
+  document.getElementById('lessons-done').textContent = state.completedLessons.length;
+
+  const container = document.getElementById('units-container');
+  container.innerHTML = '';
+
+  UNITS.forEach(unit => {
+    const allLessons = unit.lessons;
+    const doneLessons = allLessons.filter(l => state.completedLessons.includes(l.id));
+    const progress = Math.round((doneLessons.length / allLessons.length) * 100);
+
+    const card = document.createElement('div');
+    card.className = 'unit-card';
+
+    let lessonsHtml = allLessons.map((l, i) => {
+      const done = state.completedLessons.includes(l.id);
+      const prevDone = i === 0 || state.completedLessons.includes(allLessons[i-1].id);
+      const active = !done && prevDone;
+      const locked = !done && !prevDone;
+      const cls = done ? 'completed' : active ? 'active' : 'locked';
+      const check = done ? '<div class="checkmark">✓</div>' : '';
+      return `<button class="lesson-btn ${cls}" ${locked ? 'disabled' : ''} onclick="openLesson(${unit.id}, '${l.id}')">
+        ${check}
+        <span class="lesson-icon">${l.icon}</span>
+        <span class="lesson-name">${l.name}</span>
+      </button>`;
+    }).join('');
+
+    card.innerHTML = `
+      <div class="unit-header" style="background: linear-gradient(135deg, ${unit.color}22, ${unit.color}11);">
+        <div class="unit-icon">${unit.icon}</div>
+        <div class="unit-info">
+          <div class="unit-title" style="color:${unit.color}">${unit.title}</div>
+          <div class="unit-desc">${unit.desc.substring(0,50)}...</div>
+        </div>
+      </div>
+      <div class="unit-progress-bar"><div class="unit-progress-fill" style="width:${progress}%; background: linear-gradient(90deg, ${unit.color}, ${unit.color}88)"></div></div>
+      <div class="lessons-list">${lessonsHtml}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// ═══════════════════ LESSON OPEN ═══════════════════
+function openLesson(unitId, lessonId) {
+  const unit = UNITS.find(u => u.id === unitId);
+  const lesson = unit.lessons.find(l => l.id === lessonId);
+  if (!lesson) return;
+  currentLesson = { unit, lesson };
+
+  document.getElementById('intro-icon').textContent = unit.icon;
+  document.getElementById('intro-title').textContent = `${unit.title} — ${lesson.name}`;
+  document.getElementById('intro-desc').textContent = unit.desc;
+  const topicsHtml = unit.topics.map(t => `<div class="intro-topic">✦ ${t}</div>`).join('');
+  document.getElementById('intro-topics').innerHTML = topicsHtml;
+
+  showScreen('lesson-intro');
+}
+
+// ═══════════════════ BUILD EXERCISES ═══════════════════
+function startExercises() {
+  const { lesson } = currentLesson;
+  const vocabs = lesson.vocabIds.map(id => VOCAB.find(v => v.id === id)).filter(Boolean);
+
+  hearts = 3;
+  xpGained = 0;
+  correctCount = 0;
+  currentExIdx = 0;
+  feedbackShowing = false;
+
+  if (lesson.type === 'flashcard') {
+    exercises = vocabs.map(v => ({ type: 'flashcard', vocab: v }));
+  } else if (lesson.type === 'multiple_choice') {
+    exercises = vocabs.map(v => buildMC(v, vocabs));
+    shuffle(exercises);
+    exercises = exercises.slice(0, 8);
+  } else if (lesson.type === 'matching') {
+    exercises = [{ type: 'matching', vocabs: vocabs.slice(0,5) }];
+  } else if (lesson.type === 'fill_blank') {
+    exercises = vocabs.map(v => buildFill(v));
+  }
+
+  showScreen('exercise');
+  renderExercise();
+}
+
+function buildMC(vocab, allVocabs) {
+  // Either lat→ger or ger→lat
+  const isLatToGer = Math.random() > 0.4;
+  const distractors = allVocabs.filter(v => v.id !== vocab.id);
+  shuffle(distractors);
+  const options = [vocab, ...distractors.slice(0,3)];
+  shuffle(options);
+  return {
+    type: 'multiple_choice',
+    question: isLatToGer ? vocab.lat : vocab.ger,
+    questionType: isLatToGer ? vocab.type : 'Latein',
+    answer: isLatToGer ? vocab.ger : vocab.lat,
+    options: options.map(o => ({ text: isLatToGer ? o.ger : o.lat, correct: o.id === vocab.id })),
+    vocab
+  };
+}
+
+function buildFill(vocab) {
+  // Simple: show German, fill Latin
+  return {
+    type: 'fill_blank',
+    sentence: `___ bedeutet: "${vocab.ger}"`,
+    answer: vocab.lat,
+    vocab,
+    options: shuffled4(vocab, VOCAB.filter(v => v.unit === vocab.unit)).map(v => v.lat)
+  };
+}
+
+function shuffled4(correct, pool) {
+  const others = pool.filter(v => v.id !== correct.id);
+  shuffle(others);
+  const four = [correct, ...others.slice(0,3)];
+  shuffle(four);
+  return four;
+}
+
+// ═══════════════════ RENDER EXERCISE ═══════════════════
+function renderExercise() {
+  updateExHeader();
+  const ex = exercises[currentExIdx];
+  if (!ex) { finishLesson(); return; }
+
+  const body = document.getElementById('ex-body');
+  body.innerHTML = '';
+
+  if (ex.type === 'flashcard') renderFlashcard(ex, body);
+  else if (ex.type === 'multiple_choice') renderMC(ex, body);
+  else if (ex.type === 'matching') renderMatching(ex, body);
+  else if (ex.type === 'fill_blank') renderFill(ex, body);
+}
+
+function updateExHeader() {
+  const total = exercises.length;
+  const pct = Math.round((currentExIdx / total) * 100);
+  document.getElementById('ex-progress').style.width = pct + '%';
+  document.getElementById('ex-counter').textContent = `${currentExIdx + 1} / ${total}`;
+  document.getElementById('xp-gain').textContent = xpGained;
+  const heartsHtml = [0,1,2].map(i => `<span class="heart${i >= hearts ? ' lost' : ''}">❤️</span>`).join('');
+  document.getElementById('hearts-display').innerHTML = heartsHtml;
+}
+
+function renderFlashcard(ex, body) {
+  const v = ex.vocab;
+  body.innerHTML = `
+    <div class="ex-instruction">Lerne diese Vokabel</div>
+    <div class="flashcard-wrap">
+      <div class="flashcard" id="fc" onclick="flipCard()">
+        <div class="fc-front">
+          <div class="fc-latin">${v.lat}</div>
+          <div class="fc-type">${v.type} ${v.gen}</div>
+          <div class="fc-hint" style="margin-top:24px">Tippe zum Umdrehen 👆</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-german">${v.ger}</div>
+          <div class="fc-example">${v.example || ''}</div>
+        </div>
+      </div>
+    </div>
+    <div id="fc-buttons" style="display:none; padding:0 4px">
+      <div class="fc-knew-btns">
+        <button class="btn-didnt" onclick="cardAnswer(false)">😕 Noch nicht</button>
+        <button class="btn-knew" onclick="cardAnswer(true)">😊 Gewusst!</button>
+      </div>
+    </div>
+  `;
+}
+function flipCard() {
+  const fc = document.getElementById('fc');
+  fc.classList.toggle('flipped');
+  document.getElementById('fc-buttons').style.display = 'block';
+  fc.onclick = null;
+}
+function cardAnswer(knew) {
+  if (knew) { xpGained += 5; correctCount++; }
+  currentExIdx++;
+  renderExercise();
+}
+
+function renderMC(ex, body) {
+  const optHtml = ex.options.map((o,i) =>
+    `<button class="mc-option" id="opt${i}" onclick="selectMC(${i})">${o.text}</button>`
+  ).join('');
+  body.innerHTML = `
+    <div class="ex-instruction">${ex.questionType === 'Latein' ? 'Was bedeutet auf Latein?' : 'Was bedeutet das?'}</div>
+    <div class="mc-question">
+      <div class="mc-latin">${ex.question}</div>
+      <div class="mc-type">${ex.questionType}</div>
+    </div>
+    <div class="mc-options">${optHtml}</div>
+  `;
+}
+function selectMC(idx) {
+  if (feedbackShowing) return;
+  const ex = exercises[currentExIdx];
+  const opt = ex.options[idx];
+  const btn = document.getElementById('opt' + idx);
+  document.querySelectorAll('.mc-option').forEach(b => b.classList.add('disabled'));
+
+  if (opt.correct) {
+    btn.classList.add('correct');
+    xpGained += 10;
+    correctCount++;
+    showFeedback(true, 'Richtig! 🎉', `${ex.vocab.lat} = ${ex.vocab.ger}`);
+  } else {
+    btn.classList.add('wrong');
+    const correctBtn = document.getElementById('opt' + ex.options.findIndex(o => o.correct));
+    if (correctBtn) correctBtn.classList.add('correct');
+    loseHeart();
+    showFeedback(false, 'Nicht ganz...', `Richtig wäre: ${ex.options.find(o=>o.correct).text}`);
+  }
+}
+
+function renderMatching(ex, body) {
+  const vocabs = ex.vocabs;
+  matchCorrect = 0;
+  matchTotal = vocabs.length;
+  matchSelected = null;
+
+  const latins = vocabs.map(v => ({id:v.id, text:v.lat, side:'lat'}));
+  const germans = vocabs.map(v => ({id:v.id, text:v.ger, side:'ger'}));
+  shuffle(latins); shuffle(germans);
+  const pairs = [];
+  for (let i = 0; i < vocabs.length; i++) {
+    pairs.push(latins[i], germans[i]);
+  }
+  // display as 2-col grid alternating
+  const leftCol = latins;
+  const rightCol = germans;
+
+  let html = `<div class="ex-instruction">Ordne die Paare zu!</div><div class="match-grid">`;
+  for (let i = 0; i < vocabs.length; i++) {
+    html += `<div class="match-item latin" id="ml${latins[i].id}" data-id="${latins[i].id}" data-side="lat" onclick="selectMatch(this)">${latins[i].text}</div>`;
+    html += `<div class="match-item" id="mg${germans[i].id}" data-id="${germans[i].id}" data-side="ger" onclick="selectMatch(this)">${germans[i].text}</div>`;
+  }
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function selectMatch(el) {
+  if (el.classList.contains('matched')) return;
+  if (!matchSelected) {
+    document.querySelectorAll('.match-item.selected').forEach(e => e.classList.remove('selected'));
+    matchSelected = el;
+    el.classList.add('selected');
+  } else {
+    if (matchSelected === el) { el.classList.remove('selected'); matchSelected = null; return; }
+    if (matchSelected.dataset.id === el.dataset.id && matchSelected.dataset.side !== el.dataset.side) {
+      // Correct!
+      matchSelected.classList.remove('selected');
+      matchSelected.classList.add('matched');
+      el.classList.add('matched');
+      matchSelected = null;
+      matchCorrect++;
+      xpGained += 8;
+      correctCount++;
+      if (matchCorrect === matchTotal) {
+        setTimeout(() => { showFeedback(true, 'Alle Paare gefunden! 🎉', 'Klasse gemacht!'); }, 300);
+      }
+    } else {
+      el.classList.add('wrong-flash');
+      matchSelected.classList.add('wrong-flash');
+      setTimeout(() => {
+        el.classList.remove('wrong-flash','selected');
+        matchSelected.classList.remove('wrong-flash','selected');
+        matchSelected = null;
+        loseHeart();
+      }, 500);
+    }
+  }
+}
+
+function renderFill(ex, body) {
+  const optHtml = ex.options.map((o,i) =>
+    `<button class="mc-option" id="fopt${i}" onclick="selectFill(${i})">${o}</button>`
+  ).join('');
+  body.innerHTML = `
+    <div class="ex-instruction">Wähle das richtige lateinische Wort!</div>
+    <div class="fill-sentence">${ex.sentence.replace('___', '<span class="fill-blank">???</span>')}</div>
+    <div class="fill-options">${optHtml}</div>
+  `;
+}
+function selectFill(idx) {
+  if (feedbackShowing) return;
+  const ex = exercises[currentExIdx];
+  const chosen = ex.options[idx];
+  const btn = document.getElementById('fopt' + idx);
+  document.querySelectorAll('.mc-option').forEach(b => b.classList.add('disabled'));
+
+  if (chosen === ex.answer) {
+    btn.classList.add('correct');
+    xpGained += 10;
+    correctCount++;
+    showFeedback(true, 'Richtig! ✅', `${ex.answer} = ${ex.vocab.ger}`);
+  } else {
+    btn.classList.add('wrong');
+    document.querySelectorAll('.mc-option').forEach((b,i) => { if(ex.options[i]===ex.answer) b.classList.add('correct'); });
+    loseHeart();
+    showFeedback(false, 'Fast!', `Richtig: ${ex.answer}`);
+  }
+}
+
+// ═══════════════════ FEEDBACK ═══════════════════
+function showFeedback(correct, title, answer) {
+  feedbackShowing = true;
+  const bar = document.getElementById('feedback-bar');
+  const icon = document.getElementById('fb-icon');
+  const ttl = document.getElementById('fb-title');
+  const ans = document.getElementById('fb-answer');
+  const btn = document.getElementById('btn-continue');
+
+  bar.className = 'feedback-bar show ' + (correct ? 'correct-fb' : 'wrong-fb');
+  icon.textContent = correct ? '🎉' : '😬';
+  ttl.className = 'fb-title ' + (correct ? 'correct' : 'wrong');
+  ttl.textContent = title;
+  ans.textContent = answer;
+  btn.className = 'btn-continue ' + (correct ? 'correct' : 'wrong');
+  btn.textContent = correct ? 'Weiter →' : 'Weiter →';
+
+  if (correct) popXP();
+}
+
+function popXP() {
+  const el = document.createElement('div');
+  el.className = 'xp-pop';
+  el.textContent = '+10 ⭐';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1100);
+}
+
+function nextExercise() {
+  feedbackShowing = false;
+  document.getElementById('feedback-bar').className = 'feedback-bar';
+  const ex = exercises[currentExIdx];
+  if (ex && ex.type !== 'matching') currentExIdx++;
+  else if (ex && ex.type === 'matching' && matchCorrect === matchTotal) currentExIdx++;
+  if (hearts <= 0) { failLesson(); return; }
+  renderExercise();
+}
+
+function loseHeart() {
+  hearts = Math.max(0, hearts - 1);
+  updateExHeader();
+}
+
+// ═══════════════════ FINISH / FAIL ═══════════════════
+function finishLesson() {
+  const { lesson, unit } = currentLesson;
+  if (!state.completedLessons.includes(lesson.id)) {
+    state.completedLessons.push(lesson.id);
+  }
+  state.xp += xpGained;
+  const today = new Date().toDateString();
+  if (state.lastDate !== today) {
+    state.streak++;
+    state.lastDate = today;
+  }
+  saveState();
+
+  const emoji = correctCount >= exercises.length * 0.8 ? '🏆' : correctCount >= exercises.length * 0.5 ? '⭐' : '💪';
+  const title = correctCount >= exercises.length * 0.8 ? 'Ausgezeichnet!' : 'Gut gemacht!';
+  document.getElementById('results-icon').textContent = emoji;
+  document.getElementById('results-title').textContent = title;
+  document.getElementById('results-subtitle').textContent = `${unit.title} — ${lesson.name} abgeschlossen!`;
+  document.getElementById('rs-xp').textContent = xpGained;
+  document.getElementById('rs-correct').textContent = `${correctCount}/${exercises.length}`;
+  document.getElementById('rs-hearts').textContent = hearts;
+
+  const ff = FUN_FACTS[Math.floor(Math.random() * FUN_FACTS.length)];
+  document.getElementById('fun-fact').innerHTML = `<div class="ff-title">${ff.icon} Wusstest du schon?</div><div class="ff-text">${ff.text}</div>`;
+
+  showScreen('results');
+}
+
+function failLesson() {
+  showFeedback(false, 'Keine Herzen mehr! 😢', 'Versuche es noch einmal — du schaffst das!');
+  document.getElementById('btn-continue').onclick = () => backToHome();
+  document.getElementById('btn-continue').textContent = 'Nochmal versuchen 💪';
+}
+
+function backToHome() {
+  document.getElementById('feedback-bar').className = 'feedback-bar';
+  showScreen('home');
+}
+
+// ═══════════════════ VOCAB SCREEN ═══════════════════
+let vocabFilter = 0;
+function renderVocab() {
+  document.getElementById('xp-vocab').textContent = state.xp;
+  const filterDiv = document.getElementById('vocab-filter');
+  const allBtn = `<button class="vocab-filter-btn ${vocabFilter===0?'active':''}" onclick="setVocabFilter(0)">Alle</button>`;
+  const unitBtns = UNITS.map(u => `<button class="vocab-filter-btn ${vocabFilter===u.id?'active':''}" onclick="setVocabFilter(${u.id})">${u.icon} ${u.title}</button>`).join('');
+  filterDiv.innerHTML = allBtn + unitBtns;
+
+  const list = document.getElementById('vocab-list');
+  const filtered = vocabFilter === 0 ? VOCAB : VOCAB.filter(v => v.unit === vocabFilter);
+  list.innerHTML = filtered.map(v => `
+    <div class="vocab-item">
+      <div class="vi-latin">${v.lat}</div>
+      <div class="vi-german">${v.ger}</div>
+      <div class="vi-type">${v.type}</div>
+    </div>
+  `).join('');
+}
+function setVocabFilter(id) { vocabFilter = id; renderVocab(); }
+
+// ═══════════════════ GRAMMAR SCREEN ═══════════════════
+function renderGrammar() {
+  document.getElementById('xp-gram').textContent = state.xp;
+  const list = document.getElementById('grammar-list');
+  list.innerHTML = GRAMMAR_CARDS.map(g => {
+    const thead = `<tr>${g.table[0].map(h=>`<th>${h}</th>`).join('')}</tr>`;
+    const tbody = g.table.slice(1).map(row => `<tr>${row.map((cell,i)=>`<td>${cell}</td>`).join('')}</tr>`).join('');
+    return `
+      <div class="grammar-card slide-up">
+        <div class="gc-title">${g.title}</div>
+        <table class="gc-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table>
+        <div class="gc-tip">${g.tip}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ═══════════════════ UTILS ═══════════════════
+function shuffle(arr) {
+  for (let i = arr.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ═══════════════════ INIT ═══════════════════
+loadState();
+renderHome();
+</script>
+</body>
+</html>
