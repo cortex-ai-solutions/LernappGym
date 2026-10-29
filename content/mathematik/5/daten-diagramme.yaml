@@ -1,0 +1,63 @@
+fach: mathematik
+klasse: 5
+thema: daten-diagramme
+titel: "Daten erfassen und darstellen"
+icon: "📊"
+reihenfolge: 5
+lehrplanbezug:
+  - "2.1.1 Daten erfassen und darstellen: Daten in Ur- und Strichlisten erfassen und ordnen"
+  - "2.1.1 Daten erfassen und darstellen: Daten in Häufigkeitstabellen, Säulen- und Balkendiagrammen veranschaulichen"
+  - "2.1.1 Daten erfassen und darstellen: Daten aus statistischen Darstellungen entnehmen"
+verifiziert: true
+quelle: "Lehrplan Mathematik Gymnasium Thüringen 2026 (Erprobungsfassung), Kap. 2.1.1, S. 15–16 – siehe curriculum/mathematik.yaml"
+erklaerung: |
+  **Strichliste:** Jeder Strich ist eine Nennung. Der 5. Strich wird quer durch die ersten vier gezogen – so zählst du schnell in Fünferpäckchen.
+
+  **Säulendiagramm:** Die Säulen stehen **senkrecht** nebeneinander.
+  **Balkendiagramm:** Die Balken liegen **waagerecht** übereinander.
+
+  So zeichnest du ein Diagramm:
+  1. Achsen mit dem Lineal zeichnen
+  2. Achsen beschriften und gleichmäßig einteilen (z. B. 1 Kästchen = 1 Nennung)
+  3. Säulen/Balken gleich breit und mit Abstand zeichnen
+  4. Überschrift nicht vergessen!
+wissenswertes:
+  - "Diagramme helfen, viele Zahlen auf einen Blick zu vergleichen. Zeitungen und Nachrichten benutzen sie ständig."
+aufgaben:
+  - id: saeule-waagerecht
+    typ: richtig_falsch
+    frage: "In einem Säulendiagramm liegen die Säulen waagerecht."
+    loesung: false
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 3
+  - id: strichliste
+    typ: multiple_choice
+    frage: "Eine Strichliste zeigt zwei Fünferpäckchen und drei einzelne Striche. Wie viele Nennungen sind das?"
+    optionen: ["8", "11", "13", "15"]
+    loesung: "13"
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 2
+  - id: ablesen
+    typ: diagramm
+    generator: diagramm
+    parameter: { modus: ablesen, kategorien: 5 }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 1
+  - id: saeulen-zeichnen
+    typ: diagramm
+    generator: diagramm
+    parameter: { modus: zeichnen, art: saeule, quelle: strichliste, kategorien: 5, max: 10 }
+    be: 6
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: balken-zeichnen
+    typ: diagramm
+    generator: diagramm
+    parameter: { modus: zeichnen, art: balken, quelle: tabelle, kategorien: 5, max: 10 }
+    be: 6
+    schwierigkeit: 2
+    prioritaet: 2

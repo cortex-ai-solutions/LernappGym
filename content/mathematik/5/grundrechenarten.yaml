@@ -1,0 +1,97 @@
+fach: mathematik
+klasse: 5
+thema: grundrechenarten
+titel: "Rechnen mit natürlichen Zahlen"
+icon: "➗"
+reihenfolge: 3
+lehrplanbezug:
+  - "2.1.2 Natürliche Zahlen: Grundrechenoperationen im Kopf und schriftlich ausführen"
+  - "2.1.2 Natürliche Zahlen: Zusammenhang zwischen Rechenoperation und Umkehroperation erläutern"
+  - "2.1.2 Natürliche Zahlen: einfache Gleichungen durch inhaltliche Überlegungen lösen"
+verifiziert: true
+quelle: "Lehrplan Mathematik Gymnasium Thüringen 2026 (Erprobungsfassung), Kap. 2.1.2, S. 16–17 – siehe curriculum/mathematik.yaml"
+erklaerung: |
+  **Die Fachbegriffe**
+
+  | Rechnung | Teile | Ergebnis |
+  |---|---|---|
+  | 13 + 5 = 18 | Summand + Summand | **Summe** |
+  | 20 − 6 = 14 | Minuend − Subtrahend | **Differenz** |
+  | 4 · 7 = 28 | Faktor · Faktor | **Produkt** |
+  | 36 : 4 = 9 | Dividend : Divisor | **Quotient** |
+
+  **Kästchen-Trick:** Rechne mit der Umkehraufgabe. 47 − ∎ = 23 → 47 − 23 = 24, also ∎ = 24. Probe: 47 − 24 = 23 ✓
+wissenswertes:
+  - "Durch 0 kann man nicht teilen – das ist in der Mathematik verboten!"
+  - "Jede Zahl mal 1 bleibt sie selbst. Jede Zahl mal 0 ergibt 0."
+aufgaben:
+  - id: begriff-produkt
+    typ: multiple_choice
+    frage: "Wie heißt das Ergebnis einer Multiplikation?"
+    optionen: ["Summe", "Differenz", "Produkt", "Quotient"]
+    loesung: "Produkt"
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 3
+  - id: begriff-quotient
+    typ: multiple_choice
+    frage: "Wie heißt das Ergebnis einer Division?"
+    optionen: ["Summe", "Differenz", "Produkt", "Quotient"]
+    loesung: "Quotient"
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 3
+  - id: begriffe-zuordnen
+    typ: zuordnung
+    frage: "Ordne jedem Rechenzeichen den Namen des Ergebnisses zu."
+    paare: [["+", "Summe"], ["−", "Differenz"], ["·", "Produkt"], [":", "Quotient"]]
+    be: 2
+    schwierigkeit: 1
+    prioritaet: 3
+  - id: kopfrechnen
+    typ: rechnung
+    generator: kopfrechnen
+    parameter: { operationen: ["+", "-", "*", ":"], bereich: [10, 150], faktor: [11, 25] }
+    anzahl: 4
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 1
+  - id: platzhalter
+    typ: rechnung
+    generator: platzhalter
+    parameter: { operationen: ["+", "-", "*", ":"], bereich: [5, 120], faktor: [6, 15] }
+    anzahl: 4
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: fachbegriffe
+    typ: rechnung
+    generator: fachbegriffe
+    parameter: { operationen: ["+", "-", "*", ":"], bereich: [5, 60], faktor: [5, 19] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: verkettet
+    typ: rechnung
+    generator: verkettet
+    parameter: { operationen: ["+", "-"], bereich: [5, 40] }
+    anzahl: 1
+    be: 2
+    schwierigkeit: 3
+    prioritaet: 2
+  - id: wie-oft
+    typ: rechnung
+    generator: wie-oft
+    parameter: { bereich: [6, 15], faktor: [11, 25] }
+    anzahl: 1
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 2
+  - id: null-eins
+    typ: richtig_falsch
+    frage: "0 : 5 = 0"
+    loesung: true
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 3

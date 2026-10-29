@@ -36,7 +36,7 @@ aufgaben:
   - id: runden-einfach
     typ: rechnung
     generator: runden
-    parameter: { stellen: [zehner, hunderter, tausender], ziffern: [4, 5] }
+    parameter: { stellen: [zehner, hunderter, tausender], ziffern: [5, 6] }
     anzahl: 3
     be: 1
     schwierigkeit: 1

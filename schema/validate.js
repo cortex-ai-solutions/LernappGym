@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const Ajv = require('ajv');
+const { instanz } = require('../generator/generate');
 
 const schema = require('./content.schema.json');
 const validateSchema = new Ajv({ allErrors: true, allowUnionTypes: true }).compile(schema);
@@ -31,7 +32,15 @@ function checkRules(doc, file) {
     const wo = `Aufgabe "${a.id}"`;
     if (ids.has(a.id)) errors.push(`${wo}: id doppelt`);
     ids.add(a.id);
-    if (a.generator) continue; // feste Lösungen werden erst im Generator berechnet und dort getestet
+    if (a.generator) {
+      // Generator muss existieren und mit den Parametern eine Aufgabe erzeugen können
+      try {
+        instanz(a, 'validate');
+      } catch (e) {
+        errors.push(`${wo}: ${e.message}`);
+      }
+      continue;
+    }
     if (a.typ === 'multiple_choice') {
       if (!a.optionen || a.optionen.length < 2) errors.push(`${wo}: multiple_choice braucht mindestens 2 Optionen`);
       else {

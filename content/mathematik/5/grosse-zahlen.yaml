@@ -1,0 +1,82 @@
+fach: mathematik
+klasse: 5
+thema: grosse-zahlen
+titel: "Große Zahlen lesen und schreiben"
+icon: "🔢"
+reihenfolge: 1
+lehrplanbezug:
+  - "2.1.2 Natürliche Zahlen: bis 1 Billion mit Ziffern, als Zahlwort, in der Stellenwerttafel darstellen und zwischen den Darstellungen wechseln"
+  - "2.1.2 Natürliche Zahlen: ordnen und vergleichen"
+verifiziert: true
+quelle: "Lehrplan Mathematik Gymnasium Thüringen 2026 (Erprobungsfassung), Kap. 2.1.2, S. 16–17 – siehe curriculum/mathematik.yaml"
+erklaerung: |
+  **Dreiergruppen helfen beim Lesen.** Teile die Zahl von rechts in Dreierpäckchen:
+  Einer – Tausender – Millionen – Milliarden – Billionen.
+
+  | Mrd. | Mio. | Tsd. | E |
+  |---|---|---|---|
+  | 2 | 045 | 300 | 018 |
+
+  2 045 300 018 = zwei Milliarden fünfundvierzig Millionen dreihunderttausendachtzehn
+
+  **Schreibregel:** Zahlen unter einer Million schreibt man zusammen. *Million*, *Milliarde* und *Billion* stehen als eigene Wörter.
+wissenswertes:
+  - "Eine Billion hat 12 Nullen: 1 000 000 000 000. Wenn du jede Sekunde eins weiterzählst, brauchst du dafür über 31 000 Jahre!"
+  - "Auf der Erde leben ungefähr 8 Milliarden Menschen."
+aufgaben:
+  - id: dreiergruppen
+    typ: multiple_choice
+    frage: "Wie viele Nullen hat eine Million?"
+    optionen: ["3", "6", "9", "12"]
+    loesung: "6"
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 3
+  - id: in-ziffern-mio
+    typ: eingabe
+    generator: zahl-in-ziffern
+    parameter: { bereich: [100000, 99999999] }
+    anzahl: 2
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 1
+  - id: in-worten
+    typ: freitext
+    generator: zahl-in-worten
+    parameter: { bereich: [10000, 9999999] }
+    anzahl: 2
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: stellenwert
+    typ: multiple_choice
+    generator: stellenwert
+    parameter: { bereich: [100000, 999999999] }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 2
+  - id: vergleichen
+    typ: multiple_choice
+    generator: vergleichen
+    parameter: { bereich: [10000, 99999999] }
+    anzahl: 4
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 2
+  - id: vorgaenger-nachfolger
+    typ: eingabe
+    generator: vorgaenger-nachfolger
+    parameter: { bereich: [1000, 9999999] }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 3
+  - id: in-ziffern-mrd
+    typ: eingabe
+    generator: zahl-in-ziffern
+    parameter: { bereich: [1000000000, 999999999999] }
+    anzahl: 1
+    be: 1
+    schwierigkeit: 3
+    prioritaet: 3

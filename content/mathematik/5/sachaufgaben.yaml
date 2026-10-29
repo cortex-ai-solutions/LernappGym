@@ -1,0 +1,54 @@
+fach: mathematik
+klasse: 5
+thema: sachaufgaben
+titel: "Sachaufgaben lösen"
+icon: "🧺"
+reihenfolge: 4
+lehrplanbezug:
+  - "2.1.2 Natürliche Zahlen: einfache Probleme aus dem Alltag lösen (Rechenoperationen verknüpfen, Überschlag und Probe, Lösungen prüfen, Lösungswege präsentieren)"
+verifiziert: true
+quelle: "Lehrplan Mathematik Gymnasium Thüringen 2026 (Erprobungsfassung), Kap. 2.1.2, S. 17 – siehe curriculum/mathematik.yaml"
+erklaerung: |
+  **In 4 Schritten zur Lösung**
+  1. **Lesen:** Was ist gegeben? Was ist gesucht? Unterstreiche die Zahlen.
+  2. **Planen:** Welche Rechnung passt? Eine Skizze oder Tabelle hilft.
+  3. **Rechnen:** Schreib den Rechenweg ordentlich auf.
+  4. **Antworten:** Schreib einen ganzen **Antwortsatz** und prüfe: Kann das stimmen?
+wissenswertes:
+  - "Rückwärts rechnen ist ein Profi-Trick: Wenn du das Ende kennst, gehst du mit den Umkehraufgaben zum Anfang zurück."
+aufgaben:
+  - id: tierbeine
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [tierbeine] }
+    be: 2
+    schwierigkeit: 1
+    prioritaet: 1
+  - id: rueckgeld
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [rueckgeld] }
+    be: 2
+    schwierigkeit: 2
+    prioritaet: 2
+  - id: busse
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [busse] }
+    be: 2
+    schwierigkeit: 2
+    prioritaet: 2
+  - id: mitglieder
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [mitglieder] }
+    be: 2
+    schwierigkeit: 3
+    prioritaet: 1
+  - id: fahrkarten
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [fahrkarten] }
+    be: 2
+    schwierigkeit: 3
+    prioritaet: 1

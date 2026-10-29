@@ -3,6 +3,10 @@
 Neueste oben. Format: Datum · Entscheidung · Grund.
 
 ## 2026-10-29
+- **Generatoren liefern ein gemeinsames Instanz-Format** (`anweisung`, `teile[]` mit `loesung`/`antwort`/`eingabe`, optional `daten`, `weg`, `antwortsatz`). Druck und Webapp rendern daraus, damit eine Aufgabe überall gleich gelöst wird. Jede Instanz trägt ihre Rohdaten in `pruefung`, damit Tests unabhängig nachrechnen.
+- **Zahlwörter:** Blöcke wie „101 Millionen“ (hunderteine Million) werden nicht erzeugt, weil die Schreibweise uneinheitlich ist. Hunderter werden mit „ein“ geschrieben (einhundert).
+- **Diagramm zeichnen ist nur für den Druck** (`nur: druck`). In der Webapp gibt es Diagramme zum Ablesen.
+- **Übergangs-Startseite** in `docs/` verlinkt die bestehenden Apps, bis der Webapp-Generator (Schritt 6) sie ersetzt.
 - **Lehrplanbasis Mathe = Erprobungsfassung 2026** (Stand 25.08.2026, in Kraft ab 2026/27 für Kl. 5/6), nicht der Lehrplan 2018. Lehrplanbezüge in `content/` verweisen auf die Kapitelnummern 2.1.x.
 - **Mathematik zuerst** (statt Latein wie in CLAUDE.md §8). Grund: Es gibt aktuelles Unterrichtsmaterial (Stand 09/2026), und die Latein- und Geschichts-Apps sind bereits im Einsatz.
 - **Bestehende Apps als Vorlage:** `LATINA_App.html` und `geschichte-lernapp.html` liegen jetzt in `legacy/`. Übernommen werden die bewährten Mechaniken (Screens Home → Lektion → Übung → Abschluss, Herzen, XP, Karteikarte, MC, Zuordnung, Lückentext) und die Lektionsstruktur der Geschichts-App (Abschnitte mit Erklärung vor den Übungen). Inhalte werden später migriert und geprüft.
