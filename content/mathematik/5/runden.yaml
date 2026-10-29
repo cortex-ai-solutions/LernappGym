@@ -56,3 +56,19 @@ aufgaben:
     be: 1
     schwierigkeit: 3
     prioritaet: 3
+  - id: welche-zahl
+    typ: multiple_choice
+    frage: "Welche Zahl ergibt auf Zehner gerundet 350?"
+    optionen: ["344", "349", "355", "360"]
+    loesung: "349"
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 2
+  - id: rueckwaerts
+    typ: rechnung
+    generator: runden-rueckwaerts
+    parameter: { stellen: [zehner, hunderter, tausender] }
+    anzahl: 2
+    be: 1
+    schwierigkeit: 3
+    prioritaet: 2

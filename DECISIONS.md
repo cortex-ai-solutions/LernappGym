@@ -3,6 +3,9 @@
 Neueste oben. Format: Datum · Entscheidung · Grund.
 
 ## 2026-10-29
+- **Arbeitsblatt:** 6–10 Aufgaben, nach Schwierigkeit sortiert (●○○ statt BE). Reicht die Inhaltsdatei nicht, werden Generator-Aufgaben mit neuen Zahlen wiederholt. Besser ist, die Datei zu ergänzen; der Test prüft das ab 6 Aufgaben. Lösungsblatt ohne Namenszeile, Antworten an der Stelle der Felder.
+- **Kästchenraster als SVG**, weil CSS-Verlaufsraster im Chromium-PDF verschwinden. Diagramme: 4 mm je Einheit, Zeichenraster: 5 mm (Heftkästchen).
+- **PDFs auf der GitHub Page** (`npm run blatt -- --alle --veroeffentlichen` → `docs/blaetter/`), damit vom Handy aus gedruckt werden kann.
 - **Generatoren liefern ein gemeinsames Instanz-Format** (`anweisung`, `teile[]` mit `loesung`/`antwort`/`eingabe`, optional `daten`, `weg`, `antwortsatz`). Druck und Webapp rendern daraus, damit eine Aufgabe überall gleich gelöst wird. Jede Instanz trägt ihre Rohdaten in `pruefung`, damit Tests unabhängig nachrechnen.
 - **Zahlwörter:** Blöcke wie „101 Millionen“ (hunderteine Million) werden nicht erzeugt, weil die Schreibweise uneinheitlich ist. Hunderter werden mit „ein“ geschrieben (einhundert).
 - **Diagramm zeichnen ist nur für den Druck** (`nur: druck`). In der Webapp gibt es Diagramme zum Ablesen.

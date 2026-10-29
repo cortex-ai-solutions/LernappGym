@@ -42,11 +42,19 @@ aufgaben:
   - id: ablesen
     typ: diagramm
     generator: diagramm
-    parameter: { modus: ablesen, kategorien: 5 }
+    parameter: { modus: ablesen, art: saeule, kategorien: 5 }
     anzahl: 3
     be: 1
     schwierigkeit: 1
     prioritaet: 1
+  - id: ablesen-balken
+    typ: diagramm
+    generator: diagramm
+    parameter: { modus: ablesen, art: balken, kategorien: 4 }
+    anzahl: 2
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 2
   - id: saeulen-zeichnen
     typ: diagramm
     generator: diagramm

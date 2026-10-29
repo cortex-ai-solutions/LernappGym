@@ -50,6 +50,20 @@
     background: linear-gradient(135deg, var(--gold-dark), var(--gold-base) 50%, var(--gold-light));
     border-radius: 60% 0 0 0; opacity: 0.1; pointer-events: none;
   }
+  h2 { margin: 36px 0 4px; font-size: 18px; font-weight: 600; letter-spacing: 0.03em; color: var(--gold-light); }
+  .hinweis { margin-bottom: 14px; font-size: 13px; color: var(--text-muted); }
+  .blaetter { list-style: none; padding: 0; margin: 0; }
+  .blaetter li {
+    display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px 8px 16px; margin-bottom: 10px;
+    border-radius: 12px; border: 1px solid var(--border); background: linear-gradient(135deg, #003B49 0%, #002530 100%);
+  }
+  .blaetter li span { flex: 1; font-size: 15px; }
+  .blaetter a {
+    display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: 8px;
+    font-size: 14px; font-weight: 600; text-decoration: none; color: #000;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold-base));
+  }
+  .blaetter a.sek { color: var(--gold-base); background: transparent; border: 1px solid rgba(200, 168, 76, 0.4); }
   footer { margin-top: 32px; font-size: 12px; color: var(--text-muted); text-align: center; }
 </style>
 </head>
@@ -68,9 +82,19 @@
   </a>
   <div class="fach bald" aria-disabled="true">
     <span class="icon" aria-hidden="true">🧮</span>
-    <span><span class="name">Mathematik</span><span class="info" style="display:block">Natürliche Zahlen, Runden, Diagramme</span></span>
+    <span><span class="name">Mathematik</span><span class="info" style="display:block">Lern-App folgt – die Arbeitsblätter gibt es schon</span></span>
     <span class="badge">Bald</span>
   </div>
+
+  <h2 id="blaetter">Arbeitsblätter zum Drucken</h2>
+  <p class="hinweis">Mathematik · Klasse 5 · A4 · mit Lösungsblatt für Eltern</p>
+  <ul class="blaetter">
+    <li><span>🔢 Große Zahlen lesen und schreiben</span><a href="blaetter/mathematik/grosse-zahlen.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/grosse-zahlen_loesung.pdf">Lösung</a></li>
+    <li><span>🎯 Natürliche Zahlen runden</span><a href="blaetter/mathematik/runden.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/runden_loesung.pdf">Lösung</a></li>
+    <li><span>➗ Rechnen mit natürlichen Zahlen</span><a href="blaetter/mathematik/grundrechenarten.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/grundrechenarten_loesung.pdf">Lösung</a></li>
+    <li><span>🧺 Sachaufgaben lösen</span><a href="blaetter/mathematik/sachaufgaben.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/sachaufgaben_loesung.pdf">Lösung</a></li>
+    <li><span>📊 Daten erfassen und darstellen</span><a href="blaetter/mathematik/daten-diagramme.pdf">Blatt</a><a class="sek" href="blaetter/mathematik/daten-diagramme_loesung.pdf">Lösung</a></li>
+  </ul>
 
   <footer>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</footer>
 </main>

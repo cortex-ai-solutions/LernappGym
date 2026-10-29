@@ -31,6 +31,13 @@ aufgaben:
     be: 2
     schwierigkeit: 2
     prioritaet: 2
+  - id: sparen
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [sparen] }
+    be: 2
+    schwierigkeit: 2
+    prioritaet: 2
   - id: busse
     typ: rechnung
     generator: sachaufgabe

@@ -110,6 +110,7 @@ test('Sachaufgaben: Beispiele wie in der 2. TÜ', () => {
   assert.deepStrictEqual(VORLAGEN.fahrkarten.loese({ erwachsene: 2, kinder: 3, gesamt: 84 }), { erwachsener: 24, kind: 12 });
   assert.strictEqual(VORLAGEN.busse.loese({ plaetze: 40, kinder: 169 }), 5);
   assert.strictEqual(VORLAGEN.rueckgeld.loese({ a: { anzahl: 6, preis: 3 }, b: { anzahl: 1, preis: 12 }, schein: 50 }), 20);
+  assert.strictEqual(VORLAGEN.sparen.loese({ rate: 8, erspart: 20, preis: 140 }), 15);
 });
 
 // ---------- (2) Nachrechnen über viele Seeds ----------
@@ -130,6 +131,13 @@ test(`runden / runden-reihe: ${SEEDS} Seeds gegen Ziffern-Referenz`, () => {
     }
     const reihe = erzeuge('runden-reihe', { stellen: Object.keys(K), ziffern: [7] }, undefined, s);
     for (const t of reihe.teile) assert.strictEqual(t.loesung, rundenRef(t.pruefung.n, K[t.pruefung.stelle]));
+    // rückwärts: Lösung rundet auf den Wert, die Nachbarzahl außen nicht mehr
+    for (const t of erzeuge('runden-rueckwaerts', { stellen: ['zehner', 'hunderter', 'tausender'] }, 2, s).teile) {
+      const { gerundet, stelle, groesste } = t.pruefung;
+      const k = K[stelle];
+      assert.strictEqual(rundenRef(t.loesung, k), gerundet, t.text);
+      assert.notStrictEqual(rundenRef(t.loesung + (groesste ? 1 : -1), k), gerundet, `${t.text}: ${t.loesung} ist nicht die ${groesste ? 'größte' : 'kleinste'}`);
+    }
   }
 });
 
@@ -222,6 +230,10 @@ test(`Sachaufgaben: ${SEEDS} Seeds je Vorlage, Probe am Sachverhalt`, () => {
           break;
         case 'busse':
           assert.ok((l[0] - 1) * d.plaetze < d.kinder && d.kinder <= l[0] * d.plaetze);
+          break;
+        case 'sparen':
+          assert.strictEqual(d.erspart + l[0] * d.rate, d.preis);
+          assert.ok(d.erspart + (l[0] - 1) * d.rate < d.preis, 'eine Woche früher reicht es noch nicht');
           break;
         default:
           assert.fail(`keine Probe für Vorlage ${vorlage}`);

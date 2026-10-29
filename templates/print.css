@@ -1,0 +1,84 @@
+/* Druckvorlage für Arbeitsblatt, Test und Lösung – A4, Schwarz-Weiß, gut lesbar (≥ 12 pt) */
+@page { size: A4; margin: 15mm; }
+
+:root {
+  --linie: #000;
+  --grau: #555;
+  --hell: #c8c8c8;
+  --raster: #d0d0d0;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+  margin: 0;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000;
+  background: #fff;
+}
+h1, h2, .kopf, .nr, .be, .merke-label { font-family: 'Montserrat', 'Inter', Arial, sans-serif; }
+.zahl, .ziffern { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+/* Kopf */
+.kopf { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1.5pt solid var(--linie); padding-bottom: 2mm; }
+.kopf .fach { font-size: 9pt; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--grau); }
+.kopf h1 { margin: 0.5mm 0 0; font-size: 19pt; font-weight: 700; line-height: 1.2; }
+.kopf .marke { display: flex; align-items: center; gap: 1.5mm; font-size: 8.5pt; font-weight: 700; letter-spacing: 0.1em; color: var(--grau); }
+.kopf .marke svg { width: 9mm; height: 4mm; }
+.namenszeile { display: flex; gap: 6mm; margin: 4mm 0 5mm; font-size: 11pt; }
+.namenszeile span { flex: 1; border-bottom: 0.8pt solid var(--linie); padding-bottom: 0.5mm; }
+.namenszeile span.kurz { flex: 0 0 38mm; }
+.namenszeile span.punkte { flex: 0 0 34mm; text-align: left; }
+
+/* Merkkasten */
+.merke { position: relative; border: 1.5pt solid var(--linie); border-radius: 3mm; padding: 4mm 5mm 2mm; margin: 0 0 6mm; break-inside: avoid; font-size: 11.5pt; }
+.merke-label { position: absolute; top: -3mm; left: 4mm; background: #fff; padding: 0 2mm; font-size: 10pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.merke p { margin: 0 0 2mm; }
+.merke ul, .merke ol { margin: 0 0 2mm; padding-left: 6mm; }
+.merke table { border-collapse: collapse; margin: 1mm 0 3mm; font-size: 11pt; }
+.merke th, .merke td { border: 0.6pt solid var(--linie); padding: 0.8mm 3mm; text-align: center; }
+.merke th { font-weight: 600; background: #eee; }
+
+/* Aufgaben */
+.aufgabe { break-inside: avoid; margin: 0 0 6mm; }
+.aufgabe-kopf { display: flex; gap: 3mm; align-items: baseline; }
+.nr { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 7mm; height: 7mm; border: 1.2pt solid var(--linie); border-radius: 50%; font-size: 11pt; font-weight: 700; transform: translateY(1.2mm); }
+.anweisung { flex: 1; font-weight: 500; }
+.be { flex: 0 0 auto; font-size: 9.5pt; font-weight: 600; white-space: nowrap; }
+.stufe { flex: 0 0 auto; font-size: 9pt; letter-spacing: 0.1em; color: var(--grau); white-space: nowrap; }
+.teile { margin: 2mm 0 0 10mm; }
+.teile.spalten { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; }
+.teil { display: flex; align-items: baseline; gap: 2mm; min-height: 10mm; padding-top: 1.5mm; break-inside: avoid; }
+.teil .label { flex: 0 0 6mm; font-weight: 600; }
+.teil.block { display: block; }
+.teil.block .label { display: inline-block; margin-right: 2mm; }
+
+/* Antwortfelder */
+.linie { display: inline-block; flex: 1; min-width: 28mm; max-width: 60mm; border-bottom: 0.8pt solid var(--linie); height: 7mm; vertical-align: bottom; }
+.linie.voll { display: block; max-width: none; width: 100%; height: 9mm; }
+.kaestchen { display: inline-block; width: 13mm; height: 8mm; border: 0.8pt solid var(--linie); vertical-align: middle; text-align: center; line-height: 7.5mm; margin: 0 1mm; }
+.kaestchen.klein { width: 8mm; }
+.wahl { display: flex; flex-wrap: wrap; gap: 2mm 7mm; margin-top: 1mm; }
+.wahl span::before { content: ''; display: inline-block; width: 3.6mm; height: 3.6mm; border: 0.8pt solid var(--linie); margin-right: 1.8mm; vertical-align: -0.4mm; }
+.wahl span.richtig::before { background: linear-gradient(45deg, transparent 42%, #000 42% 58%, transparent 58%), linear-gradient(-45deg, transparent 42%, #000 42% 58%, transparent 58%); }
+.raster { display: block; margin: 2mm 0 1mm; }
+.antwortsatz { display: flex; gap: 2mm; align-items: baseline; margin-top: 1mm; }
+.paare { display: grid; grid-template-columns: max-content 30mm max-content; row-gap: 2mm; margin: 2mm 0 0 10mm; align-items: center; }
+.paare .punkt::after { content: ' •'; }
+.paare .punkt-l::before { content: '• '; }
+
+/* Daten */
+.datentabelle { border-collapse: collapse; margin: 2mm 0 0 10mm; font-size: 11pt; }
+.datentabelle th, .datentabelle td { border: 0.6pt solid var(--linie); padding: 1mm 3mm; text-align: left; }
+.datentabelle th { background: #eee; font-weight: 600; }
+.grafik { display: block; margin: 2mm 0 1mm 10mm; }
+
+/* Lösungsblatt: Antworten statt leerer Felder */
+.loesung .linie, .loesung .kaestchen { border-color: var(--grau); }
+.antwort { font-weight: 600; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 11.5pt; }
+.weg { margin: 1.5mm 0 0 10mm; font-size: 11pt; }
+.weg b { font-family: 'Montserrat', sans-serif; font-size: 9.5pt; letter-spacing: 0.06em; text-transform: uppercase; }
+
+.fuss-hinweis { margin-top: 4mm; font-size: 8.5pt; color: var(--grau); }

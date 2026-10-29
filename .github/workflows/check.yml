@@ -18,6 +18,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Chromium für PDF-Tests
+        run: npx playwright install --with-deps chromium
       - name: Schema-Validierung
         run: npm run validate
       - name: Tests (Mathe-Lösungen, Auswahlaufgaben)

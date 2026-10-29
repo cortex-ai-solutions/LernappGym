@@ -72,7 +72,7 @@ const VORLAGEN = {
     },
     loese: ({ a, b, schein }) => schein - (a.anzahl * a.preis + b.anzahl * b.preis),
     text: ({ a, b, schein }) =>
-      `Lena kauft ${a.anzahl} ${a.ding} für je ${euro(a.preis)} und ${b.anzahl} ${b.ding} für je ${euro(b.preis)}. Sie bezahlt mit einem ${schein}-€-Schein. Wie viel Geld bekommt sie zurück?`,
+      `Lena kauft ${a.anzahl} ${a.ding} für je ${euro(a.preis)} und ${b.anzahl} ${b.ding} für je ${euro(b.preis)}. Sie bezahlt mit einem ${schein}‑€‑Schein. Wie viel Geld bekommt sie zurück?`,
     weg: ({ a, b, schein }, l) => `${a.anzahl} · ${a.preis} + ${b.anzahl} · ${b.preis} = ${schein - l}; ${schein} − ${schein - l} = ${l}`,
     satz: (_, l) => `Lena bekommt ${euro(l)} zurück.`,
   },
@@ -90,6 +90,21 @@ const VORLAGEN = {
       `${fmt(kinder)} Kinder fahren ins Schullandheim. In einen Bus passen ${plaetze} Kinder. Wie viele Busse werden mindestens gebraucht?`,
     weg: ({ plaetze, kinder }, l) => `${fmt(kinder)} : ${plaetze} = ${Math.floor(kinder / plaetze)} Rest ${kinder % plaetze}; für den Rest braucht man noch einen Bus → ${l}`,
     satz: (_, l) => `Es werden mindestens ${l} Busse gebraucht.`,
+  },
+
+  sparen: {
+    // Wochen = (Preis − Erspartes) : Rate, geht ohne Rest auf
+    ziehe: (rng) => {
+      const rate = rng.pick([4, 5, 6, 8, 10, 12, 15]);
+      const wochen = rng.int(5, 20);
+      const erspart = rng.int(1, 8) * 5;
+      return { rate, erspart, preis: erspart + rate * wochen, ding: rng.pick(['ein Fahrrad', 'ein Skateboard', 'Inliner', 'ein Zelt']) };
+    },
+    loese: ({ rate, erspart, preis }) => (preis - erspart) / rate,
+    text: ({ rate, erspart, preis, ding }) =>
+      `Mia möchte sich ${ding} für ${euro(preis)} kaufen. Sie hat schon ${euro(erspart)} gespart. Jede Woche legt sie ${euro(rate)} dazu. Nach wie vielen Wochen hat sie genug Geld?`,
+    weg: ({ rate, erspart, preis }, l) => `${preis} − ${erspart} = ${preis - erspart}; ${preis - erspart} : ${rate} = ${l}`,
+    satz: (_, l) => `Mia hat nach ${l} Wochen genug Geld.`,
   },
 };
 

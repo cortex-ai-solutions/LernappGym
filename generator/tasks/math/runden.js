@@ -75,4 +75,29 @@ const rundenReihe = {
   },
 };
 
-module.exports = [rundenEinzeln, rundenReihe];
+// Rückwärts denken: kleinste/größte natürliche Zahl, die gerundet einen Wert ergibt (3 400 → 3 350 bzw. 3 449)
+const rundenRueckwaerts = {
+  name: 'runden-rueckwaerts',
+  pruefe(p) {
+    for (const s of p.stellen || []) if (!['zehner', 'hunderter', 'tausender'].includes(s)) throw new Error(`stellen: nur zehner/hunderter/tausender, nicht "${s}"`);
+    if (!p.stellen?.length) throw new Error('stellen: Liste fehlt');
+  },
+  erzeuge(p, rng) {
+    const teile = [];
+    const gesehen = new Set();
+    while (teile.length < (p.anzahl || 1)) {
+      const stelle = rng.pick(p.stellen);
+      const f = 10 ** STELLEN[stelle];
+      const gerundet = rng.int(2, 99) * f;
+      const groesste = rng.next() < 0.5;
+      const loesung = groesste ? gerundet + f / 2 - 1 : gerundet - f / 2;
+      const text = `Nenne die ${groesste ? 'größte' : 'kleinste'} Zahl, die auf ${STELLEN_NAME[stelle]} gerundet ${fmt(gerundet)} ergibt.`;
+      if (gesehen.has(text)) continue;
+      gesehen.add(text);
+      teile.push({ text, loesung, antwort: fmt(loesung), eingabe: 'zahl', pruefung: { gerundet, stelle, groesste } });
+    }
+    return { anweisung: 'Denk rückwärts!', teile };
+  },
+};
+
+module.exports = [rundenEinzeln, rundenReihe, rundenRueckwaerts];
