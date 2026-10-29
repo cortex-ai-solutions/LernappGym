@@ -1,0 +1,150 @@
+# Lehrplan-Extrakt Mathematik, Gymnasium Thüringen, Klassenstufen 5/6
+# Eigene, gekürzte Zusammenfassung der Sach- und Methodenkompetenzen. Formulierungen eng am
+# Lehrplan, damit sich jeder Lehrplanbezug in content/ hierauf zurückführen lässt.
+fach: mathematik
+schulart: gymnasium
+quelle:
+  titel: "Lehrplan für das Gymnasium – Mathematik 2026 (Erprobungsfassung)"
+  herausgeber: "Thüringer Ministerium für Bildung, Wissenschaft und Kultur"
+  url: "https://www.schulportal-thueringen.de/web/guest/media/detail?tspi=20558"
+  datei: "https://www.schulportal-thueringen.de/tip/resources/medien/68204?dateiname=LP_Mathematik_GY_Erprobung_2026-08-25.pdf"
+  stand_datei: 2026-08-25
+  abgerufen: 2026-10-29
+  inkraftsetzung: "Schuljahr 2026/27 für Klassenstufen 5/6, 7 und 11/12"
+  seiten: "15–23 (Kap. 2.1)"
+hinweise:
+  - "Der Lehrplan beschreibt Kompetenzen am ENDE von Klassenstufe 6 (Doppelklassenstufe 5/6). Was davon in Klasse 5 behandelt wird, legt das Schulcurriculum bzw. das Lehrbuch fest."
+  - "Die Zuordnung 'klasse_5' unten stützt sich auf die Unterrichtsunterlagen (1. und 2. TÜ, Tafelbild 'II Natürliche Zahlen', Stand 09/2026) und ist deshalb verifiziert: false."
+  - "Bis 2025/26 galt für Klasse 5/6 der Lehrplan Mathematik 2018. Die neue Fassung ist für das laufende Schuljahr maßgeblich."
+  - "Hilfsmittel: Taschenrechner erst ab Klassenstufe 7. In Klasse 5/6 Kopfrechnen und schriftliche Rechenverfahren."
+operatoren_quelle: "https://www.schulportal-thueringen.de/tip/resources/medien/68594?dateiname=Operatorenliste.pdf"
+
+klassenstufe: "5/6"
+lernbereiche:
+  - id: daten-erfassen-darstellen
+    nr: "2.1.1"
+    titel: "Daten erfassen und darstellen"
+    leitideen: ["Daten und Zufall", "Zahl und Operation"]
+    klasse_5: { im_unterricht: true, beleg: "1. TÜ, Aufg. 1–2 (Strichliste → Säulendiagramm, Tabelle → Balkendiagramm)", verifiziert: false }
+    lernziele:
+      - "Daten aus statistischen Darstellungen entnehmen"
+      - "Daten in Ur- und Strichlisten erfassen"
+      - "Daten ordnen"
+      - "Daten in Ranglisten, Häufigkeitstabellen, Säulen- und Balkendiagrammen veranschaulichen (ohne und mit digitalem Werkzeug)"
+      - "Angemessenheit von Darstellungen kritisch werten"
+    schluesselbegriffe: [Urliste, Strichliste, Rangliste, Häufigkeitstabelle, Häufigkeit, Säulendiagramm, Balkendiagramm, Achse, Einteilung]
+
+  - id: natuerliche-zahlen
+    nr: "2.1.2"
+    titel: "Natürliche Zahlen"
+    leitideen: ["Zahl und Operation"]
+    klasse_5: { im_unterricht: true, beleg: "1. TÜ Aufg. 3–5, 2. TÜ komplett, Tafelbild 'II Natürliche Zahlen'", verifiziert: false }
+    lernausgangslage_grundschule:
+      - "Zahlen bis 1 000 000 lesen, schreiben, ordnen, vergleichen, runden"
+      - "Schriftlich addieren (bis 3 Summanden), subtrahieren (bis 2 Subtrahenden), mehrstellig multiplizieren, durch einstellige und wichtige zweistellige Divisoren (10, 12, 20, 25, 50) dividieren"
+      - "Begriffe: Vorgänger/Nachfolger, gerade/ungerade, Summand, Summe, Minuend, Subtrahend, Differenz, Faktor, Produkt, Dividend, Divisor, Quotient, Vielfaches, Teiler, das Doppelte, die Hälfte"
+      - "Gleichungen und Ungleichungen durch inhaltliches Überlegen oder Probieren lösen"
+    themen:
+      - id: zahldarstellung
+        lernziele:
+          - "Natürliche Zahlen bis 1 Billion darstellen: mit Ziffern, als Zahlwort, auf dem Zahlenstrahl, in der Stellenwerttafel, mit Zehnerpotenzen; zwischen den Darstellungen wechseln"
+          - "Natürliche Zahlen lesen und im mündlichen und schriftlichen Sprachgebrauch sicher verwenden"
+        schluesselbegriffe: [Ziffer, Zahlwort, Stellenwerttafel, Stellenwert, Million, Milliarde, Billion, Zahlenstrahl, Zehnerpotenz]
+      - id: ordnen-vergleichen
+        lernziele: ["Natürliche Zahlen ordnen und vergleichen"]
+        schluesselbegriffe: [kleiner als, größer als, Vorgänger, Nachfolger]
+      - id: runden
+        lernziele: ["Natürliche Zahlen auf vorgegebene Stellen runden"]
+        schluesselbegriffe: [runden, aufrunden, abrunden, Rundungsstelle, ungefähr gleich]
+      - id: grundrechenarten
+        lernziele:
+          - "Die Grundrechenoperationen im Kopf und schriftlich ausführen"
+          - "Zusammenhang zwischen Rechenoperation und Umkehroperation an Beispielen erläutern"
+          - "Rechengesetze zum vorteilhaften Rechnen anwenden (Kommutativ-, Assoziativ-, Distributivgesetz), Besonderheiten bei 0 und 1"
+        schluesselbegriffe: [Summand, Summe, Minuend, Subtrahend, Differenz, Faktor, Produkt, Dividend, Divisor, Quotient, Umkehraufgabe, Probe, Überschlag]
+      - id: terme-gleichungen
+        lernziele:
+          - "Einfache Terme mit Variablen aufstellen und Werte von Termen berechnen"
+          - "Zahlenfolgen fortführen, auch mit Variablen"
+          - "Einfache Gleichungen durch inhaltliche Überlegungen und systematisches Probieren lösen"
+        schluesselbegriffe: [Term, Variable, Platzhalter, Gleichung, Zahlenfolge]
+      - id: teilbarkeit
+        lernziele:
+          - "Mengen von Teilern und Vielfachen bestimmen"
+          - "Teilbarkeit mit Teilbarkeitsregeln (2, 3, 4, 5, 10) untersuchen"
+          - "Primzahlen erkennen und beschreiben"
+        schluesselbegriffe: [Teiler, Vielfaches, Teilermenge, Teilbarkeitsregel, Quersumme, Primzahl]
+      - id: potenzen
+        lernziele:
+          - "Potenzen mit natürlichen Exponenten berechnen"
+          - "Quadratzahlen bis 20² wiedergeben"
+        schluesselbegriffe: [Potenz, Basis, Exponent, Quadratzahl]
+      - id: sachaufgaben
+        lernziele:
+          - "Alltagsprobleme lösen: mehrere Rechenoperationen verknüpfen, Überschlag und Probe, heuristische Mittel (informative Figur, Tabelle, systematisches Probieren), Lösungen prüfen und interpretieren, Lösungswege mit Fachbegriffen präsentieren"
+        schluesselbegriffe: [Sachaufgabe, Antwortsatz, Skizze, Tabelle, Probe, Überschlag]
+
+  - id: groessen
+    nr: "2.1.3"
+    titel: "Größen"
+    leitideen: ["Größen und Messen"]
+    klasse_5: { im_unterricht: offen, verifiziert: false }
+    lernziele:
+      - "Größen (Geld, Länge, Masse, Zeit, Flächeninhalt, Volumen) schätzen, messen, vergleichen, ordnen"
+      - "Größenangaben ineinander umwandeln"
+      - "Mit Größenangaben rechnen und Einheiten sinnvoll verwenden"
+      - "Aus maßstäblichen Darstellungen auf reale Größen schließen und umgekehrt"
+    schluesselbegriffe: [Einheit, Maßzahl, Umrechnungszahl, Kommaschreibweise, Maßstab]
+
+  - id: ebene-figuren-koerper
+    nr: "2.1.4"
+    titel: "Ebene Figuren und Körper"
+    leitideen: ["Raum und Form"]
+    klasse_5: { im_unterricht: offen, verifiziert: false }
+    lernziele:
+      - "Grundbegriffe Punkt, Strecke, Strahl, Gerade, Abstand, rechter Winkel; senkrecht, parallel; symbolische Schreibweisen"
+      - "Parallele und Senkrechte zeichnen"
+      - "Quadrat, Rechteck, Parallelogramm, Raute, Trapez, Drachenviereck identifizieren, beschreiben, klassifizieren, skizzieren, zeichnen"
+      - "Umfang und Flächeninhalt von Quadraten, Rechtecken und zusammengesetzten Figuren messen und berechnen"
+      - "Verschiebungen, Achsenspiegelungen erkennen, begründen, durchführen; Punktsymmetrie erkennen"
+      - "Figuren im Koordinatensystem (I.–IV. Quadrant) darstellen, verschieben, spiegeln"
+      - "Würfel, Quader, Pyramide, Kegel, Zylinder, Kugel identifizieren, beschreiben, klassifizieren"
+      - "Netze und Schrägbilder von Würfel und Quader; Netze und Körper zuordnen"
+      - "Oberflächeninhalt und Volumen von Würfel und Quader angeben und anwenden"
+
+  - id: gebrochene-zahlen
+    nr: "2.1.5"
+    titel: "Gebrochene Zahlen"
+    klasse_5: { im_unterricht: offen, verifiziert: false }
+    lernziele:
+      - "Gemeine Brüche beschreiben (Zähler, Nenner), darstellen, erweitern, kürzen, ordnen, vergleichen"
+      - "Echte/unechte Brüche, gemischte Zahlen"
+      - "Grundrechenarten mit gemeinen Brüchen und Dezimalbrüchen"
+      - "Dezimalbrüche darstellen, ordnen, runden"
+      - "Brüche, Dezimalbrüche und Prozentangaben ineinander umwandeln"
+
+  - id: dreiecke-kreise
+    nr: "2.1.6"
+    titel: "Dreiecke und Kreise"
+    klasse_5: { im_unterricht: offen, verifiziert: false }
+    lernziele:
+      - "Winkel zeichnen, messen, schätzen, Winkelarten zuordnen"
+      - "Dreiecke klassifizieren, zeichnen; Winkelsätze, Innenwinkelsatz, Dreiecksungleichung"
+      - "Mittelsenkrechte, Winkelhalbierende; Kreis, Sehne, Sekante, Tangente, Passante; Satz des Thales"
+
+  - id: statistik-zufall
+    nr: "2.1.7"
+    titel: "Statistische Kenngrößen und mit Zufall experimentieren"
+    klasse_5: { im_unterricht: offen, verifiziert: false }
+    lernziele:
+      - "Minimum, Maximum, Spannweite, Median, Quartil, Modalwert, arithmetisches Mittel bestimmen"
+      - "Boxplot; absolute und relative Häufigkeit"
+      - "Ein- und zweistufige Zufallsexperimente planen, durchführen, im Baumdiagramm darstellen"
+
+  - id: zuordnungen
+    nr: "2.1.8"
+    titel: "Zuordnungen"
+    klasse_5: { im_unterricht: offen, verifiziert: false }
+    lernziele:
+      - "Zuordnungen erkennen und beschreiben"
+      - "Direkt proportionale Zuordnungen darstellen (Text, Gleichung, Wertetabelle, Graph), Quotientengleichheit, Dreisatz"

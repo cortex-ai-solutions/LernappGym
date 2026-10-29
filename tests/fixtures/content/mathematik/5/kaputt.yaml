@@ -1,0 +1,21 @@
+# Absichtlich fehlerhaft: prüft, dass der Validator Regelverstöße meldet
+fach: mathematik
+klasse: 5
+thema: kaputt
+titel: "Fehlerhaftes Beispiel"
+verifiziert: true
+erklaerung: "Nur für den Test des Validators."
+aufgaben:
+  - id: a1
+    typ: multiple_choice
+    frage: "2 + 2 = ?"
+    optionen: [3, 5, 5]
+    loesung: 4
+    be: 1
+    schwierigkeit: 1
+  - id: a1
+    typ: richtig_falsch
+    frage: "1 + 1 = 2"
+    loesung: true
+    be: 1
+    schwierigkeit: 1

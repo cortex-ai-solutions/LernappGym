@@ -1,0 +1,58 @@
+fach: mathematik
+klasse: 5
+thema: runden
+titel: "Natürliche Zahlen runden"
+icon: "🎯"
+reihenfolge: 2
+lehrplanbezug: ["2.1.2 Natürliche Zahlen: natürliche Zahlen auf vorgegebene Stellen runden"]
+verifiziert: true
+quelle: "Lehrplan Mathematik Gymnasium Thüringen 2026 (Erprobungsfassung), Kap. 2.1.2, S. 17 – siehe curriculum/mathematik.yaml"
+erklaerung: |
+  **So rundest du:** Schau auf die Ziffer **rechts neben** der Rundungsstelle.
+  - Ist sie **0, 1, 2, 3 oder 4**, wird **abgerundet**: Die Rundungsstelle bleibt gleich.
+  - Ist sie **5, 6, 7, 8 oder 9**, wird **aufgerundet**: Die Rundungsstelle wird um 1 größer.
+  - Alle Ziffern rechts von der Rundungsstelle werden zu **0**.
+
+  Beispiel: 34 761 auf Hunderter → die Zehnerziffer ist 6 → aufrunden → **34 800**
+wissenswertes:
+  - "Das Zeichen ≈ bedeutet „ungefähr gleich“. Man schreibt zum Beispiel 34 761 ≈ 34 800."
+  - "Auch Zeitungen runden: Wenn dort „rund 2 Millionen Besucher“ steht, waren es nicht genau 2 000 000."
+aufgaben:
+  - id: entscheidende-ziffer
+    typ: multiple_choice
+    frage: "Du rundest auf Hunderter. Auf welche Ziffer musst du schauen?"
+    optionen: ["Einerziffer", "Zehnerziffer", "Hunderterziffer", "Tausenderziffer"]
+    loesung: "Zehnerziffer"
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 2
+  - id: halb-aufrunden
+    typ: richtig_falsch
+    frage: "4 500 auf Tausender gerundet ergibt 5 000."
+    loesung: true
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 2
+  - id: runden-einfach
+    typ: rechnung
+    generator: runden
+    parameter: { stellen: [zehner, hunderter, tausender], ziffern: [4, 5] }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 1
+  - id: runden-reihe
+    typ: rechnung
+    generator: runden-reihe
+    parameter: { stellen: [zehner, hunderter, tausender, zehntausender, hunderttausender], ziffern: [7] }
+    be: 5
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: runden-uebertrag
+    typ: rechnung
+    generator: runden
+    parameter: { stellen: [hunderter, tausender], ziffern: [5, 6], uebertrag: true }
+    anzahl: 2
+    be: 1
+    schwierigkeit: 3
+    prioritaet: 3

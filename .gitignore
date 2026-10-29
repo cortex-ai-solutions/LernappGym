@@ -1,0 +1,9 @@
+# Unterrichtsmaterial der Schule (Urheberrecht Lehrkraft) und Scans mit Handschrift/Namen bleiben lokal
+Materialien/
+
+# Build-Ausgabe (PDFs, Zwischenstände); die veröffentlichte Webapp liegt in docs/
+output/
+
+node_modules/
+.env
+*.log

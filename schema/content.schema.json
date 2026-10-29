@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "lernwerk/content.schema.json",
+  "title": "LERNWERK Inhaltsdatei (ein Thema)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fach", "klasse", "thema", "titel", "verifiziert", "erklaerung", "aufgaben"],
+  "properties": {
+    "fach": { "enum": ["mathematik", "latein", "geschichte", "deutsch", "biologie", "englisch"] },
+    "klasse": { "type": "integer", "minimum": 5, "maximum": 12 },
+    "thema": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+    "titel": { "type": "string", "minLength": 3 },
+    "icon": { "type": "string" },
+    "reihenfolge": { "type": "integer", "minimum": 1 },
+    "lehrplanbezug": { "type": "array", "items": { "type": "string" } },
+    "verifiziert": { "type": "boolean" },
+    "quelle": { "type": "string" },
+    "erklaerung": { "type": "string", "minLength": 10 },
+    "wissenswertes": { "type": "array", "items": { "type": "string" } },
+    "vokabeln": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lat", "de"],
+        "properties": {
+          "lat": { "type": "string" },
+          "info": { "type": "string" },
+          "de": { "type": "string" },
+          "beispiel": { "type": "string" }
+        }
+      }
+    },
+    "aufgaben": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/definitions/aufgabe" }
+    }
+  },
+  "definitions": {
+    "aufgabe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "typ", "be", "schwierigkeit"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "typ": {
+          "enum": ["zuordnung", "multiple_choice", "lueckentext", "uebersetzung", "richtig_falsch",
+                   "freitext", "rechnung", "zeitleiste", "eingabe", "diagramm"]
+        },
+        "frage": { "type": "string" },
+        "optionen": { "type": "array", "items": { "type": ["string", "number"] } },
+        "paare": {
+          "type": "array",
+          "items": { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2 }
+        },
+        "loesung": {},
+        "generator": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "parameter": { "type": "object" },
+        "anzahl": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "be": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "schwierigkeit": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "prioritaet": { "type": "integer", "minimum": 1, "maximum": 3 },
+        "nur": { "enum": ["druck", "web"] }
+      },
+      "oneOf": [
+        { "required": ["generator"] },
+        { "required": ["frage", "loesung"] },
+        { "required": ["frage", "paare"] }
+      ]
+    }
+  }
+}
