@@ -79,6 +79,10 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .eingabe:focus { outline: none; border-color: var(--gold-light); box-shadow: 0 0 0 3px rgba(200, 168, 76, 0.15); }
 .wortfeld { min-height: 120px; padding: 12px 16px; font-size: 20px; line-height: 1.4; resize: none; overflow-wrap: anywhere; }
 .eingabe::placeholder { color: var(--text-muted); font-weight: 400; font-size: 18px; }
+.felder { display: flex; flex-wrap: wrap; gap: 12px; }
+.feld { display: flex; align-items: center; gap: 8px; }
+.feld .eingabe { width: 120px; text-align: center; }
+.einheit { font-size: 22px; font-weight: 700; color: var(--gold-light); min-width: 2.2em; }
 .label { display: block; font-size: 15px; color: var(--text-secondary); margin: 0 0 6px; }
 .optionen { display: grid; gap: 10px; }
 .optionen.zwei { grid-template-columns: 1fr 1fr; }

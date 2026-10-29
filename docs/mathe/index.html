@@ -79,6 +79,10 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .eingabe:focus { outline: none; border-color: var(--gold-light); box-shadow: 0 0 0 3px rgba(200, 168, 76, 0.15); }
 .wortfeld { min-height: 120px; padding: 12px 16px; font-size: 20px; line-height: 1.4; resize: none; overflow-wrap: anywhere; }
 .eingabe::placeholder { color: var(--text-muted); font-weight: 400; font-size: 18px; }
+.felder { display: flex; flex-wrap: wrap; gap: 12px; }
+.feld { display: flex; align-items: center; gap: 8px; }
+.feld .eingabe { width: 120px; text-align: center; }
+.einheit { font-size: 22px; font-weight: 700; color: var(--gold-light); min-width: 2.2em; }
 .label { display: block; font-size: 15px; color: var(--text-secondary); margin: 0 0 6px; }
 .optionen { display: grid; gap: 10px; }
 .optionen.zwei { grid-template-columns: 1fr 1fr; }
@@ -133,9 +137,9 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
   var defs = [/* web-einstieg.js */ [function (module, exports, require) {
 // Einstieg für das Browser-Bundle der Webapp (window.LW)
 const { instanz } = require('./generate');
-const { fmt, parseZahl } = require('./lib/zahlen');
+const { fmt, parseZahl, gleich } = require('./lib/zahlen');
 
-module.exports = { instanz, fmt, parseZahl };
+module.exports = { instanz, fmt, parseZahl, gleich };
 
 }, {"./generate":1,"./lib/zahlen":5}],
 /* generate.js */ [function (module, exports, require) {
@@ -235,6 +239,8 @@ const MODULE = [
   require('./math/rechnen'),
   require('./math/sachaufgaben'),
   require('./math/diagramm'),
+  require('./math/groessen'),
+  require('./math/kommazahlen'),
 ];
 
 const GENERATOREN = {};
@@ -245,7 +251,7 @@ for (const g of MODULE.flat()) {
 
 module.exports = { GENERATOREN };
 
-}, {"./math/runden":4,"./math/zahldarstellung":6,"./math/rechnen":7,"./math/sachaufgaben":8,"./math/diagramm":9}],
+}, {"./math/runden":4,"./math/zahldarstellung":6,"./math/rechnen":7,"./math/sachaufgaben":8,"./math/diagramm":10,"./math/groessen":9,"./math/kommazahlen":11}],
 /* runden.js */ [function (module, exports, require) {
 const { fmt, runden, STELLEN, STELLEN_NAME } = require('../../lib/zahlen');
 
@@ -357,8 +363,12 @@ module.exports = [rundenEinzeln, rundenReihe, rundenRueckwaerts];
 // deutscher Rechtschreibung (unter einer Million zusammen, Million/Milliarde/Billion getrennt).
 const GRUPPE = ' '; // schmales geschütztes Leerzeichen: 34 761
 
+// Kommazahlen mit Dezimalkomma: 3.45 → "3,45". Generatoren rechnen intern mit ganzen Zahlen
+// (z. B. Gramm statt Kilogramm) und teilen erst am Ende durch 10^k, damit keine Rundungsfehler entstehen.
 function fmt(n) {
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, GRUPPE);
+  const [ganz, dez] = String(n).split('.');
+  const g = ganz.replace(/\B(?=(\d{3})+(?!\d))/g, GRUPPE);
+  return dez === undefined ? g : `${g},${dez}`;
 }
 
 const EINER = ['', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn',
@@ -428,13 +438,20 @@ function runden(n, stelle) {
   return Math.floor((n + f / 2) / f) * f;
 }
 
-// Eingaben tolerant lesen: "34 761", "34.761", "34761" → 34761
-function parseZahl(s) {
-  const t = String(s).replace(/[\s.  ]/g, '');
-  return /^\d+$/.test(t) ? Number(t) : NaN;
+// Eingaben tolerant lesen: "34 761", "34.761", "34761" → 34761; "3,45" → 3.45.
+// Ein Punkt gilt als Tausenderpunkt, außer punktIstKomma ist gesetzt (erwartete Lösung ist eine Kommazahl):
+// dann ist "3.45" dasselbe wie "3,45", weil manche Handy-Tastaturen nur einen Punkt anbieten.
+function parseZahl(s, punktIstKomma = false) {
+  let t = String(s).replace(/[\s  ]/g, '');
+  if (punktIstKomma && !t.includes(',') && (t.match(/\./g) || []).length === 1) t = t.replace('.', ',');
+  t = t.replace(/\./g, '');
+  return /^(\d+,?\d*|,\d+)$/.test(t) ? Number(t.replace(',', '.')) : NaN;
 }
 
-module.exports = { fmt, zahlwort, runden, parseZahl, STELLEN, STELLEN_NAME, GRUPPE };
+// gleiche Zahl? Eingabe und Generator-Lösung können bei Kommazahlen im letzten Bit abweichen
+const gleich = (a, b) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(b));
+
+module.exports = { fmt, zahlwort, runden, parseZahl, gleich, STELLEN, STELLEN_NAME, GRUPPE };
 
 }, {}],
 /* zahldarstellung.js */ [function (module, exports, require) {
@@ -800,7 +817,11 @@ module.exports.ZEICHEN = ZEICHEN;
 // Eigene Formulierungen im Stil der Klassenarbeiten, keine Aufgaben aus dem Unterricht.
 const { fmt } = require('../../lib/zahlen');
 
+const { gr, euro: euroCt } = require('./groessen');
+
 const euro = (x) => `${fmt(x)} €`;
+const uhr = (min) => `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`;
+const zeitspanne = (min) => (min % 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min / 60} h`);
 
 const VORLAGEN = {
   tierbeine: {
@@ -904,6 +925,96 @@ const VORLAGEN = {
     weg: ({ rate, erspart, preis }, l) => `${preis} − ${erspart} = ${preis - erspart}; ${preis - erspart} : ${rate} = ${l}`,
     satz: (_, l) => `Mia hat nach ${l} Wochen genug Geld.`,
   },
+
+  // ---------- Größen und Kommazahlen: gerechnet wird in g, m, ct, min ----------
+
+  pakete: {
+    ziehe: (rng) => ({
+      buecher: 100 * rng.int(12, 48), // 1,2 kg bis 4,8 kg
+      dinge: rng.shuffle([['Schuhe', 50 * rng.int(8, 19)], ['eine Dose Kekse', 50 * rng.int(4, 12)], ['ein Spiel', 50 * rng.int(6, 16)]]).slice(0, 2),
+    }),
+    loese: ({ buecher, dinge }) => (buecher + dinge[0][1] + dinge[1][1]) / 1000,
+    komma: true,
+    text: ({ buecher, dinge }) =>
+      `Tom packt ein Paket: Bücher mit ${gr(buecher / 1000, 'kg')}, ${dinge[0][0]} mit ${gr(dinge[0][1], 'g')} und ${dinge[1][0]} mit ${gr(dinge[1][1], 'g')}. Wie schwer ist das Paket insgesamt? Gib das Ergebnis in kg an.`,
+    weg: ({ buecher, dinge }, l) =>
+      `${gr(buecher / 1000, 'kg')} = ${gr(buecher, 'g')}; ${fmt(buecher)} g + ${fmt(dinge[0][1])} g + ${fmt(dinge[1][1])} g = ${gr(l * 1000, 'g')} = ${gr(l, 'kg')}`,
+    satz: (_, l) => `Das Paket wiegt ${gr(l, 'kg')}.`,
+    teile: (l) => [{ text: 'Ergebnis (in kg)', loesung: l }],
+  },
+
+  schulweg: {
+    ziehe: (rng) => ({ meter: 50 * rng.int(13, 39), tage: rng.pick([4, 5]) }), // 650 m bis 1,95 km
+    loese: ({ meter, tage }) => (meter * 2 * tage) / 1000,
+    komma: true,
+    text: ({ meter, tage }) =>
+      `Paulas Schulweg ist ${gr(meter / 1000, 'km')} lang. Sie geht ihn an ${tage} Schultagen hin und zurück. Wie viele Kilometer läuft sie in dieser Woche?`,
+    weg: ({ meter, tage }, l) => `${gr(meter / 1000, 'km')} = ${gr(meter, 'm')}; ${fmt(meter)} m · 2 · ${tage} = ${gr(l * 1000, 'm')} = ${gr(l, 'km')}`,
+    satz: (_, l) => `Paula läuft in dieser Woche ${gr(l, 'km')}.`,
+    teile: (l) => [{ text: 'Ergebnis (in km)', loesung: l }],
+  },
+
+  einkauf: {
+    ziehe: (rng) => {
+      const a = { ding: rng.pick(['Hefte', 'Bleistifte', 'Radiergummis']), anzahl: rng.int(2, 5), preis: 5 * rng.int(9, 50) };
+      const b = { ding: rng.pick(['einen Zirkel', 'ein Geodreieck', 'einen Füller']), preis: 10 * rng.int(12, 89) };
+      const kosten = a.anzahl * a.preis + b.preis;
+      return { a, b, schein: [10, 20, 50].find((s) => s * 100 > kosten) };
+    },
+    loese: ({ a, b, schein }) => (schein * 100 - a.anzahl * a.preis - b.preis) / 100,
+    komma: true,
+    text: ({ a, b, schein }) =>
+      `Ben kauft ${a.anzahl} ${a.ding} zu je ${euroCt(a.preis)} und ${b.ding} für ${euroCt(b.preis)}. Er bezahlt mit einem ${schein}‑€‑Schein. Wie viel Geld bekommt er zurück?`,
+    weg: ({ a, b, schein }, l) => {
+      const k = a.anzahl * a.preis + b.preis;
+      return `${a.anzahl} · ${euroCt(a.preis)} = ${euroCt(a.anzahl * a.preis)}; ${euroCt(a.anzahl * a.preis)} + ${euroCt(b.preis)} = ${euroCt(k)}; ${euroCt(schein * 100)} − ${euroCt(k)} = ${euroCt(Math.round(l * 100))}`;
+    },
+    satz: (_, l) => `Ben bekommt ${euroCt(Math.round(l * 100))} zurück.`,
+    teile: (l) => [{ text: 'Rückgeld (in €)', loesung: l, antwort: euroCt(Math.round(l * 100)) }],
+  },
+
+  fahrzeit: {
+    // Zeitspanne zwischen zwei Uhrzeiten, über die volle Stunde gerechnet
+    ziehe: (rng) => {
+      const ab = 60 * rng.int(7, 16) + 5 * rng.int(1, 11);
+      return { ab, an: ab + 5 * rng.int(Math.ceil((60 - (ab % 60)) / 5) + 1, 34) };
+    },
+    loese: ({ ab, an }) => an - ab,
+    text: ({ ab, an }) =>
+      `Der Zug fährt um ${uhr(ab)} Uhr ab und kommt um ${uhr(an)} Uhr an. Wie lange dauert die Fahrt? Gib die Dauer in Minuten an.`,
+    weg: ({ ab, an }, l) => {
+      const schritte = [];
+      const voll = Math.ceil(ab / 60) * 60;
+      schritte.push([ab, voll]);
+      let t = voll;
+      while (t + 60 <= an) { schritte.push([t, t + 60]); t += 60; }
+      if (t < an) schritte.push([t, an]);
+      return `${schritte.map(([x, y]) => `${uhr(x)} → ${uhr(y)}: ${y - x} min`).join('; ')}; ${schritte.map(([x, y]) => y - x).join(' + ')} = ${l} min`;
+    },
+    satz: (_, l) => `Die Fahrt dauert ${l} Minuten${l >= 60 ? ` (${zeitspanne(l)})` : ''}.`,
+    teile: (l) => [{ text: 'Dauer (in min)', loesung: l }],
+  },
+
+  training: {
+    // Gesamtzeit über 1 h und mit Minutenrest, sonst ist das Zerlegen zu leicht
+    ziehe: (rng) => {
+      let mal, minuten;
+      do { mal = rng.int(2, 5); minuten = 5 * rng.int(6, 15); } while (mal * minuten <= 60 || (mal * minuten) % 60 === 0);
+      return { mal, minuten, name: rng.pick(['Jonas', 'Emma', 'Noah', 'Lea']), sport: rng.pick(['Fußball', 'Schwimmen', 'Turnen', 'Judo']) };
+    },
+    loese: ({ mal, minuten }) => {
+      const gesamt = mal * minuten;
+      return { h: Math.floor(gesamt / 60), min: gesamt % 60 };
+    },
+    text: ({ mal, minuten, name, sport }) =>
+      `${name} hat ${mal}-mal in der Woche ${sport}. Jedes Training dauert ${minuten} Minuten. Wie lange trainiert ${name} in einer Woche? Gib das Ergebnis in Stunden und Minuten an.`,
+    weg: ({ mal, minuten }, l) => `${mal} · ${minuten} min = ${mal * minuten} min = ${zeitspanne(mal * minuten)}`,
+    satz: ({ name }, l) => `${name} trainiert in einer Woche ${zeitspanne(l.h * 60 + l.min)}.`,
+    teile: (l) => [
+      { text: 'Stunden (h)', loesung: l.h },
+      { text: 'Minuten (min)', loesung: l.min },
+    ],
+  },
 };
 
 const sachaufgabe = {
@@ -917,9 +1028,8 @@ const sachaufgabe = {
     const v = VORLAGEN[name];
     const daten = v.ziehe(rng);
     const l = v.loese(daten);
-    const teile = v.teile
-      ? v.teile(l).map((t) => ({ ...t, antwort: fmt(t.loesung), eingabe: 'zahl' }))
-      : [{ text: 'Ergebnis', loesung: l, antwort: fmt(l), eingabe: 'zahl' }];
+    const teile = (v.teile ? v.teile(l) : [{ text: 'Ergebnis', loesung: l }])
+      .map((t) => ({ antwort: fmt(t.loesung), ...t, eingabe: 'zahl', ...(v.komma ? { komma: true } : {}) }));
     return {
       anweisung: v.text(daten),
       teile,
@@ -933,6 +1043,197 @@ const sachaufgabe = {
 
 module.exports = [sachaufgabe];
 module.exports.VORLAGEN = VORLAGEN;
+
+}, {"../../lib/zahlen":5,"./groessen":9}],
+/* groessen.js */ [function (module, exports, require) {
+// Größen umrechnen: Länge, Masse, Zeit, Geld. Gerechnet wird immer in der kleinsten Einheit als ganze Zahl
+// (mm, mg, s, ct); Kommazahlen entstehen erst beim Teilen durch die Umrechnungszahl.
+// "pruefung" trägt den Wert in der Grundeinheit, damit Tests unabhängig nachrechnen.
+const { fmt } = require('../../lib/zahlen');
+
+// Faktor zur kleinsten Einheit, von klein nach groß
+const GROESSEN = {
+  laenge: { mm: 1, cm: 10, dm: 100, m: 1000, km: 1000000 },
+  masse: { mg: 1, g: 1000, kg: 1000000, t: 1000000000 },
+  zeit: { s: 1, min: 60, h: 3600, d: 86400 },
+  geld: { ct: 1, '€': 100 },
+};
+const STANDARD = { laenge: ['mm', 'cm', 'dm', 'm', 'km'], masse: ['g', 'kg', 't'], zeit: ['s', 'min', 'h', 'd'], geld: ['ct', '€'] };
+const MODI = ['ganz', 'komma', 'gemischt', 'zerlegen'];
+
+const NB = ' '; // geschütztes Leerzeichen zwischen Maßzahl und Einheit
+const gr = (zahl, einheit) => `${fmt(zahl)}${NB}${einheit}`;
+// Geld immer mit zwei Nachkommastellen: 2,40 €
+const euro = (ct) => `${fmt(Math.floor(ct / 100))},${String(ct % 100).padStart(2, '0')}${NB}€`;
+const istZehnerpotenz = (f) => /^10*$/.test(String(f));
+const stellen = (f) => String(f).length - 1;
+// Zeitreste lieber in 5er-Schritten (15 min, 40 s), bei Stunden eines Tages beliebig
+const glatterRest = (rng, f) => (f % 5 === 0 ? 5 * rng.int(1, f / 5 - 1) : rng.int(1, f - 1));
+
+function pruefeGroesse(p) {
+  const groessen = p.groessen || [p.groesse];
+  for (const g of groessen) {
+    if (!GROESSEN[g]) throw new Error(`groesse: unbekannt "${g}"`);
+    for (const e of p.einheiten || []) if (!(e in GROESSEN[g]) && groessen.length === 1) throw new Error(`einheiten: "${e}" passt nicht zu ${g}`);
+  }
+  if (p.modus && !MODI.includes(p.modus)) throw new Error(`modus: unbekannt "${p.modus}"`);
+  if (p.modus === 'komma' && groessen.includes('zeit')) throw new Error('modus komma: Zeit hat keine Kommaschreibweise in Klasse 5');
+  // mindestens ein erlaubtes Einheitenpaar je Größe
+  for (const g of groessen) if (!paare(g, p).length) throw new Error(`${g}: kein Einheitenpaar für modus ${p.modus || 'ganz'}`);
+}
+
+// erlaubte (klein, groß)-Paare: benachbart, Umrechnungszahl ≤ maxFaktor, bei Komma nur Zehnerpotenzen
+function paare(g, p) {
+  const tab = GROESSEN[g];
+  const liste = (p.einheiten || STANDARD[g]).filter((e) => e in tab);
+  const max = p.maxFaktor || (g === 'zeit' ? 60 : 1000);
+  const ergebnis = [];
+  for (let i = 0; i < liste.length; i++) {
+    for (let j = i + 1; j < liste.length; j++) {
+      if (p.nachbarn !== false && j !== i + 1) continue;
+      const f = tab[liste[j]] / tab[liste[i]];
+      if (f > max) continue;
+      if ((p.modus === 'komma' || g === 'geld') && !istZehnerpotenz(f)) continue;
+      ergebnis.push({ klein: liste[i], gross: liste[j], f });
+    }
+  }
+  return ergebnis;
+}
+
+// Darstellung eines Werts (in Einheiten von "klein") in der großen Einheit mit Komma
+const alsGross = (wert, { gross, f }, g) => (g === 'geld' ? euro(wert) : gr(wert / f, gross));
+
+function einTeil(p, rng) {
+  const g = rng.pick(p.groessen || [p.groesse]);
+  const paar = rng.pick(paare(g, p));
+  const { klein, gross, f } = paar;
+  const modus = p.modus || 'ganz';
+  const runter = p.richtung === 'runter' ? true : p.richtung === 'hoch' ? false : rng.next() < 0.5; // groß → klein?
+  const basis = (w) => ({ groesse: g, klein, gross, f, wert: w });
+
+  if (modus === 'ganz') {
+    const k = g === 'zeit' ? rng.int(2, f === 24 ? 7 : 12) : rng.int(2, f >= 1000 ? 30 : 99);
+    const w = k * f;
+    return runter
+      ? { text: `${gr(k, gross)} = ∎ ${klein}`, loesung: w, antwort: `${gr(k, gross)} = ${gr(w, klein)}`, eingabe: 'zahl', breit: true, pruefung: basis(w) }
+      : { text: `${gr(w, klein)} = ∎ ${gross}`, loesung: k, antwort: `${gr(w, klein)} = ${gr(k, gross)}`, eingabe: 'zahl', breit: true, pruefung: basis(w) };
+  }
+
+  if (modus === 'komma') {
+    // Wert mit 1 bis 3 echten Nachkommastellen in der großen Einheit, z. B. 3,45 kg = 3 450 g
+    const d = rng.int(1, Math.min(g === 'geld' ? 2 : 3, stellen(f)));
+    const z = 10 ** d;
+    let rest;
+    do rest = rng.int(1, z - 1); while (rest % 10 === 0);
+    const ganz = rng.int(0, g === 'geld' ? 20 : 25);
+    const w = ((ganz * z + rest) * f) / z; // in kleiner Einheit, ganzzahlig
+    const gross_ = alsGross(w, paar, g);
+    return runter
+      ? { text: `${gross_} = ∎ ${klein}`, loesung: w, antwort: `${gross_} = ${gr(w, klein)}`, eingabe: 'zahl', breit: true, pruefung: basis(w) }
+      : { text: `${gr(w, klein)} = ∎ ${gross}`, loesung: w / f, antwort: `${gr(w, klein)} = ${gross_}`, eingabe: 'zahl', komma: true, breit: true, pruefung: basis(w) };
+  }
+
+  // gemischt / zerlegen: 3 m 25 cm ↔ 325 cm (bzw. 3,25 m)
+  const ganz = rng.int(1, g === 'zeit' ? (f === 24 ? 6 : 9) : 20);
+  const rest = g === 'zeit' && rng.next() < 0.6 ? glatterRest(rng, f) : rng.int(1, f - 1);
+  const w = ganz * f + rest;
+  const zusammen = `${gr(ganz, gross)} ${gr(rest, klein)}`;
+  if (modus === 'zerlegen') {
+    return {
+      text: `${gr(w, klein)} = ∎ ${gross} ∎ ${klein}`,
+      loesung: [ganz, rest],
+      felder: [gross, klein],
+      antwort: `${gr(w, klein)} = ${zusammen}`,
+      eingabe: 'felder',
+      pruefung: basis(w),
+    };
+  }
+  if (p.komma && istZehnerpotenz(f) && rng.next() < 0.5) {
+    return { text: `${zusammen} = ∎ ${gross}`, loesung: w / f, antwort: `${zusammen} = ${alsGross(w, paar, g)}`, eingabe: 'zahl', komma: true, breit: true, pruefung: basis(w) };
+  }
+  return { text: `${zusammen} = ∎ ${klein}`, loesung: w, antwort: `${zusammen} = ${gr(w, klein)}`, eingabe: 'zahl', breit: true, pruefung: basis(w) };
+}
+
+function mehrere(p, rng, baue) {
+  const teile = [];
+  const gesehen = new Set();
+  let versuche = 0;
+  while (teile.length < (p.anzahl || 1)) {
+    const t = baue();
+    if (gesehen.has(t.text) && versuche++ < 50) continue;
+    gesehen.add(t.text);
+    teile.push(t);
+  }
+  return teile;
+}
+
+const ANWEISUNG = {
+  ganz: 'Rechne in die angegebene Einheit um.',
+  komma: 'Rechne um. Achte auf das Komma.',
+  gemischt: 'Schreibe in einer Einheit.',
+  zerlegen: 'Schreibe mit zwei Einheiten.',
+};
+
+const umrechnen = {
+  name: 'umrechnen',
+  pruefe: pruefeGroesse,
+  erzeuge(p, rng) {
+    return { anweisung: ANWEISUNG[p.modus || 'ganz'], teile: mehrere(p, rng, () => einTeil(p, rng)) };
+  },
+};
+
+// 3,5 kg ∎ 3 050 g – mit typischen Fehlern als knappe Gegenwerte
+const vergleichen = {
+  name: 'groessen-vergleichen',
+  pruefe(p) { pruefeGroesse({ ...p, modus: 'gemischt' }); },
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Setze <, > oder = ein.',
+      teile: mehrere(p, rng, () => {
+        const g = rng.pick(p.groessen || [p.groesse]);
+        const paar = rng.pick(paare(g, { ...p, modus: 'gemischt' }));
+        const { klein, f } = paar;
+        let links, w, falle;
+        if (g === 'zeit') {
+          // 1 h 30 min ∎ 130 min: Falle ist "Stunden wie Hunderter lesen"
+          const ganz = rng.int(1, 5);
+          const rest = glatterRest(rng, f);
+          w = ganz * f + rest;
+          links = `${gr(ganz, paar.gross)} ${gr(rest, klein)}`;
+          falle = ganz * 100 + rest;
+        } else {
+          // 3,5 kg ∎ 3 050 g: Falle ist "Nachkommaziffern als kleine Einheit lesen"
+          const d = Math.min(2, stellen(f));
+          const z = 10 ** d;
+          let rest;
+          do rest = rng.int(1, z - 1); while (rest % 10 === 0 && d > 1 && rng.next() < 0.5);
+          const ganz = rng.int(1, 9);
+          w = ((ganz * z + rest) * f) / z;
+          links = alsGross(w, paar, g);
+          falle = ganz * f + rest;
+        }
+        const schritt = g === 'zeit' ? 5 : f / 10;
+        const kandidaten = [...new Set([w, w + schritt, w - schritt, falle])].filter((x) => x > 0);
+        const rechtsWert = rng.pick(kandidaten);
+        const zeichen = w < rechtsWert ? '<' : w > rechtsWert ? '>' : '=';
+        const rechts = gr(rechtsWert, klein);
+        return {
+          text: `${links} ∎ ${rechts}`,
+          loesung: zeichen,
+          antwort: `${links} ${zeichen} ${rechts}`,
+          eingabe: 'wahl',
+          optionen: ['<', '>', '='],
+          pruefung: { groesse: g, links: w, rechts: rechtsWert, f },
+        };
+      }),
+    };
+  },
+};
+
+module.exports = [umrechnen, vergleichen];
+module.exports.GROESSEN = GROESSEN;
+module.exports.euro = euro;
+module.exports.gr = gr;
 
 }, {"../../lib/zahlen":5}],
 /* diagramm.js */ [function (module, exports, require) {
@@ -1004,7 +1305,196 @@ const diagramm = {
 
 module.exports = [diagramm];
 
-}, {}]];
+}, {}],
+/* kommazahlen.js */ [function (module, exports, require) {
+// Kommazahlen (Dezimalbrüche): Komma verschieben bei · und : 10/100/1000, addieren, subtrahieren,
+// mit einer einstelligen Zahl multiplizieren und dividieren, vergleichen, Stellenwerte.
+// Eine Kommazahl ist intern { z, d } = z / 10^d mit ganzem z; erst die Lösung wird zur JS-Zahl.
+const { fmt } = require('../../lib/zahlen');
+
+const ZEICHEN = { '+': '+', '-': '−', '*': '·', ':': ':' };
+const wert = ({ z, d }) => z / 10 ** d;
+// mit festen Nachkommastellen, auch mit Endnullen: { z: 210, d: 2 } → "2,10"
+const text = ({ z, d }) => (d === 0 ? fmt(z) : `${fmt(Math.floor(z / 10 ** d))},${String(z % 10 ** d).padStart(d, '0')}`);
+// auf gemeinsame Nachkommastellen bringen
+const auf = ({ z, d }, D) => z * 10 ** (D - d);
+
+// Kommazahl mit genau d Nachkommastellen (letzte Ziffer ≠ 0), Ganzteil in [0, maxGanz]
+function zieheDez(rng, d, maxGanz) {
+  if (d === 0) return { z: rng.int(2, maxGanz), d: 0 };
+  let rest;
+  do rest = rng.int(1, 10 ** d - 1); while (rest % 10 === 0);
+  return { z: rng.int(0, maxGanz) * 10 ** d + rest, d };
+}
+
+function mehrere(p, rng, baue) {
+  const teile = [];
+  const gesehen = new Set();
+  let versuche = 0;
+  while (teile.length < (p.anzahl || 1)) {
+    const t = baue();
+    if (gesehen.has(t.text) && versuche++ < 50) continue;
+    gesehen.add(t.text);
+    teile.push(t);
+  }
+  return teile;
+}
+
+function pruefeListe(werte, erlaubt, name) {
+  for (const w of werte) if (!erlaubt.includes(w)) throw new Error(`${name}: unbekannt "${w}"`);
+}
+
+// 3,45 · 100 = 345   |   72,5 : 10 = 7,25   |   3,45 · ∎ = 345
+const verschieben = {
+  name: 'komma-verschieben',
+  pruefe(p) {
+    pruefeListe(p.faktoren || [10, 100, 1000], [10, 100, 1000], 'faktoren');
+    pruefeListe(p.operationen || ['*', ':'], ['*', ':'], 'operationen');
+  },
+  erzeuge(p, rng) {
+    const faktoren = p.faktoren || [10, 100, 1000];
+    const ops = p.operationen || ['*', ':'];
+    const luecke = p.modus === 'platzhalter';
+    return {
+      anweisung: luecke ? 'Mit welcher Zahl wurde gerechnet? Wähle für ∎.' : 'Berechne. Verschiebe das Komma.',
+      teile: mehrere(p, rng, () => {
+        const d = rng.int(0, p.stellen ?? 2);
+        const a = zieheDez(rng, d, d === 0 ? 999 : 99);
+        const op = rng.pick(ops);
+        // beim Teilen höchstens 3 Nachkommastellen im Ergebnis
+        const f = rng.pick(op === ':' ? faktoren.filter((x) => a.d + String(x).length - 1 <= 3) : faktoren);
+        const k = String(f).length - 1;
+        const c = op === '*' ? { z: a.z * f, d: a.d } : { z: a.z, d: a.d + k };
+        const loesung = wert(c);
+        const gleichung = `${text(a)} ${ZEICHEN[op]} ${fmt(f)} = ${fmt(loesung)}`;
+        if (luecke) {
+          return {
+            text: `${text(a)} ${ZEICHEN[op]} ∎ = ${fmt(loesung)}`,
+            loesung: fmt(f),
+            antwort: gleichung,
+            eingabe: 'wahl',
+            optionen: faktoren.map(fmt),
+            pruefung: { a: wert(a), op, f, c: loesung },
+          };
+        }
+        return {
+          text: `${text(a)} ${ZEICHEN[op]} ${fmt(f)} =`,
+          loesung,
+          antwort: gleichung,
+          eingabe: 'zahl',
+          komma: true,
+          pruefung: { a: wert(a), op, f, c: loesung },
+        };
+      }),
+    };
+  },
+};
+
+// 4,5 + 2,37   |   8,2 − 3,65   |   2,35 · 4   |   9,6 : 3
+const rechnen = {
+  name: 'komma-rechnen',
+  pruefe(p) { pruefeListe(p.operationen || ['+', '-'], Object.keys(ZEICHEN), 'operationen'); },
+  erzeuge(p, rng) {
+    const ops = p.operationen || ['+', '-'];
+    const maxGanz = p.maxGanz || 50;
+    return {
+      anweisung: 'Berechne.',
+      teile: mehrere(p, rng, () => {
+        const op = rng.pick(ops);
+        let a, b, c;
+        if (op === '+' || op === '-') {
+          a = zieheDez(rng, rng.int(1, 2), maxGanz);
+          b = zieheDez(rng, rng.int(op === '-' ? 1 : 0, 2), maxGanz);
+          const D = Math.max(a.d, b.d);
+          if (op === '-' && auf(a, D) < auf(b, D)) [a, b] = [b, a];
+          c = { z: op === '+' ? auf(a, D) + auf(b, D) : auf(a, D) - auf(b, D), d: D };
+          b = text(b);
+        } else {
+          const n = rng.int(2, 9);
+          const x = zieheDez(rng, rng.int(1, 2), Math.min(maxGanz, 20));
+          // Division geht auf: (x · n) : n = x
+          if (op === '*') { a = x; c = { z: x.z * n, d: x.d }; } else { a = { z: x.z * n, d: x.d }; c = x; }
+          b = String(n);
+        }
+        const loesung = wert(c);
+        return {
+          text: `${text(a)} ${ZEICHEN[op]} ${b} =`,
+          loesung,
+          antwort: `${text(a)} ${ZEICHEN[op]} ${b} = ${fmt(loesung)}`,
+          eingabe: 'zahl',
+          komma: true,
+          pruefung: { a: wert(a), op, b, c: loesung },
+        };
+      }),
+    };
+  },
+};
+
+// 3,5 ∎ 3,45 – mehr Ziffern heißt nicht größer; Endnullen ändern nichts
+const vergleichen = {
+  name: 'komma-vergleichen',
+  pruefe() {},
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Setze <, > oder = ein.',
+      teile: mehrere(p, rng, () => {
+        const a = zieheDez(rng, rng.int(1, 2), 9);
+        let b;
+        if (rng.next() < 0.2) b = { z: a.z * 10, d: a.d + 1 }; // 2,1 = 2,10
+        else {
+          const ganz = Math.floor(a.z / 10 ** a.d) + (rng.next() < 0.15 ? rng.pick([-1, 1]) : 0);
+          const d = rng.int(1, 3);
+          do b = zieheDez(rng, d, 0); while (b.z === 0);
+          b = { z: Math.max(0, ganz) * 10 ** d + b.z, d };
+        }
+        const D = Math.max(a.d, b.d);
+        const [x, y] = rng.next() < 0.5 ? [a, b] : [b, a];
+        const zeichen = auf(x, D) < auf(y, D) ? '<' : auf(x, D) > auf(y, D) ? '>' : '=';
+        return {
+          text: `${text(x)} ∎ ${text(y)}`,
+          loesung: zeichen,
+          antwort: `${text(x)} ${zeichen} ${text(y)}`,
+          eingabe: 'wahl',
+          optionen: ['<', '>', '='],
+          pruefung: { links: text(x), rechts: text(y) },
+        };
+      }),
+    };
+  },
+};
+
+const STELLEN = ['Zehner', 'Einer', 'Zehntel', 'Hundertstel', 'Tausendstel'];
+
+// "Welchen Stellenwert hat die Ziffer 3 in 25,738?" – alle Ziffern verschieden, damit es eindeutig ist
+const stellenwert = {
+  name: 'stellenwert-komma',
+  pruefe() {},
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Bestimme den Stellenwert der Ziffer.',
+      teile: mehrere(p, rng, () => {
+        const ziffern = rng.shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 5);
+        const zahl = `${ziffern[0]}${ziffern[1]},${ziffern.slice(2).join('')}`;
+        const i = rng.int(1, 4); // nicht die Zehnerstelle vorn, die ist zu leicht
+        const richtig = STELLEN[i];
+        const andere = rng.shuffle(STELLEN.filter((s) => s !== richtig)).slice(0, 3);
+        return {
+          text: `Welchen Stellenwert hat die Ziffer ${ziffern[i]} in ${zahl}?`,
+          loesung: richtig,
+          antwort: `${ziffern[i]} steht an der ${richtig}stelle.`,
+          eingabe: 'wahl',
+          optionen: STELLEN.filter((s) => s === richtig || andere.includes(s)),
+          pruefung: { zahl, ziffer: ziffern[i], stelle: i },
+        };
+      }),
+    };
+  },
+};
+
+module.exports = [verschieben, rechnen, vergleichen, stellenwert];
+module.exports.text = text;
+
+}, {"../../lib/zahlen":5}]];
   var cache = {};
   function load(id) {
     if (cache[id]) return cache[id].exports;
@@ -1014,7 +1504,7 @@ module.exports = [diagramm];
   }
   window["LW"] = load(0);
 })();</script>
-<script>window.FACH = {"id":"mathematik","titel":"Mathematik","themen":[{"thema":"grosse-zahlen","titel":"Große Zahlen lesen und schreiben","icon":"🔢","reihenfolge":1,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Dreiergruppen helfen beim Lesen.\u003c/strong> Teile die Zahl von rechts in Dreierpäckchen:\nEiner – Tausender – Millionen – Milliarden – Billionen.\u003c/p>\n\u003ctable>\n\u003cthead>\n\u003ctr>\n\u003cth>Mrd.\u003c/th>\n\u003cth>Mio.\u003c/th>\n\u003cth>Tsd.\u003c/th>\n\u003cth>E\u003c/th>\n\u003c/tr>\n\u003c/thead>\n\u003ctbody>\u003ctr>\n\u003ctd>2\u003c/td>\n\u003ctd>045\u003c/td>\n\u003ctd>300\u003c/td>\n\u003ctd>018\u003c/td>\n\u003c/tr>\n\u003c/tbody>\u003c/table>\n\u003cp>2 045 300 018 = zwei Milliarden fünfundvierzig Millionen dreihunderttausendachtzehn\u003c/p>\n\u003cp>\u003cstrong>Schreibregel:\u003c/strong> Zahlen unter einer Million schreibt man zusammen. \u003cem>Million\u003c/em>, \u003cem>Milliarde\u003c/em> und \u003cem>Billion\u003c/em> stehen als eigene Wörter.\u003c/p>\n","wissenswertes":["Eine Billion hat 12 Nullen: 1 000 000 000 000. Wenn du jede Sekunde eins weiterzählst, brauchst du dafür über 31 000 Jahre!","Auf der Erde leben ungefähr 8 Milliarden Menschen."],"aufgaben":[{"id":"dreiergruppen","typ":"multiple_choice","frage":"Wie viele Nullen hat eine Million?","optionen":["3","6","9","12"],"loesung":"6","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"in-ziffern-mio","typ":"eingabe","generator":"zahl-in-ziffern","parameter":{"bereich":[100000,99999999]},"anzahl":2,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"in-worten","typ":"freitext","generator":"zahl-in-worten","parameter":{"bereich":[10000,9999999]},"anzahl":2,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"stellenwert","typ":"multiple_choice","generator":"stellenwert","parameter":{"bereich":[100000,999999999]},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"vergleichen","typ":"multiple_choice","generator":"vergleichen","parameter":{"bereich":[10000,99999999]},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":2},{"id":"vorgaenger-nachfolger","typ":"eingabe","generator":"vorgaenger-nachfolger","parameter":{"bereich":[1000,9999999]},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":3},{"id":"in-ziffern-mrd","typ":"eingabe","generator":"zahl-in-ziffern","parameter":{"bereich":[1000000000,999999999999]},"anzahl":1,"be":1,"schwierigkeit":3,"prioritaet":3}],"blatt":"../blaetter/mathematik/grosse-zahlen.pdf","loesung":"../blaetter/mathematik/grosse-zahlen_loesung.pdf"},{"thema":"runden","titel":"Natürliche Zahlen runden","icon":"🎯","reihenfolge":2,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>So rundest du:\u003c/strong> Schau auf die Ziffer \u003cstrong>rechts neben\u003c/strong> der Rundungsstelle.\u003c/p>\n\u003cul>\n\u003cli>Ist sie \u003cstrong>0, 1, 2, 3 oder 4\u003c/strong>, wird \u003cstrong>abgerundet\u003c/strong>: Die Rundungsstelle bleibt gleich.\u003c/li>\n\u003cli>Ist sie \u003cstrong>5, 6, 7, 8 oder 9\u003c/strong>, wird \u003cstrong>aufgerundet\u003c/strong>: Die Rundungsstelle wird um 1 größer.\u003c/li>\n\u003cli>Alle Ziffern rechts von der Rundungsstelle werden zu \u003cstrong>0\u003c/strong>.\u003c/li>\n\u003c/ul>\n\u003cp>Beispiel: 34 761 auf Hunderter → die Zehnerziffer ist 6 → aufrunden → \u003cstrong>34 800\u003c/strong>\u003c/p>\n","wissenswertes":["Das Zeichen ≈ bedeutet „ungefähr gleich“. Man schreibt zum Beispiel 34 761 ≈ 34 800.","Auch Zeitungen runden: Wenn dort „rund 2 Millionen Besucher“ steht, waren es nicht genau 2 000 000."],"aufgaben":[{"id":"entscheidende-ziffer","typ":"multiple_choice","frage":"Du rundest auf Hunderter. Auf welche Ziffer musst du schauen?","optionen":["Einerziffer","Zehnerziffer","Hunderterziffer","Tausenderziffer"],"loesung":"Zehnerziffer","be":1,"schwierigkeit":1,"prioritaet":2},{"id":"halb-aufrunden","typ":"richtig_falsch","frage":"4 500 auf Tausender gerundet ergibt 5 000.","loesung":true,"be":1,"schwierigkeit":1,"prioritaet":2},{"id":"runden-einfach","typ":"rechnung","generator":"runden","parameter":{"stellen":["zehner","hunderter","tausender"],"ziffern":[5,6]},"anzahl":3,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"runden-reihe","typ":"rechnung","generator":"runden-reihe","parameter":{"stellen":["zehner","hunderter","tausender","zehntausender","hunderttausender"],"ziffern":[7]},"be":5,"schwierigkeit":2,"prioritaet":1},{"id":"runden-uebertrag","typ":"rechnung","generator":"runden","parameter":{"stellen":["hunderter","tausender"],"ziffern":[5,6],"uebertrag":true},"anzahl":2,"be":1,"schwierigkeit":3,"prioritaet":3},{"id":"welche-zahl","typ":"multiple_choice","frage":"Welche Zahl ergibt auf Zehner gerundet 350?","optionen":["344","349","355","360"],"loesung":"349","be":1,"schwierigkeit":2,"prioritaet":2},{"id":"rueckwaerts","typ":"rechnung","generator":"runden-rueckwaerts","parameter":{"stellen":["zehner","hunderter","tausender"]},"anzahl":2,"be":1,"schwierigkeit":3,"prioritaet":2}],"blatt":"../blaetter/mathematik/runden.pdf","loesung":"../blaetter/mathematik/runden_loesung.pdf"},{"thema":"grundrechenarten","titel":"Rechnen mit natürlichen Zahlen","icon":"➗","reihenfolge":3,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Die Fachbegriffe\u003c/strong>\u003c/p>\n\u003ctable>\n\u003cthead>\n\u003ctr>\n\u003cth>Rechnung\u003c/th>\n\u003cth>Teile\u003c/th>\n\u003cth>Ergebnis\u003c/th>\n\u003c/tr>\n\u003c/thead>\n\u003ctbody>\u003ctr>\n\u003ctd>13 + 5 = 18\u003c/td>\n\u003ctd>Summand + Summand\u003c/td>\n\u003ctd>\u003cstrong>Summe\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>20 − 6 = 14\u003c/td>\n\u003ctd>Minuend − Subtrahend\u003c/td>\n\u003ctd>\u003cstrong>Differenz\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>4 · 7 = 28\u003c/td>\n\u003ctd>Faktor · Faktor\u003c/td>\n\u003ctd>\u003cstrong>Produkt\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>36 : 4 = 9\u003c/td>\n\u003ctd>Dividend : Divisor\u003c/td>\n\u003ctd>\u003cstrong>Quotient\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003c/tbody>\u003c/table>\n\u003cp>\u003cstrong>Kästchen-Trick:\u003c/strong> Rechne mit der Umkehraufgabe. 47 − ∎ = 23 → 47 − 23 = 24, also ∎ = 24. Probe: 47 − 24 = 23 ✓\u003c/p>\n","wissenswertes":["Durch 0 kann man nicht teilen – das ist in der Mathematik verboten!","Jede Zahl mal 1 bleibt sie selbst. Jede Zahl mal 0 ergibt 0."],"aufgaben":[{"id":"begriff-produkt","typ":"multiple_choice","frage":"Wie heißt das Ergebnis einer Multiplikation?","optionen":["Summe","Differenz","Produkt","Quotient"],"loesung":"Produkt","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"begriff-quotient","typ":"multiple_choice","frage":"Wie heißt das Ergebnis einer Division?","optionen":["Summe","Differenz","Produkt","Quotient"],"loesung":"Quotient","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"begriffe-zuordnen","typ":"zuordnung","frage":"Ordne jedem Rechenzeichen den Namen des Ergebnisses zu.","paare":[["+","Summe"],["−","Differenz"],["·","Produkt"],[":","Quotient"]],"be":2,"schwierigkeit":1,"prioritaet":3},{"id":"kopfrechnen","typ":"rechnung","generator":"kopfrechnen","parameter":{"operationen":["+","-","*",":"],"bereich":[10,150],"faktor":[11,25]},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"platzhalter","typ":"rechnung","generator":"platzhalter","parameter":{"operationen":["+","-","*",":"],"bereich":[5,120],"faktor":[6,15]},"anzahl":4,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"fachbegriffe","typ":"rechnung","generator":"fachbegriffe","parameter":{"operationen":["+","-","*",":"],"bereich":[5,60],"faktor":[5,19]},"anzahl":4,"be":2,"schwierigkeit":2,"prioritaet":1},{"id":"verkettet","typ":"rechnung","generator":"verkettet","parameter":{"operationen":["+","-"],"bereich":[5,40]},"anzahl":1,"be":2,"schwierigkeit":3,"prioritaet":2},{"id":"wie-oft","typ":"rechnung","generator":"wie-oft","parameter":{"bereich":[6,15],"faktor":[11,25]},"anzahl":1,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"null-eins","typ":"richtig_falsch","frage":"0 : 5 = 0","loesung":true,"be":1,"schwierigkeit":2,"prioritaet":3}],"blatt":"../blaetter/mathematik/grundrechenarten.pdf","loesung":"../blaetter/mathematik/grundrechenarten_loesung.pdf"},{"thema":"sachaufgaben","titel":"Sachaufgaben lösen","icon":"🧺","reihenfolge":4,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>In 4 Schritten zur Lösung\u003c/strong>\u003c/p>\n\u003col>\n\u003cli>\u003cstrong>Lesen:\u003c/strong> Was ist gegeben? Was ist gesucht? Unterstreiche die Zahlen.\u003c/li>\n\u003cli>\u003cstrong>Planen:\u003c/strong> Welche Rechnung passt? Eine Skizze oder Tabelle hilft.\u003c/li>\n\u003cli>\u003cstrong>Rechnen:\u003c/strong> Schreib den Rechenweg ordentlich auf.\u003c/li>\n\u003cli>\u003cstrong>Antworten:\u003c/strong> Schreib einen ganzen \u003cstrong>Antwortsatz\u003c/strong> und prüfe: Kann das stimmen?\u003c/li>\n\u003c/ol>\n","wissenswertes":["Rückwärts rechnen ist ein Profi-Trick: Wenn du das Ende kennst, gehst du mit den Umkehraufgaben zum Anfang zurück."],"aufgaben":[{"id":"tierbeine","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["tierbeine"]},"be":2,"schwierigkeit":1,"prioritaet":1},{"id":"rueckgeld","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["rueckgeld"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"sparen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["sparen"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"busse","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["busse"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"mitglieder","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["mitglieder"]},"be":2,"schwierigkeit":3,"prioritaet":1},{"id":"fahrkarten","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["fahrkarten"]},"be":2,"schwierigkeit":3,"prioritaet":1}],"blatt":"../blaetter/mathematik/sachaufgaben.pdf","loesung":"../blaetter/mathematik/sachaufgaben_loesung.pdf"},{"thema":"daten-diagramme","titel":"Daten erfassen und darstellen","icon":"📊","reihenfolge":5,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Strichliste:\u003c/strong> Jeder Strich ist eine Nennung. Der 5. Strich wird quer durch die ersten vier gezogen – so zählst du schnell in Fünferpäckchen.\u003c/p>\n\u003cp>\u003cstrong>Säulendiagramm:\u003c/strong> Die Säulen stehen \u003cstrong>senkrecht\u003c/strong> nebeneinander.\n\u003cstrong>Balkendiagramm:\u003c/strong> Die Balken liegen \u003cstrong>waagerecht\u003c/strong> übereinander.\u003c/p>\n\u003cp>So zeichnest du ein Diagramm:\u003c/p>\n\u003col>\n\u003cli>Achsen mit dem Lineal zeichnen\u003c/li>\n\u003cli>Achsen beschriften und gleichmäßig einteilen (z. B. 1 Kästchen = 1 Nennung)\u003c/li>\n\u003cli>Säulen/Balken gleich breit und mit Abstand zeichnen\u003c/li>\n\u003cli>Überschrift nicht vergessen!\u003c/li>\n\u003c/ol>\n","wissenswertes":["Diagramme helfen, viele Zahlen auf einen Blick zu vergleichen. Zeitungen und Nachrichten benutzen sie ständig."],"aufgaben":[{"id":"saeule-waagerecht","typ":"richtig_falsch","frage":"In einem Säulendiagramm liegen die Säulen waagerecht.","loesung":false,"be":1,"schwierigkeit":1,"prioritaet":3},{"id":"strichliste","typ":"multiple_choice","frage":"Eine Strichliste zeigt zwei Fünferpäckchen und drei einzelne Striche. Wie viele Nennungen sind das?","optionen":["8","11","13","15"],"loesung":"13","be":1,"schwierigkeit":1,"prioritaet":2},{"id":"ablesen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"saeule","kategorien":5},"anzahl":3,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"ablesen-balken","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"balken","kategorien":4},"anzahl":2,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"saeulen-zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"saeule","quelle":"strichliste","kategorien":5,"max":10},"be":6,"schwierigkeit":2,"prioritaet":1},{"id":"balken-zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"balken","quelle":"tabelle","kategorien":5,"max":10},"be":6,"schwierigkeit":2,"prioritaet":2}],"blatt":"../blaetter/mathematik/daten-diagramme.pdf","loesung":"../blaetter/mathematik/daten-diagramme_loesung.pdf"}],"sw":"../sw.js","swScope":"../"};</script>
+<script>window.FACH = {"id":"mathematik","titel":"Mathematik","themen":[{"thema":"grosse-zahlen","titel":"Große Zahlen lesen und schreiben","icon":"🔢","reihenfolge":1,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Dreiergruppen helfen beim Lesen.\u003c/strong> Teile die Zahl von rechts in Dreierpäckchen:\nEiner – Tausender – Millionen – Milliarden – Billionen.\u003c/p>\n\u003ctable>\n\u003cthead>\n\u003ctr>\n\u003cth>Mrd.\u003c/th>\n\u003cth>Mio.\u003c/th>\n\u003cth>Tsd.\u003c/th>\n\u003cth>E\u003c/th>\n\u003c/tr>\n\u003c/thead>\n\u003ctbody>\u003ctr>\n\u003ctd>2\u003c/td>\n\u003ctd>045\u003c/td>\n\u003ctd>300\u003c/td>\n\u003ctd>018\u003c/td>\n\u003c/tr>\n\u003c/tbody>\u003c/table>\n\u003cp>2 045 300 018 = zwei Milliarden fünfundvierzig Millionen dreihunderttausendachtzehn\u003c/p>\n\u003cp>\u003cstrong>Schreibregel:\u003c/strong> Zahlen unter einer Million schreibt man zusammen. \u003cem>Million\u003c/em>, \u003cem>Milliarde\u003c/em> und \u003cem>Billion\u003c/em> stehen als eigene Wörter.\u003c/p>\n","wissenswertes":["Eine Billion hat 12 Nullen: 1 000 000 000 000. Wenn du jede Sekunde eins weiterzählst, brauchst du dafür über 31 000 Jahre!","Auf der Erde leben ungefähr 8 Milliarden Menschen."],"aufgaben":[{"id":"dreiergruppen","typ":"multiple_choice","frage":"Wie viele Nullen hat eine Million?","optionen":["3","6","9","12"],"loesung":"6","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"in-ziffern-mio","typ":"eingabe","generator":"zahl-in-ziffern","parameter":{"bereich":[100000,99999999]},"anzahl":2,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"in-worten","typ":"freitext","generator":"zahl-in-worten","parameter":{"bereich":[10000,9999999]},"anzahl":2,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"stellenwert","typ":"multiple_choice","generator":"stellenwert","parameter":{"bereich":[100000,999999999]},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"vergleichen","typ":"multiple_choice","generator":"vergleichen","parameter":{"bereich":[10000,99999999]},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":2},{"id":"vorgaenger-nachfolger","typ":"eingabe","generator":"vorgaenger-nachfolger","parameter":{"bereich":[1000,9999999]},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":3},{"id":"in-ziffern-mrd","typ":"eingabe","generator":"zahl-in-ziffern","parameter":{"bereich":[1000000000,999999999999]},"anzahl":1,"be":1,"schwierigkeit":3,"prioritaet":3}],"blatt":"../blaetter/mathematik/grosse-zahlen.pdf","loesung":"../blaetter/mathematik/grosse-zahlen_loesung.pdf"},{"thema":"runden","titel":"Natürliche Zahlen runden","icon":"🎯","reihenfolge":2,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>So rundest du:\u003c/strong> Schau auf die Ziffer \u003cstrong>rechts neben\u003c/strong> der Rundungsstelle.\u003c/p>\n\u003cul>\n\u003cli>Ist sie \u003cstrong>0, 1, 2, 3 oder 4\u003c/strong>, wird \u003cstrong>abgerundet\u003c/strong>: Die Rundungsstelle bleibt gleich.\u003c/li>\n\u003cli>Ist sie \u003cstrong>5, 6, 7, 8 oder 9\u003c/strong>, wird \u003cstrong>aufgerundet\u003c/strong>: Die Rundungsstelle wird um 1 größer.\u003c/li>\n\u003cli>Alle Ziffern rechts von der Rundungsstelle werden zu \u003cstrong>0\u003c/strong>.\u003c/li>\n\u003c/ul>\n\u003cp>Beispiel: 34 761 auf Hunderter → die Zehnerziffer ist 6 → aufrunden → \u003cstrong>34 800\u003c/strong>\u003c/p>\n","wissenswertes":["Das Zeichen ≈ bedeutet „ungefähr gleich“. Man schreibt zum Beispiel 34 761 ≈ 34 800.","Auch Zeitungen runden: Wenn dort „rund 2 Millionen Besucher“ steht, waren es nicht genau 2 000 000."],"aufgaben":[{"id":"entscheidende-ziffer","typ":"multiple_choice","frage":"Du rundest auf Hunderter. Auf welche Ziffer musst du schauen?","optionen":["Einerziffer","Zehnerziffer","Hunderterziffer","Tausenderziffer"],"loesung":"Zehnerziffer","be":1,"schwierigkeit":1,"prioritaet":2},{"id":"halb-aufrunden","typ":"richtig_falsch","frage":"4 500 auf Tausender gerundet ergibt 5 000.","loesung":true,"be":1,"schwierigkeit":1,"prioritaet":2},{"id":"runden-einfach","typ":"rechnung","generator":"runden","parameter":{"stellen":["zehner","hunderter","tausender"],"ziffern":[5,6]},"anzahl":3,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"runden-reihe","typ":"rechnung","generator":"runden-reihe","parameter":{"stellen":["zehner","hunderter","tausender","zehntausender","hunderttausender"],"ziffern":[7]},"be":5,"schwierigkeit":2,"prioritaet":1},{"id":"runden-uebertrag","typ":"rechnung","generator":"runden","parameter":{"stellen":["hunderter","tausender"],"ziffern":[5,6],"uebertrag":true},"anzahl":2,"be":1,"schwierigkeit":3,"prioritaet":3},{"id":"welche-zahl","typ":"multiple_choice","frage":"Welche Zahl ergibt auf Zehner gerundet 350?","optionen":["344","349","355","360"],"loesung":"349","be":1,"schwierigkeit":2,"prioritaet":2},{"id":"rueckwaerts","typ":"rechnung","generator":"runden-rueckwaerts","parameter":{"stellen":["zehner","hunderter","tausender"]},"anzahl":2,"be":1,"schwierigkeit":3,"prioritaet":2}],"blatt":"../blaetter/mathematik/runden.pdf","loesung":"../blaetter/mathematik/runden_loesung.pdf"},{"thema":"grundrechenarten","titel":"Rechnen mit natürlichen Zahlen","icon":"➗","reihenfolge":3,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Die Fachbegriffe\u003c/strong>\u003c/p>\n\u003ctable>\n\u003cthead>\n\u003ctr>\n\u003cth>Rechnung\u003c/th>\n\u003cth>Teile\u003c/th>\n\u003cth>Ergebnis\u003c/th>\n\u003c/tr>\n\u003c/thead>\n\u003ctbody>\u003ctr>\n\u003ctd>13 + 5 = 18\u003c/td>\n\u003ctd>Summand + Summand\u003c/td>\n\u003ctd>\u003cstrong>Summe\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>20 − 6 = 14\u003c/td>\n\u003ctd>Minuend − Subtrahend\u003c/td>\n\u003ctd>\u003cstrong>Differenz\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>4 · 7 = 28\u003c/td>\n\u003ctd>Faktor · Faktor\u003c/td>\n\u003ctd>\u003cstrong>Produkt\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>36 : 4 = 9\u003c/td>\n\u003ctd>Dividend : Divisor\u003c/td>\n\u003ctd>\u003cstrong>Quotient\u003c/strong>\u003c/td>\n\u003c/tr>\n\u003c/tbody>\u003c/table>\n\u003cp>\u003cstrong>Kästchen-Trick:\u003c/strong> Rechne mit der Umkehraufgabe. 47 − ∎ = 23 → 47 − 23 = 24, also ∎ = 24. Probe: 47 − 24 = 23 ✓\u003c/p>\n","wissenswertes":["Durch 0 kann man nicht teilen – das ist in der Mathematik verboten!","Jede Zahl mal 1 bleibt sie selbst. Jede Zahl mal 0 ergibt 0."],"aufgaben":[{"id":"begriff-produkt","typ":"multiple_choice","frage":"Wie heißt das Ergebnis einer Multiplikation?","optionen":["Summe","Differenz","Produkt","Quotient"],"loesung":"Produkt","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"begriff-quotient","typ":"multiple_choice","frage":"Wie heißt das Ergebnis einer Division?","optionen":["Summe","Differenz","Produkt","Quotient"],"loesung":"Quotient","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"begriffe-zuordnen","typ":"zuordnung","frage":"Ordne jedem Rechenzeichen den Namen des Ergebnisses zu.","paare":[["+","Summe"],["−","Differenz"],["·","Produkt"],[":","Quotient"]],"be":2,"schwierigkeit":1,"prioritaet":3},{"id":"kopfrechnen","typ":"rechnung","generator":"kopfrechnen","parameter":{"operationen":["+","-","*",":"],"bereich":[10,150],"faktor":[11,25]},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"platzhalter","typ":"rechnung","generator":"platzhalter","parameter":{"operationen":["+","-","*",":"],"bereich":[5,120],"faktor":[6,15]},"anzahl":4,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"fachbegriffe","typ":"rechnung","generator":"fachbegriffe","parameter":{"operationen":["+","-","*",":"],"bereich":[5,60],"faktor":[5,19]},"anzahl":4,"be":2,"schwierigkeit":2,"prioritaet":1},{"id":"verkettet","typ":"rechnung","generator":"verkettet","parameter":{"operationen":["+","-"],"bereich":[5,40]},"anzahl":1,"be":2,"schwierigkeit":3,"prioritaet":2},{"id":"wie-oft","typ":"rechnung","generator":"wie-oft","parameter":{"bereich":[6,15],"faktor":[11,25]},"anzahl":1,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"null-eins","typ":"richtig_falsch","frage":"0 : 5 = 0","loesung":true,"be":1,"schwierigkeit":2,"prioritaet":3}],"blatt":"../blaetter/mathematik/grundrechenarten.pdf","loesung":"../blaetter/mathematik/grundrechenarten_loesung.pdf"},{"thema":"sachaufgaben","titel":"Sachaufgaben lösen","icon":"🧺","reihenfolge":4,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>In 4 Schritten zur Lösung\u003c/strong>\u003c/p>\n\u003col>\n\u003cli>\u003cstrong>Lesen:\u003c/strong> Was ist gegeben? Was ist gesucht? Unterstreiche die Zahlen.\u003c/li>\n\u003cli>\u003cstrong>Planen:\u003c/strong> Welche Rechnung passt? Eine Skizze oder Tabelle hilft.\u003c/li>\n\u003cli>\u003cstrong>Rechnen:\u003c/strong> Schreib den Rechenweg ordentlich auf.\u003c/li>\n\u003cli>\u003cstrong>Antworten:\u003c/strong> Schreib einen ganzen \u003cstrong>Antwortsatz\u003c/strong> und prüfe: Kann das stimmen?\u003c/li>\n\u003c/ol>\n","wissenswertes":["Rückwärts rechnen ist ein Profi-Trick: Wenn du das Ende kennst, gehst du mit den Umkehraufgaben zum Anfang zurück."],"aufgaben":[{"id":"tierbeine","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["tierbeine"]},"be":2,"schwierigkeit":1,"prioritaet":1},{"id":"rueckgeld","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["rueckgeld"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"sparen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["sparen"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"busse","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["busse"]},"be":2,"schwierigkeit":2,"prioritaet":2},{"id":"mitglieder","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["mitglieder"]},"be":2,"schwierigkeit":3,"prioritaet":1},{"id":"fahrkarten","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["fahrkarten"]},"be":2,"schwierigkeit":3,"prioritaet":1}],"blatt":"../blaetter/mathematik/sachaufgaben.pdf","loesung":"../blaetter/mathematik/sachaufgaben_loesung.pdf"},{"thema":"daten-diagramme","titel":"Daten erfassen und darstellen","icon":"📊","reihenfolge":5,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Strichliste:\u003c/strong> Jeder Strich ist eine Nennung. Der 5. Strich wird quer durch die ersten vier gezogen – so zählst du schnell in Fünferpäckchen.\u003c/p>\n\u003cp>\u003cstrong>Säulendiagramm:\u003c/strong> Die Säulen stehen \u003cstrong>senkrecht\u003c/strong> nebeneinander.\n\u003cstrong>Balkendiagramm:\u003c/strong> Die Balken liegen \u003cstrong>waagerecht\u003c/strong> übereinander.\u003c/p>\n\u003cp>So zeichnest du ein Diagramm:\u003c/p>\n\u003col>\n\u003cli>Achsen mit dem Lineal zeichnen\u003c/li>\n\u003cli>Achsen beschriften und gleichmäßig einteilen (z. B. 1 Kästchen = 1 Nennung)\u003c/li>\n\u003cli>Säulen/Balken gleich breit und mit Abstand zeichnen\u003c/li>\n\u003cli>Überschrift nicht vergessen!\u003c/li>\n\u003c/ol>\n","wissenswertes":["Diagramme helfen, viele Zahlen auf einen Blick zu vergleichen. Zeitungen und Nachrichten benutzen sie ständig."],"aufgaben":[{"id":"saeule-waagerecht","typ":"richtig_falsch","frage":"In einem Säulendiagramm liegen die Säulen waagerecht.","loesung":false,"be":1,"schwierigkeit":1,"prioritaet":3},{"id":"strichliste","typ":"multiple_choice","frage":"Eine Strichliste zeigt zwei Fünferpäckchen und drei einzelne Striche. Wie viele Nennungen sind das?","optionen":["8","11","13","15"],"loesung":"13","be":1,"schwierigkeit":1,"prioritaet":2},{"id":"ablesen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"saeule","kategorien":5},"anzahl":3,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"ablesen-balken","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"balken","kategorien":4},"anzahl":2,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"saeulen-zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"saeule","quelle":"strichliste","kategorien":5,"max":10},"be":6,"schwierigkeit":2,"prioritaet":1},{"id":"balken-zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"balken","quelle":"tabelle","kategorien":5,"max":10},"be":6,"schwierigkeit":2,"prioritaet":2}],"blatt":"../blaetter/mathematik/daten-diagramme.pdf","loesung":"../blaetter/mathematik/daten-diagramme_loesung.pdf"},{"thema":"laengen-massen","titel":"Längen und Massen umrechnen","icon":"📏","reihenfolge":6,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Umrechnungszahlen\u003c/strong>\u003c/p>\n\u003ctable>\n\u003cthead>\n\u003ctr>\n\u003cth>Länge\u003c/th>\n\u003cth>Masse\u003c/th>\n\u003c/tr>\n\u003c/thead>\n\u003ctbody>\u003ctr>\n\u003ctd>1 cm = 10 mm\u003c/td>\n\u003ctd>1 g = 1 000 mg\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>1 dm = 10 cm\u003c/td>\n\u003ctd>1 kg = 1 000 g\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>1 m = 10 dm = 100 cm\u003c/td>\n\u003ctd>1 t = 1 000 kg\u003c/td>\n\u003c/tr>\n\u003ctr>\n\u003ctd>1 km = 1 000 m\u003c/td>\n\u003ctd>\u003c/td>\n\u003c/tr>\n\u003c/tbody>\u003c/table>\n\u003cul>\n\u003cli>\u003cstrong>In die kleinere Einheit:\u003c/strong> mal die Umrechnungszahl. 3 kg = 3 · 1 000 g = \u003cstrong>3 000 g\u003c/strong>\u003c/li>\n\u003cli>\u003cstrong>In die größere Einheit:\u003c/strong> durch die Umrechnungszahl. 4 500 g = 4 500 : 1 000 kg = \u003cstrong>4,5 kg\u003c/strong>\u003c/li>\n\u003c/ul>\n\u003cp>\u003cstrong>Kommaschreibweise:\u003c/strong> 3,25 m = 3 m 25 cm = \u003cstrong>325 cm\u003c/strong>. Bei kg/g und km/m gehören \u003cstrong>drei\u003c/strong> Stellen hinter das Komma: 2 kg 50 g = 2,050 kg = \u003cstrong>2,05 kg\u003c/strong>.\u003c/p>\n","wissenswertes":["Ein Blatt Papier ist ungefähr 0,1 mm dick. 10 Blätter zusammen sind also etwa 1 mm dick.","Ein Blauwal kann mehr als 100 t wiegen – so viel wie rund 20 Elefanten."],"aufgaben":[{"id":"umrechnungszahlen","typ":"zuordnung","frage":"Ordne jeder Einheit zu, wie viel sie in der nächstkleineren Einheit ist.","paare":[["1 cm","10 mm"],["1 m","100 cm"],["1 km","1 000 m"],["1 kg","1 000 g"],["1 t","1 000 kg"]],"be":2,"schwierigkeit":1,"prioritaet":2},{"id":"laenge-ganz","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"laenge","modus":"ganz"},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"masse-ganz","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"masse","modus":"ganz"},"anzahl":3,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"laenge-komma","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"laenge","modus":"komma"},"anzahl":4,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"masse-komma","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"masse","modus":"komma"},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"gemischt","typ":"rechnung","generator":"umrechnen","parameter":{"groessen":["laenge","masse"],"modus":"gemischt","komma":true},"anzahl":4,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"zerlegen","typ":"rechnung","generator":"umrechnen","parameter":{"groessen":["laenge","masse"],"modus":"zerlegen"},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"vergleichen","typ":"rechnung","generator":"groessen-vergleichen","parameter":{"groessen":["laenge","masse"]},"anzahl":4,"be":1,"schwierigkeit":3,"prioritaet":2},{"id":"komma-falle","typ":"richtig_falsch","frage":"3 kg 50 g sind dasselbe wie 3,5 kg.","loesung":false,"be":1,"schwierigkeit":3,"prioritaet":3},{"id":"am-laengsten","typ":"multiple_choice","frage":"Welche Strecke ist am längsten?","optionen":["1,2 km","980 m","12 000 cm","1 100 000 mm"],"loesung":"1,2 km","be":1,"schwierigkeit":3,"prioritaet":3},{"id":"paket","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["pakete"]},"be":2,"schwierigkeit":2,"prioritaet":1},{"id":"schulweg","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["schulweg"]},"be":2,"schwierigkeit":3,"prioritaet":2}],"blatt":"../blaetter/mathematik/laengen-massen.pdf","loesung":"../blaetter/mathematik/laengen-massen_loesung.pdf"},{"thema":"zeit","titel":"Zeit umrechnen","icon":"⏱️","reihenfolge":7,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Umrechnungszahlen\u003c/strong>\u003c/p>\n\u003cul>\n\u003cli>1 min = 60 s · 1 h = 60 min\u003c/li>\n\u003cli>1 d = 24 h · 1 h = 3 600 s\u003c/li>\n\u003c/ul>\n\u003cp>\u003cstrong>Achtung:\u003c/strong> Bei der Zeit ist die Umrechnungszahl \u003cstrong>60\u003c/strong> (oder 24), nicht 10, 100 oder 1 000!\u003c/p>\n\u003cul>\n\u003cli>2 h 15 min = 120 min + 15 min = \u003cstrong>135 min\u003c/strong>\u003c/li>\n\u003cli>150 min = 120 min + 30 min = \u003cstrong>2 h 30 min\u003c/strong>\u003c/li>\n\u003c/ul>\n\u003cp>\u003cstrong>Zeitspannen\u003c/strong> rechnest du am besten über die volle Stunde: 14:35 Uhr → 15:00 Uhr (25 min) → 16:00 Uhr (60 min) → 16:10 Uhr (10 min), zusammen \u003cstrong>95 min\u003c/strong>.\u003c/p>\n","wissenswertes":["Ein Tag hat 86 400 Sekunden.","Dass eine Stunde 60 Minuten hat, geht auf die Babylonier zurück. Sie haben vor über 4 000 Jahren gern mit der Zahl 60 gerechnet."],"aufgaben":[{"id":"umrechnungszahlen","typ":"zuordnung","frage":"Ordne richtig zu.","paare":[["1 min","60 s"],["1 h","60 min"],["1 d","24 h"],["eine halbe Stunde","30 min"],["eine Viertelstunde","15 min"]],"be":2,"schwierigkeit":1,"prioritaet":2},{"id":"zeit-ganz","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"zeit","modus":"ganz"},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"sekunden-stunde","typ":"multiple_choice","frage":"Wie viele Sekunden hat eine Stunde?","optionen":["60","360","3 600","6 000"],"loesung":"3 600","be":1,"schwierigkeit":2,"prioritaet":3},{"id":"gemischt","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"zeit","einheiten":["s","min","h"],"modus":"gemischt"},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"zerlegen","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"zeit","einheiten":["s","min","h"],"modus":"zerlegen"},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"vergleichen","typ":"rechnung","generator":"groessen-vergleichen","parameter":{"groesse":"zeit","einheiten":["s","min","h"]},"anzahl":3,"be":1,"schwierigkeit":3,"prioritaet":2},{"id":"hundert-falle","typ":"richtig_falsch","frage":"1 h 30 min sind 130 min.","loesung":false,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"fahrzeit","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["fahrzeit"]},"be":2,"schwierigkeit":2,"prioritaet":1},{"id":"training","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["training"]},"be":2,"schwierigkeit":3,"prioritaet":2}],"blatt":"../blaetter/mathematik/zeit.pdf","loesung":"../blaetter/mathematik/zeit_loesung.pdf"},{"thema":"kommazahlen","titel":"Kommazahlen: Komma verschieben und rechnen","icon":"🔟","reihenfolge":8,"klasse":5,"erklaerungHtml":"\u003cp>\u003cstrong>Stellenwerte hinter dem Komma\u003c/strong>\u003c/p>\n\u003ctable>\n\u003cthead>\n\u003ctr>\n\u003cth>Z\u003c/th>\n\u003cth>E\u003c/th>\n\u003cth>,\u003c/th>\n\u003cth>z\u003c/th>\n\u003cth>h\u003c/th>\n\u003cth>t\u003c/th>\n\u003c/tr>\n\u003c/thead>\n\u003ctbody>\u003ctr>\n\u003ctd>2\u003c/td>\n\u003ctd>3\u003c/td>\n\u003ctd>,\u003c/td>\n\u003ctd>4\u003c/td>\n\u003ctd>5\u003c/td>\n\u003ctd>7\u003c/td>\n\u003c/tr>\n\u003c/tbody>\u003c/table>\n\u003cp>z = Zehntel, h = Hundertstel, t = Tausendstel. 23,457 hat 4 Zehntel, 5 Hundertstel und 7 Tausendstel.\u003c/p>\n\u003cp>\u003cstrong>Komma verschieben\u003c/strong>\u003c/p>\n\u003cul>\n\u003cli>\u003cstrong>· 10, · 100, · 1 000:\u003c/strong> Komma um 1, 2, 3 Stellen nach \u003cstrong>rechts\u003c/strong>. 3,45 · 100 = \u003cstrong>345\u003c/strong>\u003c/li>\n\u003cli>\u003cstrong>: 10, : 100, : 1 000:\u003c/strong> Komma um 1, 2, 3 Stellen nach \u003cstrong>links\u003c/strong>. 4,5 : 100 = \u003cstrong>0,045\u003c/strong>\u003c/li>\n\u003cli>Fehlende Stellen mit \u003cstrong>Nullen\u003c/strong> auffüllen: 0,8 · 100 = \u003cstrong>80\u003c/strong>\u003c/li>\n\u003c/ul>\n\u003cp>\u003cstrong>Plus und minus:\u003c/strong> Komma unter Komma schreiben, Endnullen ergänzen: 4,50 + 2,37 = \u003cstrong>6,87\u003c/strong>\u003c/p>\n\u003cp>\u003cstrong>Mal eine einstellige Zahl:\u003c/strong> ohne Komma rechnen, dann bekommt das Ergebnis gleich viele Stellen hinter dem Komma: 2,35 · 4 → 235 · 4 = 940 → \u003cstrong>9,40\u003c/strong> = 9,4\u003c/p>\n\u003cp>\u003cstrong>Geteilt durch eine einstellige Zahl:\u003c/strong> Das Komma im Ergebnis setzt du, sobald du beim Teilen über das Komma kommst: 9,6 : 3 = \u003cstrong>3,2\u003c/strong>\u003c/p>\n\u003cp>\u003cstrong>Vergleichen:\u003c/strong> Stelle für Stelle von links. 3,5 &gt; 3,45, denn 5 Zehntel sind mehr als 4 Zehntel. Endnullen ändern nichts: 2,1 = 2,10.\u003c/p>\n","wissenswertes":["In England und den USA schreibt man einen Punkt statt eines Kommas: 3.5 statt 3,5.","Preise sind Kommazahlen: 2,49 € sind 2 Euro und 49 Cent."],"aufgaben":[{"id":"komma-regel","typ":"multiple_choice","frage":"Du rechnest · 100. Was passiert mit dem Komma?","optionen":["Es wandert 2 Stellen nach rechts.","Es wandert 2 Stellen nach links.","Es wandert 1 Stelle nach rechts.","Es bleibt stehen."],"loesung":"Es wandert 2 Stellen nach rechts.","be":1,"schwierigkeit":1,"prioritaet":3},{"id":"stellenwert","typ":"rechnung","generator":"stellenwert-komma","anzahl":2,"be":1,"schwierigkeit":1,"prioritaet":2},{"id":"endnull","typ":"richtig_falsch","frage":"0,50 und 0,5 sind gleich groß.","loesung":true,"be":1,"schwierigkeit":1,"prioritaet":3},{"id":"mal-zehner","typ":"rechnung","generator":"komma-verschieben","parameter":{"operationen":["*"]},"anzahl":4,"be":1,"schwierigkeit":1,"prioritaet":1},{"id":"durch-zehner","typ":"rechnung","generator":"komma-verschieben","parameter":{"operationen":[":"]},"anzahl":4,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"welcher-faktor","typ":"rechnung","generator":"komma-verschieben","parameter":{"modus":"platzhalter"},"anzahl":3,"be":1,"schwierigkeit":3,"prioritaet":2},{"id":"vergleichen","typ":"rechnung","generator":"komma-vergleichen","anzahl":4,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"plus-minus","typ":"rechnung","generator":"komma-rechnen","parameter":{"operationen":["+","-"]},"anzahl":4,"be":1,"schwierigkeit":2,"prioritaet":1},{"id":"mal-geteilt","typ":"rechnung","generator":"komma-rechnen","parameter":{"operationen":["*",":"],"maxGanz":9},"anzahl":3,"be":1,"schwierigkeit":3,"prioritaet":2},{"id":"euro-cent","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"geld","modus":"komma"},"anzahl":3,"be":1,"schwierigkeit":2,"prioritaet":2},{"id":"einkauf","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["einkauf"]},"be":2,"schwierigkeit":3,"prioritaet":1}],"blatt":"../blaetter/mathematik/kommazahlen.pdf","loesung":"../blaetter/mathematik/kommazahlen_loesung.pdf"}],"sw":"../sw.js","swScope":"../"};</script>
 <script>/* LERNWERK Fach-App (Browser). Erwartet window.LW (Generator-Bundle) und window.FACH (Themen-Daten aus dem Build).
    Ablauf: Übersicht → (Merke) → Lektion mit 5 Herzen → Abschluss. Lernstand nur in localStorage, Export/Import als JSON. */
 (function () {
@@ -1058,7 +1548,7 @@ module.exports = [diagramm];
 
   // ---------- Hilfen ----------
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function mitBox(s) { return esc(s).replace('∎', '<span class="box">?</span>'); }
+  function mitBox(s) { return esc(s).replace(/∎/g, '<span class="box">?</span>'); }
   function sterne(n) { return '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n); }
   function mischen(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function normWort(s) {
@@ -1189,9 +1679,16 @@ module.exports = [diagramm];
     if (t.eingabe === 'zahl' || t.eingabe === 'wort') {
       koerper += (f.label ? '<label class="label" for="antwort">' + esc(f.label) + '</label>' : '') +
         (t.eingabe === 'zahl'
-          ? '<input id="antwort" class="eingabe" autocomplete="off" inputmode="numeric" placeholder="Zahl eingeben">'
+          ? (t.komma
+            ? '<input id="antwort" class="eingabe" autocomplete="off" inputmode="decimal" placeholder="Zahl, z. B. 3,5">'
+            : '<input id="antwort" class="eingabe" autocomplete="off" inputmode="numeric" placeholder="Zahl eingeben">')
           // Zahlwörter sind lang: mehrzeilig, damit das ganze Wort sichtbar bleibt
           : '<textarea id="antwort" class="eingabe wortfeld" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Als Wort schreiben"></textarea>');
+    } else if (t.eingabe === 'felder') {
+      // 217 min = ∎ h ∎ min: ein Feld je Einheit
+      koerper += '<div class="felder">' + t.felder.map(function (e, i) {
+        return '<label class="feld"><input class="eingabe" data-i="' + i + '" autocomplete="off" inputmode="numeric" aria-label="' + esc(e) + '"><span class="einheit">' + esc(e) + '</span></label>';
+      }).join('') + '</div>';
     } else if (t.eingabe === 'wahl' || t.eingabe === 'richtig_falsch') {
       var opts = t.eingabe === 'richtig_falsch' ? ['richtig', 'falsch'] : t.optionen;
       var zeichen = opts.every(function (o) { return String(o).length <= 2; });
@@ -1238,10 +1735,22 @@ module.exports = [diagramm];
         pruefen.disabled = false;
       };
     });
+    var felder = [].slice.call(app.querySelectorAll('.felder input'));
+    felder.forEach(function (f, i) {
+      f.addEventListener('input', function () { pruefen.disabled = felder.some(function (x) { return !x.value.trim(); }); });
+      f.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        if (i < felder.length - 1) felder[i + 1].focus(); else if (!pruefen.disabled) pruefen.click();
+      });
+    });
+    if (felder.length) felder[0].focus();
     if (t.eingabe === 'paare') paareSpielen(t);
     pruefen.onclick = function () {
-      var ergebnis = feld ? bewerte(t, feld.value) : bewerte(t, gewaehlt);
+      var ergebnis = felder.length ? bewerte(t, felder.map(function (f) { return f.value; }))
+        : feld ? bewerte(t, feld.value) : bewerte(t, gewaehlt);
       if (feld) feld.disabled = true;
+      felder.forEach(function (f) { f.disabled = true; });
       app.querySelectorAll('.optionen .option').forEach(function (b) {
         b.disabled = true;
         if (b.dataset.wert === String(t.eingabe === 'richtig_falsch' ? (t.loesung ? 'richtig' : 'falsch') : t.loesung)) b.classList.add('richtig');
@@ -1281,7 +1790,14 @@ module.exports = [diagramm];
   }
 
   function bewerte(t, eingabe) {
-    if (t.eingabe === 'zahl') return { richtig: LW.parseZahl(eingabe) === Number(t.loesung) };
+    if (t.eingabe === 'zahl') {
+      var soll = Number(t.loesung);
+      // bei Kommazahlen zählt auch "3.5" (Handy-Tastatur ohne Komma)
+      return { richtig: LW.gleich(LW.parseZahl(eingabe, !Number.isInteger(soll)), soll) };
+    }
+    if (t.eingabe === 'felder') {
+      return { richtig: t.loesung.every(function (w, i) { return LW.gleich(LW.parseZahl(eingabe[i]), w); }) };
+    }
     if (t.eingabe === 'wort') {
       var a = normWort(eingabe), b = normWort(t.loesung);
       if (a === b) return { richtig: true };

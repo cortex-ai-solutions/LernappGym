@@ -88,7 +88,7 @@ lernbereiche:
     nr: "2.1.3"
     titel: "Größen"
     leitideen: ["Größen und Messen"]
-    klasse_5: { im_unterricht: offen, verifiziert: false }
+    klasse_5: { im_unterricht: true, beleg: "Angabe der Eltern, 29.10.2026: Umrechnen von Länge, Masse, Zeit im laufenden Unterricht", verifiziert: false }
     lernziele:
       - "Größen (Geld, Länge, Masse, Zeit, Flächeninhalt, Volumen) schätzen, messen, vergleichen, ordnen"
       - "Größenangaben ineinander umwandeln"
@@ -115,7 +115,7 @@ lernbereiche:
   - id: gebrochene-zahlen
     nr: "2.1.5"
     titel: "Gebrochene Zahlen"
-    klasse_5: { im_unterricht: offen, verifiziert: false }
+    klasse_5: { im_unterricht: teilweise, beleg: "Angabe der Eltern, 29.10.2026: Kommazahlen (Komma verschieben, rechnen) im Zusammenhang mit Größen; gemeine Brüche noch nicht", verifiziert: false }
     lernziele:
       - "Gemeine Brüche beschreiben (Zähler, Nenner), darstellen, erweitern, kürzen, ordnen, vergleichen"
       - "Echte/unechte Brüche, gemischte Zahlen"

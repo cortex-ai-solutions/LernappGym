@@ -5,6 +5,8 @@ const MODULE = [
   require('./math/rechnen'),
   require('./math/sachaufgaben'),
   require('./math/diagramm'),
+  require('./math/groessen'),
+  require('./math/kommazahlen'),
 ];
 
 const GENERATOREN = {};

@@ -34,8 +34,12 @@ async function beantworte(page, richtig) {
     }
     return;
   }
-  if (t.eingabe === 'zahl' || t.eingabe === 'wort') {
-    await page.fill('#antwort', richtig ? String(t.loesung) : '999999999');
+  if (t.eingabe === 'felder') {
+    const felder = await page.$$('.felder input');
+    for (let i = 0; i < felder.length; i++) await felder[i].fill(richtig ? String(t.loesung[i]) : '999');
+  } else if (t.eingabe === 'zahl' || t.eingabe === 'wort') {
+    // Kommazahlen so eintippen, wie ein Kind es tut: mit Komma
+    await page.fill('#antwort', richtig ? String(t.loesung).replace('.', ',') : '999999999');
   } else {
     const wert = t.eingabe === 'richtig_falsch' ? (t.loesung ? 'richtig' : 'falsch') : t.loesung; // die richtige Option
     if (richtig) await page.click(`.optionen [data-wert="${String(wert).replace(/"/g, '\\"')}"]`);
@@ -58,7 +62,7 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
     await page.click('a[href="mathe/"]');
     await page.waitForSelector('.thema');
     const themen = await page.$$eval('.thema', (els) => els.map((e) => e.dataset.thema));
-    assert.ok(themen.length >= 5, `${themen.length} Themen`);
+    assert.ok(themen.length >= 8, `${themen.length} Themen`);
     assert.strictEqual(await page.evaluate(() => document.documentElement.scrollWidth), 393, 'kein seitliches Scrollen');
 
     for (const thema of themen) {

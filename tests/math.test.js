@@ -13,6 +13,22 @@ const { erzeugeThema } = require('../generator/generate');
 
 const SEEDS = 1000;
 
+// Größen und Kommazahlen: Text zurücklesen und mit eigener Einheitentabelle nachrechnen
+const KOMMA_VORLAGEN = ['pakete', 'schulweg', 'einkauf'];
+const EINHEIT = { mm: 1, cm: 10, dm: 100, m: 1000, km: 1e6, mg: 1, g: 1e3, kg: 1e6, t: 1e9, s: 1, min: 60, h: 3600, d: 86400, ct: 1, '€': 100 };
+const nachkommastellen = (x) => (String(x).split('.')[1] || '').length;
+// "3,45 kg" bzw. "3 kg 50 g" → Wert in der kleinsten Einheit
+function groesseWert(s) {
+  let summe = 0;
+  for (const m of s.trim().matchAll(/(\d[\d ]*(?:,\d+)?) (mm|cm|dm|km|mg|kg|min|ct|€|m|g|t|s|h|d)(?![a-z])/g)) summe += parseZahl(m[1]) * EINHEIT[m[2]];
+  return Math.round(summe * 1000) / 1000;
+}
+// "3,45" → 3450000n (feste 6 Nachkommastellen, exakt)
+function skaliert(s) {
+  const [g, n = ''] = s.replace(/\s/g, '').split(',');
+  return BigInt(g) * 1000000n + BigInt(n.padEnd(6, '0'));
+}
+
 // ---------- unabhängige Referenzen ----------
 
 // Runden über die Ziffernfolge statt über Arithmetik
@@ -100,7 +116,17 @@ test('Zahlen formatieren und Eingaben lesen', () => {
   assert.strictEqual(fmt(1234567), '1 234 567');
   assert.strictEqual(parseZahl('34 761'), 34761);
   assert.strictEqual(parseZahl('34.761'), 34761);
-  assert.ok(Number.isNaN(parseZahl('34,7')));
+  assert.strictEqual(parseZahl('34,7'), 34.7);
+  assert.strictEqual(parseZahl('0,05'), 0.05);
+  assert.strictEqual(parseZahl('3,450'), 3.45);
+  assert.strictEqual(parseZahl('3.45', true), 3.45);
+  assert.strictEqual(parseZahl('3.450'), 3450);
+  assert.strictEqual(parseZahl('1.234,5'), 1234.5);
+  assert.ok(Number.isNaN(parseZahl('3,4,5')));
+  assert.ok(Number.isNaN(parseZahl('')));
+  assert.strictEqual(fmt(3.45), '3,45');
+  assert.strictEqual(fmt(12500.5), '12 500,5');
+  assert.strictEqual(fmt(345 / 1000), '0,345');
 });
 
 test('Sachaufgaben: Beispiele wie in der 2. TÜ', () => {
@@ -208,9 +234,39 @@ test(`Sachaufgaben: ${SEEDS} Seeds je Vorlage, Probe am Sachverhalt`, () => {
     for (let s = 0; s < SEEDS; s++) {
       const inst = erzeuge('sachaufgabe', { vorlagen: [vorlage] }, undefined, s);
       const d = inst.pruefung.daten;
-      for (const t of inst.teile) assert.ok(Number.isInteger(t.loesung) && t.loesung > 0, `${vorlage}: ${t.loesung}`);
+      const komma = KOMMA_VORLAGEN.includes(vorlage);
+      for (const t of inst.teile) {
+        if (komma) assert.ok(t.loesung > 0 && t.komma && nachkommastellen(t.loesung) <= 3, `${vorlage}: ${t.loesung}`);
+        else assert.ok(Number.isInteger(t.loesung) && t.loesung >= 1, `${vorlage}: ${t.loesung}`);
+      }
       const l = inst.teile.map((t) => t.loesung);
       switch (vorlage) {
+        case 'pakete':
+          assert.strictEqual(Math.round(l[0] * 1000), d.buecher + d.dinge[0][1] + d.dinge[1][1]);
+          break;
+        case 'schulweg':
+          assert.strictEqual(Math.round(l[0] * 1000), d.meter * 2 * d.tage);
+          break;
+        case 'einkauf': {
+          // Preise aus dem Aufgabentext lesen, nicht aus den Daten
+          const preise = [...inst.anweisung.matchAll(/(\d+),(\d\d)\s€/g)].map((m) => Number(m[1]) * 100 + Number(m[2]));
+          assert.strictEqual(preise.length, 2, inst.anweisung);
+          const anzahl = Number(inst.anweisung.match(/kauft (\d+)/)[1]);
+          const schein = Number(inst.anweisung.match(/(\d+)‑€‑Schein/)[1]);
+          assert.strictEqual(anzahl * preise[0] + preise[1] + Math.round(l[0] * 100), schein * 100);
+          break;
+        }
+        case 'fahrzeit': {
+          const [ab, an] = [...inst.anweisung.matchAll(/(\d+):(\d\d) Uhr/g)].map((m) => Number(m[1]) * 60 + Number(m[2]));
+          assert.strictEqual(l[0], an - ab);
+          assert.ok(Math.floor(an / 60) > Math.floor(ab / 60), 'Fahrt geht über eine volle Stunde');
+          assert.match(inst.weg, new RegExp(`= ${l[0]} min$`));
+          break;
+        }
+        case 'training':
+          assert.ok(l[1] < 60);
+          assert.strictEqual(l[0] * 60 + l[1], d.mal * d.minuten);
+          break;
         case 'tierbeine': {
           let beine = 0;
           for (const t of d.tiere) beine += t.anzahl * (['Hühner', 'Gänse', 'Enten'].includes(t.name) ? 2 : 4);
@@ -238,9 +294,94 @@ test(`Sachaufgaben: ${SEEDS} Seeds je Vorlage, Probe am Sachverhalt`, () => {
         default:
           assert.fail(`keine Probe für Vorlage ${vorlage}`);
       }
-      assert.doesNotMatch(inst.anweisung + inst.antwortsatz + inst.weg, /undefined|NaN|,\d/);
+      assert.doesNotMatch([inst.anweisung, inst.antwortsatz, inst.weg].join(' '), komma ? /undefined|NaN|\.\d/ : /undefined|NaN|,\d/);
     }
   }
+});
+
+// ---------- Größen und Kommazahlen: Text zurücklesen und mit eigener Einheitentabelle nachrechnen ----------
+
+
+test(`Größen umrechnen: ${SEEDS} Seeds je Größe und Modus, Text zurückgelesen`, () => {
+  const faelle = [];
+  for (const groesse of ['laenge', 'masse', 'geld']) for (const modus of ['ganz', 'komma', 'gemischt', 'zerlegen']) faelle.push({ groesse, modus, komma: true });
+  for (const modus of ['ganz', 'gemischt', 'zerlegen']) faelle.push({ groesse: 'zeit', modus });
+  for (const p of faelle) {
+    for (let s = 0; s < SEEDS; s++) {
+      const inst = erzeuge('umrechnen', p, 3, s);
+      for (const t of inst.teile) {
+        const wo = `${p.groesse}/${p.modus} Seed ${s}: ${t.text}`;
+        const [links, rechts] = t.text.split(' = ');
+        const einheiten = [...rechts.matchAll(/∎ (\S+)/g)].map((m) => m[1]);
+        const werte = Array.isArray(t.loesung) ? t.loesung : [t.loesung];
+        assert.strictEqual(einheiten.length, werte.length, wo);
+        const rechtsWert = Math.round(werte.reduce((sum, w, i) => sum + w * EINHEIT[einheiten[i]], 0) * 1000) / 1000;
+        assert.strictEqual(rechtsWert, groesseWert(links), wo);
+        assert.ok(werte.every((w) => w >= 0 && nachkommastellen(w) <= 3), wo);
+        if (!werte.every(Number.isInteger)) assert.ok(t.komma, `${wo}: Kommazahl ohne Komma-Tastatur`);
+        if (p.groesse === 'zeit') assert.doesNotMatch(t.text + t.antwort, /,/, wo);
+        if (t.eingabe === 'felder') assert.ok(werte[1] < EINHEIT[einheiten[0]] / EINHEIT[einheiten[1]] && werte[0] >= 1, `${wo}: Rest zu groß`);
+        assert.strictEqual(groesseWert(t.antwort.split(' = ')[1]), groesseWert(links), `${wo}: Antwort ${t.antwort}`);
+      }
+    }
+  }
+});
+
+test(`Größen vergleichen: ${SEEDS} Seeds, Zeichen passt zu den Werten`, () => {
+  for (const p of [{ groessen: ['laenge', 'masse'] }, { groesse: 'zeit', einheiten: ['s', 'min', 'h'] }, { groesse: 'geld' }]) {
+    for (let s = 0; s < SEEDS; s++) {
+      for (const t of erzeuge('groessen-vergleichen', p, 4, s).teile) {
+        const [l, r] = t.text.split(' ∎ ').map(groesseWert);
+        assert.strictEqual(t.loesung, l < r ? '<' : l > r ? '>' : '=', t.text);
+      }
+    }
+  }
+});
+
+test(`Kommazahlen: ${SEEDS} Seeds, exakt mit BigInt nachgerechnet`, () => {
+  const rechne = { '+': (a, b) => a + b, '−': (a, b) => a - b, '·': (a, b) => (a * b) / 1000000n, ':': (a, b) => (a * 1000000n) / b };
+  for (let s = 0; s < SEEDS; s++) {
+    for (const p of [{ operationen: ['*', ':'] }, { modus: 'platzhalter' }]) {
+      for (const t of erzeuge('komma-verschieben', p, 4, s).teile) {
+        if (p.modus === 'platzhalter') {
+          const [, a, op, c] = t.text.match(/^(.+) (·|:) ∎ = (.+)$/);
+          assert.strictEqual(rechne[op](skaliert(a), skaliert(t.loesung)), skaliert(c), t.text);
+        } else {
+          const [, a, op, b] = t.text.match(/^(.+) (·|:) (.+) =$/);
+          assert.strictEqual(rechne[op](skaliert(a), skaliert(b)), skaliert(fmt(t.loesung)), t.text);
+          assert.ok(nachkommastellen(t.loesung) <= 3, t.text);
+        }
+      }
+    }
+    for (const t of erzeuge('komma-rechnen', { operationen: ['+', '-', '*', ':'] }, 4, s).teile) {
+      const [, a, op, b] = t.text.match(/^(.+) (\+|−|·|:) (.+) =$/);
+      const A = skaliert(a), B = skaliert(b);
+      if (op === ':') assert.strictEqual((A * 1000000n) % B, 0n, `${t.text} geht nicht auf`);
+      const C = rechne[op](A, B);
+      assert.ok(C >= 0n, t.text);
+      assert.strictEqual(C, skaliert(fmt(t.loesung)), t.text);
+    }
+    for (const t of erzeuge('komma-vergleichen', {}, 4, s).teile) {
+      const [l, r] = t.text.split(' ∎ ').map(skaliert);
+      assert.strictEqual(t.loesung, l < r ? '<' : l > r ? '>' : '=', t.text);
+    }
+    for (const t of erzeuge('stellenwert-komma', {}, 2, s).teile) {
+      const [, z, zahl] = t.text.match(/Ziffer (\d) in ([\d,]+)\?/);
+      const pos = zahl.indexOf(z) - zahl.indexOf(',');
+      assert.strictEqual(zahl.split(z).length, 2, 'Ziffer kommt genau einmal vor');
+      assert.strictEqual(t.loesung, { '-2': 'Zehner', '-1': 'Einer', 1: 'Zehntel', 2: 'Hundertstel', 3: 'Tausendstel' }[pos], t.text);
+    }
+  }
+});
+
+test('Größen und Kommazahlen: Handrechnungen', () => {
+  assert.strictEqual(groesseWert('3,45 kg'), 3450000);
+  assert.strictEqual(groesseWert('2 h 15 min'), 8100);
+  assert.strictEqual(VORLAGEN.pakete.loese({ buecher: 3800, dinge: [['Spiel', 450], ['Schuhe', 650]] }), 4.9);
+  assert.strictEqual(VORLAGEN.schulweg.loese({ meter: 1250, tage: 5 }), 12.5);
+  assert.strictEqual(VORLAGEN.einkauf.loese({ a: { anzahl: 3, preis: 125 }, b: { preis: 240 }, schein: 10 }), 3.85);
+  assert.strictEqual(VORLAGEN.fahrzeit.loese({ ab: 14 * 60 + 35, an: 16 * 60 + 10 }), 95);
+  assert.deepStrictEqual(VORLAGEN.training.loese({ mal: 4, minuten: 35 }), { h: 2, min: 20 });
 });
 
 test(`Diagramm: ${SEEDS} Seeds, Ablesefragen stimmen mit den Daten`, () => {

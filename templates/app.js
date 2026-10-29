@@ -41,7 +41,7 @@
 
   // ---------- Hilfen ----------
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  function mitBox(s) { return esc(s).replace('∎', '<span class="box">?</span>'); }
+  function mitBox(s) { return esc(s).replace(/∎/g, '<span class="box">?</span>'); }
   function sterne(n) { return '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n); }
   function mischen(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function normWort(s) {
@@ -172,9 +172,16 @@
     if (t.eingabe === 'zahl' || t.eingabe === 'wort') {
       koerper += (f.label ? '<label class="label" for="antwort">' + esc(f.label) + '</label>' : '') +
         (t.eingabe === 'zahl'
-          ? '<input id="antwort" class="eingabe" autocomplete="off" inputmode="numeric" placeholder="Zahl eingeben">'
+          ? (t.komma
+            ? '<input id="antwort" class="eingabe" autocomplete="off" inputmode="decimal" placeholder="Zahl, z. B. 3,5">'
+            : '<input id="antwort" class="eingabe" autocomplete="off" inputmode="numeric" placeholder="Zahl eingeben">')
           // Zahlwörter sind lang: mehrzeilig, damit das ganze Wort sichtbar bleibt
           : '<textarea id="antwort" class="eingabe wortfeld" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Als Wort schreiben"></textarea>');
+    } else if (t.eingabe === 'felder') {
+      // 217 min = ∎ h ∎ min: ein Feld je Einheit
+      koerper += '<div class="felder">' + t.felder.map(function (e, i) {
+        return '<label class="feld"><input class="eingabe" data-i="' + i + '" autocomplete="off" inputmode="numeric" aria-label="' + esc(e) + '"><span class="einheit">' + esc(e) + '</span></label>';
+      }).join('') + '</div>';
     } else if (t.eingabe === 'wahl' || t.eingabe === 'richtig_falsch') {
       var opts = t.eingabe === 'richtig_falsch' ? ['richtig', 'falsch'] : t.optionen;
       var zeichen = opts.every(function (o) { return String(o).length <= 2; });
@@ -221,10 +228,22 @@
         pruefen.disabled = false;
       };
     });
+    var felder = [].slice.call(app.querySelectorAll('.felder input'));
+    felder.forEach(function (f, i) {
+      f.addEventListener('input', function () { pruefen.disabled = felder.some(function (x) { return !x.value.trim(); }); });
+      f.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        if (i < felder.length - 1) felder[i + 1].focus(); else if (!pruefen.disabled) pruefen.click();
+      });
+    });
+    if (felder.length) felder[0].focus();
     if (t.eingabe === 'paare') paareSpielen(t);
     pruefen.onclick = function () {
-      var ergebnis = feld ? bewerte(t, feld.value) : bewerte(t, gewaehlt);
+      var ergebnis = felder.length ? bewerte(t, felder.map(function (f) { return f.value; }))
+        : feld ? bewerte(t, feld.value) : bewerte(t, gewaehlt);
       if (feld) feld.disabled = true;
+      felder.forEach(function (f) { f.disabled = true; });
       app.querySelectorAll('.optionen .option').forEach(function (b) {
         b.disabled = true;
         if (b.dataset.wert === String(t.eingabe === 'richtig_falsch' ? (t.loesung ? 'richtig' : 'falsch') : t.loesung)) b.classList.add('richtig');
@@ -264,7 +283,14 @@
   }
 
   function bewerte(t, eingabe) {
-    if (t.eingabe === 'zahl') return { richtig: LW.parseZahl(eingabe) === Number(t.loesung) };
+    if (t.eingabe === 'zahl') {
+      var soll = Number(t.loesung);
+      // bei Kommazahlen zählt auch "3.5" (Handy-Tastatur ohne Komma)
+      return { richtig: LW.gleich(LW.parseZahl(eingabe, !Number.isInteger(soll)), soll) };
+    }
+    if (t.eingabe === 'felder') {
+      return { richtig: t.loesung.every(function (w, i) { return LW.gleich(LW.parseZahl(eingabe[i]), w); }) };
+    }
     if (t.eingabe === 'wort') {
       var a = normWort(eingabe), b = normWort(t.loesung);
       if (a === b) return { richtig: true };

@@ -22,3 +22,13 @@ Neueste oben. Format: Datum · Entscheidung · Grund.
 - **Design:** Cortex-CI (`design.md` im Hub) für die Webapp, Druck in Schwarz-Weiß. Schriften lokal als woff2.
 - **GitHub wie bei den übrigen Pages-Projekten** (omni-weather-hub, busplan, steuerspirale, Haushaltsviewer): öffentliches Repo unter `cortex-ai-solutions`, Pages per Branch-Deploy aus `main:/docs`. Die gebaute Webapp wird deshalb nach `docs/` geschrieben und eingecheckt. Das ist eine bewusste Ausnahme von „Ausgaben nur in `output/`“. PDFs und Zwischenstände bleiben in `output/`.
 - **`Materialien/` ist gitignored.** Grund: Urheberrecht der Lehrkraft, Scans mit Handschrift und Namen.
+
+## 2026-10-29 – Größen und Kommazahlen
+
+- Drei neue Aufgabengebiete auf Wunsch der Eltern: **Längen und Massen**, **Zeit**, **Kommazahlen** (Komma verschieben, plus/minus, mal/geteilt durch einstellige Zahl, vergleichen, Stellenwerte, Euro/Cent). Lehrplanbezug 2.1.3 Größen und 2.1.5 Gebrochene Zahlen (Dezimalbrüche).
+- Generatoren rechnen intern ganzzahlig in der kleinsten Einheit (mm, mg, s, ct) bzw. als Ganzzahl mit Stellenzahl; erst die Lösung wird durch 10^k geteilt. So entstehen keine Rundungsfehler wie 0,30000000000000004.
+- Höchstens 3 Nachkommastellen in Lösungen (Klasse 5). Zeit ohne Kommaschreibweise (kein „2,5 h“), stattdessen „2 h 30 min“.
+- Neue Eingabeart `felder` für „217 min = ∎ h ∎ min“: ein Feld je Einheit, im Druck ein Kästchen je Einheit.
+- Eingabe von Kommazahlen: Komma ist immer Dezimalkomma; ein Punkt gilt nur dann als Komma, wenn die erwartete Lösung eine Kommazahl ist (manche Handy-Tastaturen haben kein Komma). Sonst bleibt der Punkt Tausenderpunkt.
+- Tests lesen die Aufgabentexte zurück und rechnen mit eigener Einheitentabelle bzw. exakt mit BigInt nach (je 1000 Seeds).
+

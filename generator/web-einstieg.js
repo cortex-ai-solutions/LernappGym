@@ -1,5 +1,5 @@
 // Einstieg für das Browser-Bundle der Webapp (window.LW)
 const { instanz } = require('./generate');
-const { fmt, parseZahl } = require('./lib/zahlen');
+const { fmt, parseZahl, gleich } = require('./lib/zahlen');
 
-module.exports = { instanz, fmt, parseZahl };
+module.exports = { instanz, fmt, parseZahl, gleich };

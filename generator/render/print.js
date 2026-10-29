@@ -6,6 +6,7 @@ const path = require('path');
 const { marked } = require('marked');
 const { fontFaceCss } = require('./fonts');
 const { diagramm, striche, raster, esc } = require('./svg');
+const { fmt } = require('../lib/zahlen');
 
 const CSS = fs.readFileSync(path.join(__dirname, '..', '..', 'templates', 'print.css'), 'utf8');
 const FACH = { mathematik: 'Mathematik', latein: 'Latein', geschichte: 'Geschichte' };
@@ -23,11 +24,16 @@ function antwortFeld(t, loesung, voll = false) {
   return `<span class="linie${voll ? ' voll' : ''}"></span>`;
 }
 
-// ∎ im Text wird zum Schreibkästchen (Platzhalter- und Vergleichsaufgaben)
+// ∎ im Text wird zum Schreibkästchen (Platzhalter, Vergleiche, Umrechnungen); bei "felder" eins je Wert
 function mitKaestchen(t, loesung) {
-  const inhalt = loesung ? esc(String(t.loesung)) : '';
-  const klein = t.eingabe === 'wahl' ? ' klein' : '';
-  return zahlenMono(t.text).replace('∎', `<span class="kaestchen${klein}">${inhalt ? `<span class="antwort">${inhalt}</span>` : ''}</span>`);
+  const werte = Array.isArray(t.loesung) ? t.loesung : [t.loesung];
+  const klasse = t.eingabe === 'wahl' ? ' klein' : t.breit ? ' breit' : '';
+  let i = 0;
+  return zahlenMono(t.text).replace(/∎/g, () => {
+    const w = werte[i++];
+    const inhalt = loesung ? esc(typeof w === 'number' ? fmt(w) : String(w)) : '';
+    return `<span class="kaestchen${klasse}">${inhalt ? `<span class="antwort">${inhalt}</span>` : ''}</span>`;
+  });
 }
 
 function wahl(t, loesung) {

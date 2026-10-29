@@ -4,6 +4,8 @@ const assert = require('node:assert');
 const { waehleAufgaben, ladeThema, alleThemen } = require('../generator/worksheet');
 const { seite } = require('../generator/render/print');
 const { htmlZuPdf, schliessen } = require('../generator/pdf');
+const { fmt } = require('../generator/lib/zahlen');
+const { esc } = require('../generator/render/svg');
 
 test('Aufgabenauswahl: 6–10 Aufgaben, aufsteigend sortiert, nichts nur für die Webapp', () => {
   for (const { fach, klasse, thema } of alleThemen()) {
@@ -32,7 +34,9 @@ test('Druck-HTML: keine Platzhalterreste, Lösungsblatt enthält die Antworten',
       for (const t of a.teile) {
         if (t.eingabe === 'zeichnung' || t.eingabe === 'paare') continue;
         const erwartet = String(t.eingabe === 'richtig_falsch' ? (t.loesung ? 'richtig' : 'falsch') : t.antwort).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        if (a.weg === undefined) assert.ok(loesung.includes(erwartet) || loesung.includes(String(t.loesung)), `${thema}/${a.id}: Antwort ${erwartet} fehlt im Lösungsblatt`);
+        // Kästchen-Aufgaben (∎) zeigen im Lösungsblatt nur die Werte im Kästchen, z. B. "3 kg 760 g" → "3" und "760"
+        const kaestchen = t.text.includes('∎') && [].concat(t.loesung).every((w) => loesung.includes(`<span class="antwort">${typeof w === 'number' ? fmt(w) : esc(String(w))}</span>`));
+        if (a.weg === undefined) assert.ok(loesung.includes(erwartet) || loesung.includes(String(t.loesung)) || kaestchen, `${thema}/${a.id}: Antwort ${erwartet} fehlt im Lösungsblatt`);
       }
     }
   }

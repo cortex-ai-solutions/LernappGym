@@ -12,7 +12,8 @@ monthlyRunningCost: 0
 - [x] Projektgerüst, Inhaltsschema und Validator (npm run validate, npm test)
 - [x] Lehrplan Mathematik Thüringen Gymnasium Kl. 5/6 extrahieren (Erprobungsfassung 2026)
 - [x] Mathe-Generatoren (14 Stück, 5 Themen): große Zahlen, Runden, Grundrechenarten, Sachaufgaben, Diagramme – 1000-Seed-Tests grün
-- [x] Arbeitsblatt-PDF + Lösungsblatt (5 Mathe-Themen, auf der GitHub Page druckbar)
+- [x] Arbeitsblatt-PDF + Lösungsblatt (8 Mathe-Themen, auf der GitHub Page druckbar)
+- [x] Neue Themen: Längen und Massen, Zeit, Kommazahlen (Komma verschieben, rechnen)
 - [ ] 1-Seiten-Test + Lösung mit Seitenlängenprüfung
 - [x] Mathe-App (PWA, offline) im Cortex-Design: je Aufgabengebiet Üben + Merke + Arbeitsblatt/Lösung
 - [x] GitHub-Repo cortex-ai-solutions/LernappGym angelegt
@@ -27,8 +28,8 @@ Technologie: Node.js, YAML-Inhalte, Playwright (PDF), Vanilla-JS-PWA
 Fächer: Mathematik (im Aufbau), Latein + Geschichte (Bestands-Apps)
 Repo: https://github.com/cortex-ai-solutions/LernappGym
 URL: https://cortex-ai-solutions.github.io/LernappGym/
-Mathe-Themen: 5 (Kl. 5, Lehrplan 2.1.1 + 2.1.2)
-Tests: 17 (7 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test der App)
+Mathe-Themen: 8 (Kl. 5, Lehrplan 2.1.1, 2.1.2, 2.1.3, 2.1.5)
+Tests: 21 (10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test der App)
 Mathe-App: https://cortex-ai-solutions.github.io/LernappGym/mathe/
 
 ## Notizen

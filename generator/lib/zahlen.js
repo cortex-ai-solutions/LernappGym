@@ -2,8 +2,12 @@
 // deutscher Rechtschreibung (unter einer Million zusammen, Million/Milliarde/Billion getrennt).
 const GRUPPE = ' '; // schmales geschütztes Leerzeichen: 34 761
 
+// Kommazahlen mit Dezimalkomma: 3.45 → "3,45". Generatoren rechnen intern mit ganzen Zahlen
+// (z. B. Gramm statt Kilogramm) und teilen erst am Ende durch 10^k, damit keine Rundungsfehler entstehen.
 function fmt(n) {
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, GRUPPE);
+  const [ganz, dez] = String(n).split('.');
+  const g = ganz.replace(/\B(?=(\d{3})+(?!\d))/g, GRUPPE);
+  return dez === undefined ? g : `${g},${dez}`;
 }
 
 const EINER = ['', 'eins', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun', 'zehn',
@@ -73,10 +77,17 @@ function runden(n, stelle) {
   return Math.floor((n + f / 2) / f) * f;
 }
 
-// Eingaben tolerant lesen: "34 761", "34.761", "34761" → 34761
-function parseZahl(s) {
-  const t = String(s).replace(/[\s.  ]/g, '');
-  return /^\d+$/.test(t) ? Number(t) : NaN;
+// Eingaben tolerant lesen: "34 761", "34.761", "34761" → 34761; "3,45" → 3.45.
+// Ein Punkt gilt als Tausenderpunkt, außer punktIstKomma ist gesetzt (erwartete Lösung ist eine Kommazahl):
+// dann ist "3.45" dasselbe wie "3,45", weil manche Handy-Tastaturen nur einen Punkt anbieten.
+function parseZahl(s, punktIstKomma = false) {
+  let t = String(s).replace(/[\s  ]/g, '');
+  if (punktIstKomma && !t.includes(',') && (t.match(/\./g) || []).length === 1) t = t.replace('.', ',');
+  t = t.replace(/\./g, '');
+  return /^(\d+,?\d*|,\d+)$/.test(t) ? Number(t.replace(',', '.')) : NaN;
 }
 
-module.exports = { fmt, zahlwort, runden, parseZahl, STELLEN, STELLEN_NAME, GRUPPE };
+// gleiche Zahl? Eingabe und Generator-Lösung können bei Kommazahlen im letzten Bit abweichen
+const gleich = (a, b) => Math.abs(a - b) < 1e-9 * Math.max(1, Math.abs(b));
+
+module.exports = { fmt, zahlwort, runden, parseZahl, gleich, STELLEN, STELLEN_NAME, GRUPPE };
