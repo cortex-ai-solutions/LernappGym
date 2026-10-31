@@ -91,7 +91,8 @@
         '<div class="thema-kopf"><span class="thema-icon" aria-hidden="true">' + t.icon + '</span><div><h2>' + esc(t.titel) + '</h2>' +
         '<div class="meta"><span class="sterne" aria-label="' + st.sterne + ' von 3 Sternen">' + sterne(st.sterne) + '</span> · ' + st.lektionen + ' ' + (st.lektionen === 1 ? 'Übung' : 'Übungen') + '</div></div></div>' +
         '<div class="reihe"><button class="btn btn-gold" data-aktion="ueben">▶ Üben</button><button class="btn btn-ghost" data-aktion="merke">💡 Merke</button></div>' +
-        '<div class="reihe-druck"><a class="btn btn-ghost" href="' + t.blatt + '" target="_blank" rel="noopener">🖨 Arbeitsblatt</a><a class="btn btn-ghost" href="' + t.loesung + '" target="_blank" rel="noopener">✓ Lösung</a></div>' +
+        '<div class="reihe-druck"><a class="btn btn-ghost" data-rolle="blatt" target="_blank" rel="noopener"></a><a class="btn btn-ghost" data-rolle="loesung" target="_blank" rel="noopener"></a>' +
+        '<button class="btn btn-ghost btn-neu" data-aktion="neues-blatt" aria-label="Anderes Arbeitsblatt" title="Anderes Arbeitsblatt">↻</button></div>' +
         '</article>';
     }).join('');
     app.innerHTML = '<div class="wrap">' +
@@ -105,10 +106,27 @@
         var t = karte && FACH.themen.find(function (x) { return x.thema === karte.dataset.thema; });
         if (b.dataset.aktion === 'ueben') starte(t);
         else if (b.dataset.aktion === 'merke') merke(t);
+        else if (b.dataset.aktion === 'neues-blatt') {
+          themaStand(t.thema).blatt = (blattNr(t) + 1) % t.blaetter.length;
+          speichern();
+          zeigeBlatt(karte, t);
+        }
         else if (b.dataset.aktion === 'export') exportieren();
       });
     });
+    app.querySelectorAll('[data-thema]').forEach(function (karte) {
+      zeigeBlatt(karte, FACH.themen.find(function (x) { return x.thema === karte.dataset.thema; }));
+    });
     document.getElementById('import').addEventListener('change', importieren);
+  }
+
+  // Arbeitsblatt-Vorrat: 🔄 schaltet zur nächsten Variante, Blatt und Lösung tragen denselben Buchstaben
+  function blattNr(t) { return (themaStand(t.thema).blatt || 0) % t.blaetter.length; }
+  function zeigeBlatt(karte, t) {
+    var b = t.blaetter[blattNr(t)];
+    var blatt = karte.querySelector('[data-rolle="blatt"]'), loesung = karte.querySelector('[data-rolle="loesung"]');
+    blatt.href = b.blatt; blatt.textContent = '🖨 Blatt ' + b.variante;
+    loesung.href = b.loesung; loesung.textContent = '✓ Lösung ' + b.variante;
   }
 
   function merke(t) {
@@ -375,6 +393,5 @@
   // Testzugang für den automatischen Mobil-Test (liest nur die aktuelle Lösung)
   window.LERNWERK_TEST = { loesung: function () { var u = L && L.uebungen[L.i]; return u && u.t; } };
 
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register(FACH.sw, { scope: FACH.swScope });
   uebersicht();
 })();

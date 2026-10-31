@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const yaml = require('js-yaml');
 const { marked } = require('marked');
 const { bundle } = require('./bundle');
-const { baueBlatt } = require('./worksheet');
+const { baueBlatt, VARIANTEN } = require('./worksheet');
 const { schliessen } = require('./pdf');
 
 const ROOT = path.join(__dirname, '..');
@@ -43,6 +43,48 @@ const ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <path d="M96 268 C 150 120, 214 120, 256 268 S 362 416, 416 268" fill="none" stroke="url(#gold)" stroke-width="44" stroke-linecap="round"/>
 </svg>`;
 
+// Service Worker registrieren + Update-Banner (Muster aus dem Busplan): Sobald eine neue Version geladen ist,
+// erscheint unten „Neue Inhalte – Aktualisieren“. Gesucht wird beim Start und bei jeder Rückkehr in die App.
+// Wird in jede Seite eingebaut, auch in die Bestands-Apps, damit die installierte App nie veraltet.
+function updateBanner(prefix) {
+  return `<style>
+.update-banner{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;max-width:456px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:52px;border:1px solid #C9A84C;border-radius:14px;background:#002B36;color:#F5F0E6;font:600 15px/1.3 Inter,system-ui,sans-serif;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.45);cursor:pointer;animation:ub-rein .25s ease-out}
+.update-banner[hidden]{display:none}.update-banner:disabled{opacity:.7}
+.update-banner .ub-text{flex:1;min-width:0}
+.update-banner .ub-aktion{flex-shrink:0;padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,#B8922A,#E8C97D);color:#000;font-weight:700}
+@keyframes ub-rein{from{transform:translateY(140%);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.update-banner{animation:none}}
+</style>
+<button id="update-banner" class="update-banner" type="button" hidden><span aria-hidden="true">⬆️</span><span class="ub-text">Neue Inhalte verfügbar</span><span class="ub-aktion">Aktualisieren</span></button>
+<script>
+(function () {
+  if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+  var banner = document.getElementById('update-banner');
+  function zeigen() { banner.hidden = false; }
+  banner.addEventListener('click', function () {
+    banner.disabled = true;
+    banner.querySelector('.ub-aktion').textContent = '…';
+    navigator.serviceWorker.getRegistration()
+      .then(function (reg) { if (reg && reg.waiting) reg.waiting.postMessage('SKIP_WAITING'); })
+      .catch(function () {})
+      .then(function () { location.reload(); });
+  });
+  navigator.serviceWorker.register('${prefix}sw.js', { scope: '${prefix}' }).then(function (reg) {
+    // beim allerersten Besuch (noch kein Controller) gibt es nichts zu aktualisieren
+    var hatteController = !!navigator.serviceWorker.controller;
+    if (reg.waiting && hatteController) zeigen();
+    reg.addEventListener('updatefound', function () {
+      var neu = reg.installing;
+      if (neu) neu.addEventListener('statechange', function () { if (neu.state === 'installed' && hatteController) zeigen(); });
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', function () { if (hatteController) zeigen(); });
+    reg.update().catch(function () {});
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reg.update().catch(function () {}); });
+  }).catch(function () {});
+})();
+</script>`;
+}
+
 function kopf({ titel, prefix, beschreibung }) {
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -61,7 +103,9 @@ function ladeFach(fachId, prefixZurWurzel) {
       themen.push({
         thema: doc.thema, titel: doc.titel, icon: doc.icon || '📘', reihenfolge: doc.reihenfolge || 99, klasse: doc.klasse,
         erklaerungHtml: marked.parse(doc.erklaerung), wissenswertes: doc.wissenswertes || [], aufgaben: doc.aufgaben,
-        blatt: `${prefixZurWurzel}blaetter/${fachId}/${doc.thema}.pdf`, loesung: `${prefixZurWurzel}blaetter/${fachId}/${doc.thema}_loesung.pdf`,
+        blaetter: VARIANTEN.map((v) => ({
+          variante: v, blatt: `${prefixZurWurzel}blaetter/${fachId}/${doc.thema}_${v}.pdf`, loesung: `${prefixZurWurzel}blaetter/${fachId}/${doc.thema}_${v}_loesung.pdf`,
+        })),
       });
     }
   }
@@ -69,13 +113,14 @@ function ladeFach(fachId, prefixZurWurzel) {
 }
 
 function fachSeite(fach, lwBundle) {
-  const daten = { id: fach.id, titel: fach.titel, themen: ladeFach(fach.id, '../'), sw: '../sw.js', swScope: '../' };
+  const daten = { id: fach.id, titel: fach.titel, themen: ladeFach(fach.id, '../') };
   return `${kopf({ titel: `${fach.titel} – LERNWERK`, prefix: '../', beschreibung: `${fach.titel} üben, Klasse 5` })}
 <body><div id="app"><p class="wrap">Die App wird geladen …</p></div>
 <noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
 <script>${lwBundle}</script>
 <script>window.FACH = ${jsonScript(daten)};</script>
-<script>${fs.readFileSync(path.join(TPL, 'app.js'), 'utf8')}</script></body></html>`;
+<script>${fs.readFileSync(path.join(TPL, 'app.js'), 'utf8')}</script>
+${updateBanner('../')}</body></html>`;
 }
 
 function startSeite() {
@@ -87,7 +132,7 @@ function startSeite() {
 <p style="color:var(--text-secondary)">Üben für Klasse 5 – such dir ein Fach aus!</p></header>
 ${karten}
 <footer class="fuss"><p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p></footer></div>
-<script>if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js', { scope: './' });</script></body></html>`;
+${updateBanner('')}</body></html>`;
 }
 
 function serviceWorker(dateien, version) {
@@ -95,8 +140,14 @@ function serviceWorker(dateien, version) {
 const CACHE = 'lernwerk-${version}';
 const DATEIEN = ${JSON.stringify(dateien, null, 2)};
 
+// cache: 'reload' umgeht den HTTP-Cache (GitHub Pages liefert max-age=600), sonst landen kurz nach
+// einem Deploy alte Dateien im neuen Cache. Die neue Version wartet, bis das Update-Banner sie aktiviert.
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(DATEIEN)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(DATEIEN.map((d) => new Request(d, { cache: 'reload' })))));
+});
+
+self.addEventListener('message', (e) => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
@@ -145,14 +196,19 @@ async function baueWeb() {
   for (const [, d, ws] of SCHRIFTEN) for (const w of ws) fs.copyFileSync(path.join(TPL, 'fonts', `${d}-latin-${w}-normal.woff2`), path.join(DOCS, 'fonts', `${d}-latin-${w}-normal.woff2`));
   await icons();
 
-  // Arbeitsblätter je Thema (PDF) – werden aus den Themenkarten verlinkt
+  // Arbeitsblätter je Thema als Vorrat (Varianten A–E, je PDF + Lösung) – werden aus den Themenkarten verlinkt
   for (const fach of FAECHER) {
+    const ziel = path.join(DOCS, 'blaetter', fach.id);
+    fs.rmSync(ziel, { recursive: true, force: true });
+    fs.mkdirSync(ziel, { recursive: true });
     for (const t of ladeFach(fach.id, '')) {
-      const r = await baueBlatt({ fach: fach.id, klasse: t.klasse, thema: t.thema, seed: 'blatt' });
-      const ziel = path.join(DOCS, 'blaetter', fach.id);
-      fs.mkdirSync(ziel, { recursive: true });
-      for (const d of [r.blatt.datei, r.loesung.datei]) fs.copyFileSync(d, path.join(ziel, path.basename(d)));
-      console.log(`  Blatt ${fach.id}/${t.thema}: ${r.blatt.seiten} + ${r.loesung.seiten} Seiten`);
+      const seiten = [];
+      for (const v of VARIANTEN) {
+        const r = await baueBlatt({ fach: fach.id, klasse: t.klasse, thema: t.thema, seed: v, datei: `${t.thema}_${v}` });
+        for (const d of [r.blatt.datei, r.loesung.datei]) fs.copyFileSync(d, path.join(ziel, path.basename(d)));
+        seiten.push(`${v} ${r.blatt.seiten}+${r.loesung.seiten}`);
+      }
+      console.log(`  Blätter ${fach.id}/${t.thema}: ${seiten.join(', ')} Seiten`);
     }
   }
   await schliessen();
@@ -163,10 +219,13 @@ async function baueWeb() {
     fs.mkdirSync(path.join(DOCS, fach.ordner), { recursive: true });
     fs.writeFileSync(path.join(DOCS, fach.ordner, 'index.html'), fachSeite(fach, lw));
   }
-  // Bestands-Apps unverändert übernehmen
+  // Bestands-Apps übernehmen, nur das Update-Banner kommt dazu
   for (const b of BESTAND) {
     fs.mkdirSync(path.join(DOCS, b.ordner), { recursive: true });
-    fs.copyFileSync(path.join(ROOT, 'legacy', b.quelle), path.join(DOCS, b.ordner, 'index.html'));
+    const html = fs.readFileSync(path.join(ROOT, 'legacy', b.quelle), 'utf8');
+    const ende = html.lastIndexOf('</body>');
+    if (ende < 0) throw new Error(`${b.quelle}: </body> fehlt`);
+    fs.writeFileSync(path.join(DOCS, b.ordner, 'index.html'), html.slice(0, ende) + updateBanner('../') + html.slice(ende));
   }
   fs.writeFileSync(path.join(DOCS, 'index.html'), startSeite());
   fs.writeFileSync(path.join(DOCS, '.nojekyll'), '');
@@ -185,7 +244,9 @@ async function baueWeb() {
   const hash = crypto.createHash('sha256');
   for (const d of dateien.sort()) hash.update(d).update(fs.readFileSync(path.join(DOCS, d)));
   const version = hash.digest('hex').slice(0, 10);
-  const precache = ['./', ...dateien.filter((d) => d.endsWith('index.html')).map((d) => d.replace(/index\.html$/, '')).filter(Boolean), ...dateien];
+  // Vom Blatt-Vorrat nur Variante A vorab laden; B–E landen beim ersten Öffnen im Cache
+  const vorab = dateien.filter((d) => !/^blaetter\/.*_[B-Z](_loesung)?\.pdf$/.test(d));
+  const precache = ['./', ...vorab.filter((d) => d.endsWith('index.html')).map((d) => d.replace(/index\.html$/, '')).filter(Boolean), ...vorab];
   fs.writeFileSync(path.join(DOCS, 'sw.js'), serviceWorker([...new Set(precache)], version));
   console.log(`✓ Webapp gebaut: ${dateien.length} Dateien, Cache-Version ${version}`);
 }

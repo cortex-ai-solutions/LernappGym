@@ -11,6 +11,8 @@ const { htmlZuPdf, schliessen } = require('./pdf');
 const ROOT = path.join(__dirname, '..');
 const MIN = 6;
 const MAX = 10;
+// Vorrat je Thema auf der Page: feste Varianten, damit Blatt und Lösung über den Buchstaben zusammenpassen
+const VARIANTEN = ['A', 'B', 'C', 'D', 'E'];
 
 function ladeThema(fach, klasse, thema) {
   return yaml.load(fs.readFileSync(path.join(ROOT, 'content', fach, String(klasse), `${thema}.yaml`), 'utf8'));
@@ -36,7 +38,7 @@ function waehleAufgaben(doc, seed) {
     .map((x) => x.a);
 }
 
-async function baueBlatt({ fach, klasse, thema, seed = 'blatt' }) {
+async function baueBlatt({ fach, klasse, thema, seed = 'blatt', datei = thema }) {
   const doc = ladeThema(fach, klasse, thema);
   const aufgaben = waehleAufgaben(doc, seed);
   const ordner = path.join(ROOT, 'output', 'blaetter', fach);
@@ -44,7 +46,7 @@ async function baueBlatt({ fach, klasse, thema, seed = 'blatt' }) {
   const ergebnis = {};
   for (const loesung of [false, true]) {
     const html = seite({ doc, aufgaben, art: 'blatt', loesung, seed });
-    const name = `${thema}${loesung ? '_loesung' : ''}`;
+    const name = `${datei}${loesung ? '_loesung' : ''}`;
     fs.writeFileSync(path.join(ordner, `${name}.html`), html);
     const { pdf, seiten } = await htmlZuPdf(html);
     fs.writeFileSync(path.join(ordner, `${name}.pdf`), pdf);
@@ -96,4 +98,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { baueBlatt, waehleAufgaben, ladeThema, alleThemen };
+module.exports = { baueBlatt, waehleAufgaben, ladeThema, alleThemen, VARIANTEN };

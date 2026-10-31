@@ -32,3 +32,9 @@ Neueste oben. Format: Datum · Entscheidung · Grund.
 - Eingabe von Kommazahlen: Komma ist immer Dezimalkomma; ein Punkt gilt nur dann als Komma, wenn die erwartete Lösung eine Kommazahl ist (manche Handy-Tastaturen haben kein Komma). Sonst bleibt der Punkt Tausenderpunkt.
 - Tests lesen die Aufgabentexte zurück und rechnen mit eigener Einheitentabelle bzw. exakt mit BigInt nach (je 1000 Seeds).
 
+
+## 2026-10-31 – Arbeitsblatt-Vorrat und Update-Banner
+
+- **Arbeitsblatt-Vorrat statt Zufall im Browser:** Je Thema liegen 5 feste Varianten (A–E) mit Lösung auf der Page (`<thema>_<V>.pdf`, Seed = Buchstabe). Der Knopf ↻ auf der Karte schaltet zur nächsten Variante; die Wahl wird im Lernstand gespeichert. Grund: Blatt und Lösung passen über den Buchstaben (steht auch im Fuß des Blatts) sicher zusammen, und jede Variante ist im Build geprüft. Mehr Varianten: `VARIANTEN` in `generator/worksheet.js`.
+- Der Service Worker lädt vom Vorrat nur Variante A vorab; B–E landen beim ersten Öffnen im Cache. So bleibt die Installation auf dem Handy klein.
+- **Update-Banner wie im Busplan:** Neue Versionen werden beim Start und bei jeder Rückkehr in die App gesucht. Ist eine geladen, erscheint unten „Neue Inhalte verfügbar – Aktualisieren“; erst der Tipp aktiviert sie (`SKIP_WAITING`) und lädt neu. Die Installation umgeht dabei den HTTP-Cache von GitHub Pages (`cache: 'reload'`). Das Banner wird in alle Seiten eingebaut, auch in die Latein- und Geschichts-App.

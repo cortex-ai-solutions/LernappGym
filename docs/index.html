@@ -53,6 +53,7 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .reihe .btn { flex: 1 1 auto; }
 .reihe-druck { display: flex; gap: 8px; margin-top: 8px; position: relative; z-index: 1; }
 .reihe-druck .btn { flex: 1; font-size: 14px; }
+.reihe-druck .btn-neu { flex: 0 0 52px; padding: 0; font-size: 26px; font-family: system-ui, sans-serif; }
 
 /* Buttons */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid transparent; font-size: 16px; font-weight: 700; text-decoration: none; transition: transform 0.08s, background 0.15s; }
@@ -137,4 +138,39 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 <a class="thema" href="latein/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">🦉</span><div><h2>Latein</h2><div class="meta">Vokabeln, Grammatik, Römer</div></div></div></a>
 <a class="thema" href="geschichte/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">📜</span><div><h2>Geschichte</h2><div class="meta">Lektionen, Quiz, Karteikarten</div></div></div></a>
 <footer class="fuss"><p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p></footer></div>
-<script>if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('sw.js', { scope: './' });</script></body></html>
+<style>
+.update-banner{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;max-width:456px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:52px;border:1px solid #C9A84C;border-radius:14px;background:#002B36;color:#F5F0E6;font:600 15px/1.3 Inter,system-ui,sans-serif;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.45);cursor:pointer;animation:ub-rein .25s ease-out}
+.update-banner[hidden]{display:none}.update-banner:disabled{opacity:.7}
+.update-banner .ub-text{flex:1;min-width:0}
+.update-banner .ub-aktion{flex-shrink:0;padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,#B8922A,#E8C97D);color:#000;font-weight:700}
+@keyframes ub-rein{from{transform:translateY(140%);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.update-banner{animation:none}}
+</style>
+<button id="update-banner" class="update-banner" type="button" hidden><span aria-hidden="true">⬆️</span><span class="ub-text">Neue Inhalte verfügbar</span><span class="ub-aktion">Aktualisieren</span></button>
+<script>
+(function () {
+  if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+  var banner = document.getElementById('update-banner');
+  function zeigen() { banner.hidden = false; }
+  banner.addEventListener('click', function () {
+    banner.disabled = true;
+    banner.querySelector('.ub-aktion').textContent = '…';
+    navigator.serviceWorker.getRegistration()
+      .then(function (reg) { if (reg && reg.waiting) reg.waiting.postMessage('SKIP_WAITING'); })
+      .catch(function () {})
+      .then(function () { location.reload(); });
+  });
+  navigator.serviceWorker.register('sw.js', { scope: '' }).then(function (reg) {
+    // beim allerersten Besuch (noch kein Controller) gibt es nichts zu aktualisieren
+    var hatteController = !!navigator.serviceWorker.controller;
+    if (reg.waiting && hatteController) zeigen();
+    reg.addEventListener('updatefound', function () {
+      var neu = reg.installing;
+      if (neu) neu.addEventListener('statechange', function () { if (neu.state === 'installed' && hatteController) zeigen(); });
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', function () { if (hatteController) zeigen(); });
+    reg.update().catch(function () {});
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reg.update().catch(function () {}); });
+  }).catch(function () {});
+})();
+</script></body></html>

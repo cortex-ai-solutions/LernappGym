@@ -1,26 +1,26 @@
 // Offline-Cache für LERNWERK – automatisch erzeugt von generator/webapp.js
-const CACHE = 'lernwerk-0036f0d238';
+const CACHE = 'lernwerk-dfeff391cf';
 const DATEIEN = [
   "./",
   "geschichte/",
   "latein/",
   "mathe/",
-  "blaetter/mathematik/daten-diagramme.pdf",
-  "blaetter/mathematik/daten-diagramme_loesung.pdf",
-  "blaetter/mathematik/grosse-zahlen.pdf",
-  "blaetter/mathematik/grosse-zahlen_loesung.pdf",
-  "blaetter/mathematik/grundrechenarten.pdf",
-  "blaetter/mathematik/grundrechenarten_loesung.pdf",
-  "blaetter/mathematik/kommazahlen.pdf",
-  "blaetter/mathematik/kommazahlen_loesung.pdf",
-  "blaetter/mathematik/laengen-massen.pdf",
-  "blaetter/mathematik/laengen-massen_loesung.pdf",
-  "blaetter/mathematik/runden.pdf",
-  "blaetter/mathematik/runden_loesung.pdf",
-  "blaetter/mathematik/sachaufgaben.pdf",
-  "blaetter/mathematik/sachaufgaben_loesung.pdf",
-  "blaetter/mathematik/zeit.pdf",
-  "blaetter/mathematik/zeit_loesung.pdf",
+  "blaetter/mathematik/daten-diagramme_A.pdf",
+  "blaetter/mathematik/daten-diagramme_A_loesung.pdf",
+  "blaetter/mathematik/grosse-zahlen_A.pdf",
+  "blaetter/mathematik/grosse-zahlen_A_loesung.pdf",
+  "blaetter/mathematik/grundrechenarten_A.pdf",
+  "blaetter/mathematik/grundrechenarten_A_loesung.pdf",
+  "blaetter/mathematik/kommazahlen_A.pdf",
+  "blaetter/mathematik/kommazahlen_A_loesung.pdf",
+  "blaetter/mathematik/laengen-massen_A.pdf",
+  "blaetter/mathematik/laengen-massen_A_loesung.pdf",
+  "blaetter/mathematik/runden_A.pdf",
+  "blaetter/mathematik/runden_A_loesung.pdf",
+  "blaetter/mathematik/sachaufgaben_A.pdf",
+  "blaetter/mathematik/sachaufgaben_A_loesung.pdf",
+  "blaetter/mathematik/zeit_A.pdf",
+  "blaetter/mathematik/zeit_A_loesung.pdf",
   "fonts/inter-latin-400-normal.woff2",
   "fonts/inter-latin-500-normal.woff2",
   "fonts/inter-latin-600-normal.woff2",
@@ -37,8 +37,14 @@ const DATEIEN = [
   "mathe/index.html"
 ];
 
+// cache: 'reload' umgeht den HTTP-Cache (GitHub Pages liefert max-age=600), sonst landen kurz nach
+// einem Deploy alte Dateien im neuen Cache. Die neue Version wartet, bis das Update-Banner sie aktiviert.
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(DATEIEN)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(DATEIEN.map((d) => new Request(d, { cache: 'reload' })))));
+});
+
+self.addEventListener('message', (e) => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (e) => {
