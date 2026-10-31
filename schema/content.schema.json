@@ -61,7 +61,8 @@
         "be": { "type": "integer", "minimum": 1, "maximum": 12 },
         "schwierigkeit": { "type": "integer", "minimum": 1, "maximum": 3 },
         "prioritaet": { "type": "integer", "minimum": 1, "maximum": 3 },
-        "nur": { "enum": ["druck", "web"] }
+        "nur": { "enum": ["druck", "web"] },
+        "bezeichnung": { "type": "string", "maxLength": 60 }
       },
       "oneOf": [
         { "required": ["generator"] },

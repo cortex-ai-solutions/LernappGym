@@ -26,6 +26,13 @@ function server() {
   });
 }
 
+async function gibNamen(page, name) {
+  await page.waitForSelector('#lw-name');
+  await page.fill('#lw-name', name);
+  await page.click('.lw-dialog [type="submit"]');
+  await page.waitForSelector('.lw-schleier', { state: 'detached' });
+}
+
 async function beantworte(page, richtig) {
   const t = await page.evaluate(() => window.LERNWERK_TEST.loesung());
   if (t.eingabe === 'paare') {
@@ -60,6 +67,7 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
   page.on('console', (m) => { if (m.type() === 'error') fehler.push(m.text()); });
   try {
     await page.goto(basis);
+    await gibNamen(page, 'Testkind');
     await page.click('a[href="mathe/"]');
     await page.waitForSelector('.thema');
     const themen = await page.$$eval('.thema', (els) => els.map((e) => e.dataset.thema));
@@ -127,14 +135,114 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
   }
 });
 
+test('Elternbericht: Kind übt Mathe, Latein, Geschichte → Link → Elternansicht auf anderem Gerät', { timeout: 120000 }, async () => {
+  const s = await server();
+  const basis = `http://127.0.0.1:${s.address().port}/LernappGym/`;
+  const browser = await chromium.launch();
+  const handy = { viewport: { width: 393, height: 851 }, isMobile: true, hasTouch: true, locale: 'de-DE' };
+  const kind = await browser.newContext(handy);
+  // ohne Teilen-Menü, damit der Link-Dialog erscheint (wie am PC)
+  await kind.addInitScript(() => { delete Navigator.prototype.share; });
+  const page = await kind.newPage();
+  const fehler = [];
+  page.on('pageerror', (e) => fehler.push(e.message));
+  try {
+    // Name wird auch in einer Bestands-App abgefragt, wenn sie zuerst geöffnet wird
+    await page.goto(`${basis}latein/`);
+    await gibNamen(page, 'Lena');
+
+    // Latein: Vokabelkarten der 1. Einheit, die erste „Noch nicht“, der Rest „Gewusst“
+    await page.evaluate(() => { openLesson(1, '1a'); startExercises(); });
+    for (let i = 0; !(await page.$('#results.active')); i++) {
+      await page.click('#fc');
+      await page.click(i === 0 ? '.btn-didnt' : '.btn-knew');
+      assert.ok(i < 20, 'Latein-Lektion endet nicht');
+    }
+
+    // Geschichte: Quiz der 1. Lektion, immer die erste Antwort
+    await page.goto(`${basis}geschichte/`);
+    await page.click('text=Was ist Geschichte?');
+    await page.click('.tab-btn:has-text("Quiz")');
+    while (await page.$('.opt')) {
+      await page.click('.opt');
+      await page.click('.next-btn');
+    }
+    await page.waitForSelector('.quiz-result');
+    await page.evaluate(() => render()); // neu zeichnen darf nicht doppelt zählen
+
+    // Mathe: eine Runde Runden mit lauter richtigen Antworten
+    await page.goto(`${basis}mathe/`);
+    await page.click('[data-thema="runden"] [data-aktion="ueben"]');
+    while (await page.$('.lektion')) {
+      await page.waitForSelector('.uebung');
+      await beantworte(page, true);
+      await page.click('#weiter');
+    }
+    await page.waitForSelector('.ende');
+    await page.click('#uebersicht');
+
+    const p = await page.evaluate(() => JSON.parse(localStorage.getItem('lernwerk_protokoll_v1')));
+    assert.strictEqual(p.faecher.latein.th.e1.n, 1);
+    assert.strictEqual(p.faecher.latein.th.e1.r, 4, 'Latein: 4 von 5 gewusst');
+    assert.strictEqual(p.faecher.geschichte.th.l1.n, 1, 'Geschichte nur einmal gezählt');
+    assert.strictEqual(p.faecher.mathematik.th.runden.r, p.faecher.mathematik.th.runden.g, 'Mathe: alles richtig');
+
+    // Bericht senden → Link-Dialog
+    await page.click('[data-aktion="bericht"]');
+    await page.waitForSelector('#lw-link');
+    const link = await page.inputValue('#lw-link');
+    assert.match(link, /\/LernappGym\/eltern\/#b=z/);
+    assert.ok(link.length < 8000, `Link ${link.length} Zeichen lang`);
+
+    // Eltern-Handy: eigener Speicher, öffnet den Link
+    const eltern = await browser.newContext(handy);
+    const ep = await eltern.newPage();
+    ep.on('pageerror', (e) => fehler.push(e.message));
+    await ep.goto(link);
+    await ep.waitForSelector('.kind');
+    assert.match(await ep.textContent('.wrap'), /Neuer Bericht von Lena gespeichert/);
+    const text = await ep.textContent('.wrap');
+    for (const erwartet of ['Lena', 'Mathematik', 'Natürliche Zahlen runden', '100 % richtig', 'Latein', 'Roma', '80 % richtig', 'Geschichte', 'Was ist Geschichte?']) {
+      assert.ok(text.includes(erwartet), `Elternansicht: „${erwartet}“ fehlt`);
+    }
+    // Fehlerschwerpunkt Latein: die nicht gewusste Vokabel
+    assert.match(await ep.innerHTML('.wrap'), /1 von 1 falsch/);
+    assert.strictEqual(new URL(ep.url()).hash, '', '#-Teil wird nach dem Speichern entfernt');
+    assert.strictEqual(await ep.evaluate(() => document.documentElement.scrollWidth), 393, 'kein seitliches Scrollen');
+
+    // derselbe Link noch einmal: kein doppelter Bericht; ein zweiter Bericht zeigt „+1“
+    await ep.goto(link);
+    await ep.waitForSelector('text=gibt es schon');
+    assert.strictEqual(await ep.evaluate(() => Object.values(JSON.parse(localStorage.getItem('lernwerk_eltern_v1')).kinder)[0].berichte.length), 1);
+    await page.click('#lw-zu');
+    await page.click('[data-thema="runden"] [data-aktion="ueben"]');
+    while (await page.$('.lektion')) { await page.waitForSelector('.uebung'); await beantworte(page, true); await page.click('#weiter'); }
+    await page.click('#uebersicht');
+    const link2 = await page.evaluate(() => LERNWERK.berichtLink('../'));
+    await ep.goto(link2);
+    await ep.waitForSelector('.kind');
+    assert.match(await ep.textContent('.bericht-thema'), /2 Runden\s*\+1/);
+
+    // die Elternansicht selbst fragt nie nach einem Namen
+    await ep.goto(`${basis}eltern/`);
+    await ep.waitForSelector('.kind');
+    assert.strictEqual(await ep.$('#lw-name'), null, 'Elternansicht fragt nicht nach dem Namen');
+    assert.deepStrictEqual(fehler, [], 'keine JavaScript-Fehler');
+  } finally {
+    await browser.close();
+    s.close();
+  }
+});
+
 test('Webapp: neue Version wird per Banner angeboten und nach Tippen geladen', { timeout: 60000 }, async () => {
   const s = await server();
   const basis = `http://127.0.0.1:${s.address().port}/LernappGym/`;
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 393, height: 851 }, isMobile: true, hasTouch: true });
+  await context.addInitScript(() => localStorage.setItem('lernwerk_profil', JSON.stringify({ id: 'test', name: 'Testkind' })));
   const page = await context.newPage();
   try {
-    for (const seite of ['', 'mathe/', 'latein/', 'geschichte/']) {
+    for (const seite of ['', 'mathe/', 'latein/', 'geschichte/', 'eltern/']) {
       await page.goto(basis + seite);
       await page.evaluate(() => navigator.serviceWorker.ready);
       assert.ok(await page.$('#update-banner[hidden]'), `${seite || 'Start'}: Banner fehlt oder ist beim ersten Besuch sichtbar`);

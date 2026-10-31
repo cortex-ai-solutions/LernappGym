@@ -855,6 +855,17 @@ function renderQuiz(root, lesson){
   if(quizState.i >= lesson.quiz.length){
     const total = lesson.quiz.length;
     setLessonResult(lesson.id, quizState.score, total);
+    // Lernprotokoll (Bericht an die Eltern): je Quiz-Durchgang genau einmal, auch wenn neu gezeichnet wird
+    if(window.LERNWERK && !quizState.protokolliert){
+      quizState.protokolliert = true;
+      const aufgaben = {};
+      lesson.quiz.forEach((q, n) => {
+        const ok = (quizState.antworten || [])[n];
+        if(ok === undefined) return;
+        aufgaben["f" + n] = { l: q.q.slice(0, 80), r: ok ? 1 : 0, f: ok ? 0 : 1 };
+      });
+      LERNWERK.protokolliere({ fach: "geschichte", fachTitel: "Geschichte", thema: lesson.id, titel: lesson.title, richtig: quizState.score, gesamt: total, geschafft: quizState.score / total >= 0.5, aufgaben });
+    }
     const card = document.createElement("div");
     card.className = "card quiz-result";
     const ratio = quizState.score/total;
@@ -896,6 +907,7 @@ function renderQuiz(root, lesson){
       quizState.answered = true;
       quizState.selected = idx;
       if(idx === q.correct) quizState.score++;
+      (quizState.antworten = quizState.antworten || [])[quizState.i] = idx === q.correct;
       render();
     };
     card.appendChild(b);

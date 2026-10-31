@@ -21,6 +21,21 @@ test('Aufgabenauswahl: 6–10 Aufgaben, aufsteigend sortiert, nichts nur für di
   }
 });
 
+test('Elternbericht: jede Aufgabe hat eine feste, im Thema eindeutige Bezeichnung', () => {
+  const { instanz } = require('../generator/generate');
+  for (const { fach, klasse, thema } of alleThemen()) {
+    const gesehen = {};
+    for (const a of ladeThema(fach, klasse, thema).aufgaben) {
+      const wechselt = Array.from({ length: 30 }, (_, i) => String(i + 1)).some((s) => instanz(a, s).anweisung !== instanz(a, '0').anweisung);
+      if (wechselt) assert.ok(a.bezeichnung, `${thema}/${a.id}: „bezeichnung:“ fehlt (die Anweisung enthält Zufallswerte)`);
+      if (a.nur === 'druck') continue; // erscheint nie im Bericht
+      const l = a.bezeichnung || instanz(a, '0').anweisung;
+      assert.ok(!gesehen[l], `${thema}: ${a.id} und ${gesehen[l]} heißen im Bericht beide „${l}“ – „bezeichnung:“ ergänzen`);
+      gesehen[l] = a.id;
+    }
+  }
+});
+
 test('Druck-HTML: keine Platzhalterreste, Lösungsblatt enthält die Antworten', () => {
   for (const { fach, klasse, thema } of alleThemen()) {
     const doc = ladeThema(fach, klasse, thema);

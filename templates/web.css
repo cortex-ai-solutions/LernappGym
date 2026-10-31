@@ -120,3 +120,32 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .fuss .reihe { justify-content: center; }
 .fuss .btn { min-height: 44px; font-size: 14px; flex: 0 1 auto; }
 .versteckt { display: none !important; }
+
+/* Name und Bericht (Startseite, Fach) */
+.hallo { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
+.hallo button { background: none; border: 0; color: var(--gold-light); font-weight: 700; min-height: 44px; padding: 0 4px; }
+.fuss .btn-breit { flex: 1 1 100%; margin-bottom: 10px; }
+.eltern-link { color: var(--text-muted); }
+
+/* Elternansicht */
+.karte .kind { font-size: 24px; letter-spacing: 0; text-transform: none; color: var(--gold-light); }
+.klein { font-size: 13px; color: var(--text-muted); }
+.tage-leiste { display: flex; gap: 4px; margin: 12px 0 4px; font-size: 18px; color: rgba(200, 168, 76, 0.35); }
+.tage-leiste .ja { color: var(--gold-light); }
+.fach-titel { font-size: 20px; color: var(--gold-light); margin: 22px 0 10px; }
+.bericht-thema h3 { font-size: 17px; color: var(--gold-light); margin-bottom: 8px; }
+.kennzahlen { display: flex; flex-wrap: wrap; gap: 6px; }
+.kennzahlen .neu { color: var(--ok-hell); }
+.verlauf { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 10px; margin-top: 12px; }
+.verlauf svg { max-width: 100%; height: auto; }
+.bericht-thema details { margin-top: 10px; }
+.bericht-thema summary { cursor: pointer; color: var(--gold-base); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.fehler { list-style: none; padding: 0; }
+.fehler li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 15px; }
+.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; }
+.frueher { margin: 0 0 14px; padding: 0 4px; }
+.frueher ul { padding-left: 20px; font-size: 15px; color: var(--text-secondary); }
+.kinder { flex-wrap: wrap; margin-bottom: 14px; }
+.kinder .btn { flex: 0 1 auto; min-height: 44px; }
+.meldung-ok { border-color: var(--ok); }
+.meldung-fehler { border-color: var(--fehler); }

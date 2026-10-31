@@ -15,6 +15,7 @@ monthlyRunningCost: 0
 - [x] Arbeitsblatt-PDF + Lösungsblatt (8 Mathe-Themen, auf der GitHub Page druckbar)
 - [x] Arbeitsblatt-Vorrat: 5 Varianten (A–E) je Thema, ↻-Knopf auf der Themenkarte
 - [x] Update-Banner für die installierte App (Muster aus dem Busplan)
+- [x] Elternbericht per Link: Name, Lernprotokoll für Mathe, Latein, Geschichte, Elternansicht ohne Server
 - [x] Neue Themen: Längen und Massen, Zeit, Kommazahlen (Komma verschieben, rechnen)
 - [ ] 1-Seiten-Test + Lösung mit Seitenlängenprüfung
 - [x] Mathe-App (PWA, offline) im Cortex-Design: je Aufgabengebiet Üben + Merke + Arbeitsblatt/Lösung
@@ -31,7 +32,7 @@ Fächer: Mathematik (im Aufbau), Latein + Geschichte (Bestands-Apps)
 Repo: https://github.com/cortex-ai-solutions/LernappGym
 URL: https://cortex-ai-solutions.github.io/LernappGym/
 Mathe-Themen: 8 (Kl. 5, Lehrplan 2.1.1, 2.1.2, 2.1.3, 2.1.5)
-Tests: 22 (10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test der App, Update-Test)
+Tests: 24 (10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test, Update-Test, Elternbericht über zwei Geräte)
 Mathe-App: https://cortex-ai-solutions.github.io/LernappGym/mathe/
 
 ## Notizen

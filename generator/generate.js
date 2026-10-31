@@ -16,7 +16,7 @@ function feste(a) {
 }
 
 function instanz(aufgabe, seed) {
-  const basis = { id: aufgabe.id, typ: aufgabe.typ, be: aufgabe.be, schwierigkeit: aufgabe.schwierigkeit, prioritaet: aufgabe.prioritaet || 2, nur: aufgabe.nur };
+  const basis = { id: aufgabe.id, typ: aufgabe.typ, be: aufgabe.be, schwierigkeit: aufgabe.schwierigkeit, prioritaet: aufgabe.prioritaet || 2, nur: aufgabe.nur, bezeichnung: aufgabe.bezeichnung };
   let inhalt;
   if (aufgabe.generator) {
     const g = GENERATOREN[aufgabe.generator];

@@ -80,6 +80,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 2
   - id: fahrzeit
+    bezeichnung: "Sachaufgabe Fahrzeit"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [fahrzeit] }
@@ -87,6 +88,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 1
   - id: training
+    bezeichnung: "Sachaufgabe Trainingszeit"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [training] }

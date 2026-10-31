@@ -99,7 +99,7 @@
       '<header class="kopf"><a class="zurueck" href="../" aria-label="Zur Fächerwahl">←</a><h1 class="gold">' + esc(FACH.titel) + '</h1>' +
       '<div class="chips"><span class="chip" title="Tage in Folge">🔥 ' + streakAktuell() + '</span><span class="chip" title="Erfahrungspunkte">⭐ ' + stand.xp + '</span></div></header>' +
       karten +
-      '<footer class="fuss"><p>Dein Lernstand bleibt auf diesem Gerät.</p><div class="reihe"><button class="btn btn-ghost" data-aktion="export">Lernstand sichern</button><label class="btn btn-ghost">Lernstand laden<input type="file" accept="application/json" class="versteckt" id="import"></label></div></footer></div>';
+      '<footer class="fuss"><button class="btn btn-ghost btn-breit" data-aktion="bericht">📤 Bericht an deine Eltern</button><p>Dein Lernstand bleibt auf diesem Gerät.</p><div class="reihe"><button class="btn btn-ghost" data-aktion="export">Lernstand sichern</button><label class="btn btn-ghost">Lernstand laden<input type="file" accept="application/json" class="versteckt" id="import"></label></div></footer></div>';
     app.querySelectorAll('[data-aktion]').forEach(function (b) {
       b.addEventListener('click', function () {
         var karte = b.closest('[data-thema]');
@@ -112,6 +112,7 @@
           zeigeBlatt(karte, t);
         }
         else if (b.dataset.aktion === 'export') exportieren();
+        else if (b.dataset.aktion === 'bericht') LERNWERK.senden('../');
       });
     });
     app.querySelectorAll('[data-thema]').forEach(function (karte) {
@@ -168,7 +169,7 @@
   }
 
   function starte(t) {
-    L = { thema: t, uebungen: uebungenFuer(t), i: 0, herzen: HERZEN, fehler: 0, xp: 0 };
+    L = { thema: t, uebungen: uebungenFuer(t), i: 0, herzen: HERZEN, fehler: 0, xp: 0, richtig: 0, beantwortet: 0, aufgaben: {} };
     zeigeUebung();
   }
 
@@ -322,7 +323,11 @@
   var LOB = ['Richtig!', 'Super!', 'Klasse!', 'Genau!', 'Stark!', 'Prima!'];
   function rueckmeldung(erg, u) {
     var leiste = document.getElementById('leiste');
-    if (erg.richtig) { L.xp += 10; } else { L.herzen--; L.fehler++; }
+    if (erg.richtig) { L.xp += 10; L.richtig++; } else { L.herzen--; L.fehler++; }
+    // fürs Lernprotokoll: Ergebnis je Aufgabe der Inhaltsdatei (Bezeichnung, sonst die Arbeitsanweisung)
+    L.beantwortet++;
+    var pa = L.aufgaben[u.a.id] = L.aufgaben[u.a.id] || { l: String(u.a.bezeichnung || u.a.anweisung).slice(0, 80), r: 0, f: 0 };
+    if (erg.richtig) pa.r++; else pa.f++;
     var erklaer = '';
     if (erg.hinweis) erklaer = erg.hinweis;
     else if (!erg.richtig) erklaer = 'Richtige Lösung: <b>' + esc(u.t.eingabe === 'richtig_falsch' ? (u.t.loesung ? 'richtig' : 'falsch') : u.t.antwort) + '</b>';
@@ -345,6 +350,7 @@
     window.scrollTo(0, 0);
     var t = L.thema;
     var html;
+    if (window.LERNWERK) LERNWERK.protokolliere({ fach: FACH.id, fachTitel: FACH.titel, thema: t.thema, titel: t.titel, richtig: L.richtig, gesamt: L.beantwortet, geschafft: geschafft, aufgaben: L.aufgaben });
     if (geschafft) {
       var st = L.fehler === 0 ? 3 : L.fehler <= 2 ? 2 : 1;
       var bonus = 20 + (L.fehler === 0 ? 10 : 0);

@@ -1,0 +1,548 @@
+<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#002B36"><meta name="description" content="Lernberichte der Kinder ansehen">
+<link rel="manifest" href="../manifest.webmanifest"><link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../icons/icon-192.png"><title>Elternansicht – LERNWERK</title>
+<style>@font-face{font-family:'Montserrat';font-weight:400;font-display:swap;src:url(../fonts/montserrat-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:600;font-display:swap;src:url(../fonts/montserrat-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-weight:700;font-display:swap;src:url(../fonts/montserrat-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url(../fonts/inter-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;font-display:swap;src:url(../fonts/inter-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url(../fonts/inter-latin-600-normal.woff2) format('woff2')}
+/* LERNWERK Webapp – Cortex-CI (design.md im Hub), kindgerecht: große Schrift, Tippflächen ≥ 48 px */
+:root {
+  --bg-deep: #002B36; --bg-primary: #00343F; --bg-mid: #004D5C; --bg-light: #0A6070; --bg-black: #001820;
+  --gold-dark: #8B6914; --gold-mid: #B8922A; --gold-base: #C9A84C; --gold-warm: #D4AF6A; --gold-light: #E8C97D; --gold-bright: #F0D9A0;
+  --text: #F5F0E8; --text-gold: #E8C97D; --text-secondary: #A89060; --text-muted: #8A9A9A;
+  --ok: #2D9E6B; --ok-hell: #3ECF8E; --fehler: #B84040; --fehler-hell: #E07070;
+  --border: rgba(200, 168, 76, 0.2); --border-strong: rgba(200, 168, 76, 0.5);
+  --gradient-gold: linear-gradient(135deg, #8B6914 0%, #C9A84C 45%, #E8C97D 100%);
+  --card: linear-gradient(135deg, #003B49 0%, #002530 100%);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { min-height: 100%; }
+body {
+  font-family: 'Inter', system-ui, sans-serif; font-size: 17px; line-height: 1.5; color: var(--text);
+  background: radial-gradient(ellipse at top left, var(--bg-mid) 0%, var(--bg-deep) 50%, var(--bg-black) 100%) fixed;
+  -webkit-tap-highlight-color: transparent; font-variant-numeric: tabular-nums;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 16px 16px 40px; }
+.gold { background: linear-gradient(90deg, #B8922A, #E8C97D, #C9A84C); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 2px; }
+
+/* Kopf */
+.kopf { display: flex; align-items: center; gap: 10px; margin: 4px 0 18px; }
+.kopf h1 { min-width: 0; font-size: 24px; font-weight: 700; letter-spacing: 0.03em; flex: 1; }
+.zurueck { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; min-height: 48px; border-radius: 12px; border: 1px solid var(--border); background: transparent; color: var(--gold-base); text-decoration: none; font-size: 22px; }
+.chips { display: flex; gap: 8px; }
+.chip { white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 12px; border-radius: 20px; font-size: 14px; font-weight: 700; color: var(--gold-light); background: rgba(201, 168, 76, 0.12); border: 1px solid rgba(201, 168, 76, 0.3); }
+
+/* Themenkarten */
+.thema { position: relative; overflow: hidden; padding: 16px; margin-bottom: 14px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(200, 168, 76, 0.1); }
+.thema::after { content: ''; position: absolute; right: 0; bottom: 0; width: 140px; height: 50px; background: var(--gradient-gold); border-radius: 60% 0 0 0; opacity: 0.08; pointer-events: none; }
+.thema-kopf { display: flex; align-items: center; gap: 14px; }
+.thema-icon { font-size: 38px; line-height: 1; }
+.thema h2 { font-size: 18px; font-weight: 700; color: var(--gold-light); line-height: 1.3; }
+.thema .meta { font-size: 14px; color: var(--text-muted); }
+.sterne { color: var(--gold-base); letter-spacing: 2px; }
+.reihe { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; position: relative; z-index: 1; }
+.reihe .btn { flex: 1 1 auto; }
+.reihe-druck { display: flex; gap: 8px; margin-top: 8px; position: relative; z-index: 1; }
+.reihe-druck .btn { flex: 1; font-size: 14px; }
+.reihe-druck .btn-neu { flex: 0 0 52px; padding: 0; font-size: 26px; font-family: system-ui, sans-serif; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid transparent; font-size: 16px; font-weight: 700; text-decoration: none; transition: transform 0.08s, background 0.15s; }
+.btn:active { transform: scale(0.97); }
+.btn-gold { background: var(--gradient-gold); color: #000; }
+.btn-ghost { background: transparent; color: var(--gold-base); border-color: rgba(200, 168, 76, 0.4); }
+.btn-ghost:hover { background: rgba(200, 168, 76, 0.1); }
+.btn[disabled] { opacity: 0.4; cursor: default; transform: none; }
+.btn-breit { width: 100%; }
+
+/* Lektion */
+.lektion { min-height: 100vh; display: flex; flex-direction: column; }
+.lektion-kopf { display: flex; align-items: center; gap: 12px; padding: 12px 16px; max-width: 560px; width: 100%; margin: 0 auto; }
+.schliessen { min-width: 48px; min-height: 48px; border-radius: 12px; border: none; background: transparent; color: var(--text-muted); font-size: 26px; }
+.fortschritt { flex: 1; height: 14px; border-radius: 7px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.fortschritt span { display: block; height: 100%; background: var(--gradient-gold); border-radius: 7px; transition: width 0.3s; }
+.herzen { font-weight: 700; color: var(--fehler-hell); font-size: 18px; white-space: nowrap; }
+.uebung { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 8px 16px 160px; }
+.kontext { font-size: 15px; color: var(--text-secondary); margin-bottom: 6px; overflow-wrap: anywhere; }
+.frage { font-size: 22px; font-weight: 600; line-height: 1.4; margin-bottom: 20px; overflow-wrap: anywhere; hyphens: auto; }
+.frage.lang { font-size: 19px; font-weight: 500; }
+.box { display: inline-block; min-width: 2.2em; padding: 0 6px; border: 2px dashed var(--gold-base); border-radius: 6px; text-align: center; color: var(--gold-light); }
+.eingabe { width: 100%; min-height: 60px; padding: 0 16px; border-radius: 12px; border: 2px solid var(--border-strong); background: rgba(0, 30, 40, 0.6); color: var(--text); font-size: 24px; font-weight: 600; }
+.eingabe:focus { outline: none; border-color: var(--gold-light); box-shadow: 0 0 0 3px rgba(200, 168, 76, 0.15); }
+.wortfeld { min-height: 120px; padding: 12px 16px; font-size: 20px; line-height: 1.4; resize: none; overflow-wrap: anywhere; }
+.eingabe::placeholder { color: var(--text-muted); font-weight: 400; font-size: 18px; }
+.felder { display: flex; flex-wrap: wrap; gap: 12px; }
+.feld { display: flex; align-items: center; gap: 8px; }
+.feld .eingabe { width: 120px; text-align: center; }
+.einheit { font-size: 22px; font-weight: 700; color: var(--gold-light); min-width: 2.2em; }
+.label { display: block; font-size: 15px; color: var(--text-secondary); margin: 0 0 6px; }
+.optionen { display: grid; gap: 10px; }
+.optionen.zwei { grid-template-columns: 1fr 1fr; }
+.optionen.drei { grid-template-columns: 1fr 1fr 1fr; }
+.option { min-width: 0; overflow-wrap: anywhere; min-height: 58px; padding: 10px 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--card); text-align: left; font-size: 19px; font-weight: 600; }
+.option.zeichen { text-align: center; font-size: 30px; }
+.option.gewaehlt { border-color: var(--gold-light); background: rgba(201, 168, 76, 0.15); }
+.option.richtig { border-color: var(--ok-hell); background: rgba(45, 158, 107, 0.2); }
+.option.falsch { border-color: var(--fehler-hell); background: rgba(184, 64, 64, 0.2); }
+.paare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.paare .option { text-align: center; }
+.paare .option.fertig { opacity: 0.45; border-color: var(--ok-hell); }
+.wackeln { animation: wackeln 0.3s; }
+@keyframes wackeln { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.diagramm { width: 100%; margin: 4px 0 18px; padding: 10px; border-radius: 12px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); }
+.diagramm text { fill: var(--text); font-family: Inter, sans-serif; }
+
+/* Feedback-Leiste */
+.leiste { position: fixed; z-index: 10; left: 0; right: 0; bottom: 0; padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); background: var(--bg-black); border-top: 1px solid var(--border); }
+.leiste-innen { max-width: 560px; margin: 0 auto; }
+.leiste.ok { background: #0B3B2C; border-top-color: var(--ok); }
+.leiste.fehler { background: #3A1818; border-top-color: var(--fehler); }
+.meldung { font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.leiste.ok .meldung { color: var(--ok-hell); }
+.leiste.fehler .meldung { color: var(--fehler-hell); }
+.erklaer { font-size: 15px; margin-bottom: 12px; color: var(--text); }
+
+/* Merke / Ende */
+.karte { padding: 20px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); margin-bottom: 16px; }
+.karte h2 { font-size: 15px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-base); margin-bottom: 10px; }
+.merke p, .merke li { margin-bottom: 8px; }
+.merke ul, .merke ol { padding-left: 22px; }
+.merke strong { color: var(--gold-light); }
+.merke table { border-collapse: collapse; margin: 8px 0 12px; width: 100%; font-size: 15px; }
+.merke th, .merke td { border: 1px solid var(--border-strong); padding: 6px 8px; text-align: center; }
+.merke th { color: var(--gold-light); background: rgba(201, 168, 76, 0.08); }
+.ende { text-align: center; padding-top: 40px; }
+.ende .gross { font-size: 64px; line-height: 1.1; margin-bottom: 8px; }
+.ende h1 { font-size: 30px; margin-bottom: 8px; }
+.ende .sterne { font-size: 40px; margin: 8px 0 16px; }
+.ende .werte { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+.wissen { text-align: left; }
+.stapel { display: grid; gap: 10px; }
+.fuss { margin-top: 28px; text-align: center; font-size: 13px; color: var(--text-muted); }
+.fuss .reihe { justify-content: center; }
+.fuss .btn { min-height: 44px; font-size: 14px; flex: 0 1 auto; }
+.versteckt { display: none !important; }
+
+/* Name und Bericht (Startseite, Fach) */
+.hallo { display: flex; align-items: center; gap: 8px; color: var(--text-secondary); }
+.hallo button { background: none; border: 0; color: var(--gold-light); font-weight: 700; min-height: 44px; padding: 0 4px; }
+.fuss .btn-breit { flex: 1 1 100%; margin-bottom: 10px; }
+.eltern-link { color: var(--text-muted); }
+
+/* Elternansicht */
+.karte .kind { font-size: 24px; letter-spacing: 0; text-transform: none; color: var(--gold-light); }
+.klein { font-size: 13px; color: var(--text-muted); }
+.tage-leiste { display: flex; gap: 4px; margin: 12px 0 4px; font-size: 18px; color: rgba(200, 168, 76, 0.35); }
+.tage-leiste .ja { color: var(--gold-light); }
+.fach-titel { font-size: 20px; color: var(--gold-light); margin: 22px 0 10px; }
+.bericht-thema h3 { font-size: 17px; color: var(--gold-light); margin-bottom: 8px; }
+.kennzahlen { display: flex; flex-wrap: wrap; gap: 6px; }
+.kennzahlen .neu { color: var(--ok-hell); }
+.verlauf { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px 10px; margin-top: 12px; }
+.verlauf svg { max-width: 100%; height: auto; }
+.bericht-thema details { margin-top: 10px; }
+.bericht-thema summary { cursor: pointer; color: var(--gold-base); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
+.fehler { list-style: none; padding: 0; }
+.fehler li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 15px; }
+.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; }
+.frueher { margin: 0 0 14px; padding: 0 4px; }
+.frueher ul { padding-left: 20px; font-size: 15px; color: var(--text-secondary); }
+.kinder { flex-wrap: wrap; margin-bottom: 14px; }
+.kinder .btn { flex: 0 1 auto; min-height: 44px; }
+.meldung-ok { border-color: var(--ok); }
+.meldung-fehler { border-color: var(--fehler); }
+</style></head>
+<body><div id="app"><p class="wrap">Die Elternansicht wird geladen …</p></div>
+<noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
+<script>/* LERNWERK – gemeinsamer Teil aller Seiten (Mathe, Latein, Geschichte, Start, Eltern):
+   Name des Kindes, Lernprotokoll je Fach/Thema, Bericht an die Eltern als Link.
+   Alles bleibt auf dem Gerät. Der Bericht steckt im #-Teil des Links, und der wird nie an einen Server geschickt. */
+(function () {
+  'use strict';
+  var PROFIL = 'lernwerk_profil';
+  var PROTOKOLL = 'lernwerk_protokoll_v1';
+  var MAX_VERLAUF = 15; // Runden je Thema im Verlauf
+  var MAX_TAGE = 60; // Lerntage
+  var MAX_FEHLER = 12; // häufigste Fehler je Thema im Bericht
+
+  function lies(k, leer) { try { return JSON.parse(localStorage.getItem(k)) || leer; } catch (e) { return leer; } }
+  function schreib(k, w) { try { localStorage.setItem(k, JSON.stringify(w)); } catch (e) { /* privater Modus */ } }
+  function tag(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // ---------- Profil ----------
+  // id unterscheidet zwei Kinder mit gleichem Namen in der Elternansicht
+  function profil() {
+    var p = lies(PROFIL, {});
+    if (!p.id) { p.id = Math.random().toString(36).slice(2, 10); schreib(PROFIL, p); }
+    return p;
+  }
+  function setzeName(name) { var p = profil(); p.name = name; schreib(PROFIL, p); }
+
+  // ---------- Protokoll ----------
+  function leeresProtokoll() { return { v: 1, tage: [], faecher: {} }; }
+
+  // Eine Übungsrunde: { fach, fachTitel, thema, titel, richtig, gesamt, geschafft, aufgaben: { schluessel: { l: Bezeichnung, r, f } } }
+  function protokolliere(e) {
+    var p = lies(PROTOKOLL, leeresProtokoll());
+    var heute = tag();
+    if (p.tage.indexOf(heute) < 0) p.tage = p.tage.concat(heute).slice(-MAX_TAGE);
+    var f = p.faecher[e.fach] = p.faecher[e.fach] || { ti: e.fachTitel, th: {} };
+    var t = f.th[e.thema] = f.th[e.thema] || { n: 0, ok: 0, r: 0, g: 0, h: [], a: {} };
+    t.ti = e.titel; t.n++; t.z = heute;
+    if (e.geschafft) t.ok++;
+    t.r += e.richtig; t.g += e.gesamt;
+    t.h = t.h.concat([[heute, e.richtig, e.gesamt, e.geschafft ? 1 : 0]]).slice(-MAX_VERLAUF);
+    Object.keys(e.aufgaben || {}).forEach(function (k) {
+      var a = e.aufgaben[k], alt = t.a[k] || [a.l, 0, 0];
+      t.a[k] = [a.l, alt[1] + a.r, alt[2] + a.f];
+    });
+    schreib(PROTOKOLL, p);
+  }
+
+  // Stände der Apps von vor dem Protokoll, damit auch der erste Bericht etwas zeigt
+  function staende() {
+    var m = lies('lernwerk_v1', null), la = lies('latina_state', null), ge = lies('geschichte_lernapp_progress_v1', null);
+    var s = {};
+    if (m && m.themen) {
+      s.mathematik = {};
+      Object.keys(m.themen).forEach(function (k) { s.mathematik[k.split('/').pop()] = [m.themen[k].lektionen, m.themen[k].sterne]; });
+    }
+    if (la) s.latein = { xp: la.xp || 0, fertig: (la.completedLessons || []).length };
+    if (ge) {
+      s.geschichte = {};
+      Object.keys(ge).forEach(function (k) { s.geschichte[k] = [ge[k].bestScore, ge[k].total]; });
+    }
+    return s;
+  }
+
+  function bericht() {
+    var pr = profil(), p = lies(PROTOKOLL, leeresProtokoll());
+    var faecher = {};
+    Object.keys(p.faecher).forEach(function (fid) {
+      var f = p.faecher[fid], th = {};
+      Object.keys(f.th).forEach(function (tid) {
+        var t = f.th[tid];
+        // nur Fehlerschwerpunkte mitschicken, das hält den Link kurz
+        var fehler = Object.keys(t.a).map(function (k) { return t.a[k]; })
+          .filter(function (a) { return a[2] > 0; })
+          .sort(function (x, y) { return y[2] - x[2] || y[2] / (y[1] + y[2]) - x[2] / (x[1] + x[2]); })
+          .slice(0, MAX_FEHLER);
+        th[tid] = { ti: t.ti, n: t.n, ok: t.ok, r: t.r, g: t.g, z: t.z, h: t.h, a: fehler };
+      });
+      faecher[fid] = { ti: f.ti, th: th };
+    });
+    return { v: 1, n: pr.name || 'Ohne Namen', i: pr.id, t: Date.now(), tage: p.tage, f: faecher, s: staende() };
+  }
+
+  // ---------- Link kodieren (deflate + base64url) ----------
+  function b64url(bytes) {
+    var s = '';
+    for (var i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+    return btoa(s).split('+').join('-').split('/').join('_').split('=').join('');
+  }
+  function vonB64url(s) {
+    s = s.split('-').join('+').split('_').join('/');
+    while (s.length % 4) s += '=';
+    var bin = atob(s), bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+  function strom(bytes, umwandler) {
+    return new Response(new Blob([bytes]).stream().pipeThrough(umwandler)).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+  }
+  function packen(obj) {
+    var bytes = new TextEncoder().encode(JSON.stringify(obj));
+    if (typeof CompressionStream === 'undefined') return Promise.resolve('j' + b64url(bytes));
+    return strom(bytes, new CompressionStream('deflate-raw')).then(function (b) { return 'z' + b64url(b); });
+  }
+  function auspacken(code) {
+    var art = code.charAt(0), bytes = vonB64url(code.slice(1));
+    var fertig = art === 'z' ? strom(bytes, new DecompressionStream('deflate-raw')) : Promise.resolve(bytes);
+    return fertig.then(function (b) { return JSON.parse(new TextDecoder().decode(b)); });
+  }
+
+  // ---------- Oberfläche ----------
+  var CSS = '.lw-schleier{position:fixed;inset:0;z-index:80;background:rgba(0,20,26,.82);display:flex;align-items:center;justify-content:center;padding:16px}' +
+    '.lw-dialog{width:100%;max-width:420px;background:#002B36;color:#F5F0E6;border:1px solid #C9A84C;border-radius:18px;padding:24px 20px;font:16px/1.45 Inter,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.5)}' +
+    '.lw-dialog h2{margin:0 0 6px;font:700 22px/1.25 Montserrat,Inter,system-ui,sans-serif;color:#E8C97D}' +
+    '.lw-dialog p{margin:0 0 14px;color:#C9D4D6}' +
+    '.lw-dialog input,.lw-dialog textarea{width:100%;box-sizing:border-box;min-height:52px;padding:12px 14px;border-radius:12px;border:1px solid rgba(200,168,76,.5);background:#00202A;color:#F5F0E6;font:inherit;font-size:18px}' +
+    '.lw-dialog textarea{font-size:13px;min-height:90px;word-break:break-all}' +
+    '.lw-knopf{display:flex;width:100%;align-items:center;justify-content:center;min-height:52px;margin-top:12px;border:0;border-radius:12px;background:linear-gradient(135deg,#B8922A,#E8C97D);color:#000;font:700 16px Inter,system-ui,sans-serif;cursor:pointer}' +
+    '.lw-knopf.leise{background:transparent;color:#E8C97D;border:1px solid rgba(200,168,76,.4)}';
+  function stil() {
+    if (document.getElementById('lw-stil')) return;
+    var s = document.createElement('style'); s.id = 'lw-stil'; s.textContent = CSS; document.head.appendChild(s);
+  }
+  function dialog(html) {
+    stil();
+    var d = document.createElement('div');
+    d.className = 'lw-schleier';
+    d.innerHTML = '<div class="lw-dialog" role="dialog" aria-modal="true">' + html + '</div>';
+    document.body.appendChild(d);
+    return d;
+  }
+
+  // Beim ersten Start: „Wie heißt du?“ (der Name bleibt auf dem Gerät und steht nur im Bericht)
+  function frageName(fertig) {
+    var alt = profil().name || '';
+    var d = dialog('<form><h2>' + (alt ? 'Name ändern' : 'Hallo! Wie heißt du?') + '</h2><p>Dein Name steht auf dem Bericht für deine Eltern. Er bleibt auf diesem Handy.</p>' +
+      '<input id="lw-name" maxlength="30" autocomplete="given-name" placeholder="Dein Vorname" value="' + esc(alt) + '" required><button class="lw-knopf" type="submit">Los geht’s!</button></form>');
+    var feld = d.querySelector('#lw-name');
+    feld.focus();
+    d.querySelector('form').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var name = feld.value.trim();
+      if (!name) return;
+      setzeName(name);
+      d.remove();
+      if (fertig) fertig(name);
+    });
+  }
+
+  // prefix: Weg von der aktuellen Seite zur Wurzel der App, z. B. '../'
+  function berichtLink(prefix) {
+    return packen(bericht()).then(function (code) { return new URL((prefix || '') + 'eltern/', location.href).href + '#b=' + code; });
+  }
+  function senden(prefix) {
+    var name = profil().name;
+    if (!name) return frageName(function () { senden(prefix); });
+    return berichtLink(prefix).then(function (url) {
+      var titel = 'LERNWERK-Bericht von ' + name;
+      if (navigator.share) return navigator.share({ title: titel, text: titel + ' – zum Öffnen tippen:', url: url }).catch(function () {});
+      // ohne Teilen-Menü (z. B. am PC): Link zum Kopieren zeigen
+      var d = dialog('<h2>Bericht an deine Eltern</h2><p>Kopiere diesen Link und schick ihn deinen Eltern.</p><textarea id="lw-link" readonly>' + esc(url) + '</textarea>' +
+        '<button class="lw-knopf" id="lw-kopieren">Link kopieren</button><button class="lw-knopf leise" id="lw-zu">Schließen</button>');
+      var feld = d.querySelector('#lw-link');
+      d.querySelector('#lw-kopieren').onclick = function () {
+        feld.select();
+        (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).catch(function () { document.execCommand('copy'); });
+        this.textContent = '✓ Kopiert';
+      };
+      d.querySelector('#lw-zu').onclick = function () { d.remove(); };
+    });
+  }
+
+  // Auf Kinder-Seiten: beim ersten Besuch nach dem Namen fragen
+  function start() {
+    if (profil().name) return;
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { frageName(); });
+    else frageName();
+  }
+
+  window.LERNWERK = {
+    profil: profil, setzeName: setzeName, frageName: frageName, start: start,
+    protokolliere: protokolliere, bericht: bericht, berichtLink: berichtLink, senden: senden,
+    packen: packen, auspacken: auspacken, tag: tag, esc: esc,
+  };
+})();
+</script>
+<script>window.TITEL = {"mathematik":{"grosse-zahlen":"Große Zahlen lesen und schreiben","runden":"Natürliche Zahlen runden","grundrechenarten":"Rechnen mit natürlichen Zahlen","sachaufgaben":"Sachaufgaben lösen","daten-diagramme":"Daten erfassen und darstellen","laengen-massen":"Längen und Massen umrechnen","zeit":"Zeit umrechnen","kommazahlen":"Kommazahlen: Komma verschieben und rechnen"},"geschichte":{"l1":"Was ist Geschichte?","l2":"Geschichtsquellen und Quellentypen","l3":"Zeitrechnung und Epochen","l4":"Das Alte Ägypten – Land am Nil","l5":"Antike: Griechenland und Rom (Ausblick)"}};</script>
+<script>/* LERNWERK Elternansicht (eltern/). Erwartet window.LERNWERK und window.TITEL (Themen-Titel aus dem Build).
+   Ein Bericht kommt als Link (#b=…) vom Handy des Kindes. Er wird hier gespeichert; so entsteht der Verlauf.
+   Ein „Eltern-Handy“ ist einfach das Gerät, auf dem Berichte geöffnet werden – eine Anmeldung gibt es nicht. */
+(function () {
+  'use strict';
+  var SPEICHER = 'lernwerk_eltern_v1';
+  var MAX_BERICHTE = 40;
+  var E = window.LERNWERK, esc = E.esc;
+  var app = document.getElementById('app');
+
+  function lies() { try { return JSON.parse(localStorage.getItem(SPEICHER)) || { kinder: {} }; } catch (e) { return { kinder: {} }; } }
+  function speichern() { try { localStorage.setItem(SPEICHER, JSON.stringify(daten)); } catch (e) { /* voll oder privat */ } }
+  var daten = lies();
+  var gewaehlt = null;
+
+  function aufnehmen(b) {
+    if (!b || b.v !== 1 || !b.i || !b.f) throw new Error('Format');
+    var k = daten.kinder[b.i] = daten.kinder[b.i] || { berichte: [] };
+    k.name = b.n;
+    if (!k.berichte.some(function (x) { return x.t === b.t; })) {
+      k.berichte.push(b);
+      k.berichte.sort(function (x, y) { return x.t - y.t; });
+      k.berichte = k.berichte.slice(-MAX_BERICHTE);
+    }
+    speichern();
+    return b.i;
+  }
+
+  // ---------- Formatierung ----------
+  function datum(iso) { var t = iso.split('-'); return t[2] + '.' + t[1] + '.'; }
+  function zeitpunkt(ms) {
+    var d = new Date(ms);
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ', ' + d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+  }
+  function prozent(r, g) { return g ? Math.round((r / g) * 100) : 0; }
+  function sterne(n) { return '★★★'.slice(0, n) + '☆☆☆'.slice(0, 3 - n); }
+  function plural(n, eins, viele) { return n + ' ' + (n === 1 ? eins : viele); }
+
+  // Lerntage der letzten 14 Tage vor dem Bericht als Punktreihe (Text daneben, Farbe ist nie die einzige Information)
+  function tageLeiste(b) {
+    var tage = b.tage || [], punkte = '', gelernt = 0;
+    for (var i = 13; i >= 0; i--) {
+      var d = new Date(b.t); d.setDate(d.getDate() - i);
+      var iso = E.tag(d), ja = tage.indexOf(iso) >= 0;
+      if (ja) gelernt++;
+      punkte += '<span class="tag' + (ja ? ' ja' : '') + '" title="' + datum(iso) + (ja ? ': geübt' : ': nicht geübt') + '">' + (ja ? '●' : '○') + '</span>';
+    }
+    return '<div class="tage-leiste" aria-label="An ' + gelernt + ' von 14 Tagen geübt">' + punkte + '</div><p class="klein">Geübt an <b>' + gelernt + ' von 14 Tagen</b> vor dem Bericht</p>';
+  }
+
+  // Verlauf der letzten Runden: Säule = Anteil richtig; nicht geschaffte Runden nur umrandet
+  function verlauf(h) {
+    if (!h || !h.length) return '';
+    var B = 14, A = 4, H = 44;
+    var saeulen = h.map(function (e, i) {
+      var q = e[2] ? e[1] / e[2] : 0, hoehe = Math.max(2, q * H), x = i * (B + A);
+      var titel = datum(e[0]) + ': ' + e[1] + ' von ' + e[2] + ' richtig' + (e[3] ? '' : ' (nicht geschafft)');
+      return '<rect x="' + x + '" y="' + (H - hoehe) + '" width="' + B + '" height="' + hoehe + '" rx="2" ' + (e[3] ? 'fill="url(#eg)"' : 'fill="none" stroke="#E8C97D" stroke-dasharray="3 2"') + '><title>' + esc(titel) + '</title></rect>';
+    }).join('');
+    var breite = h.length * (B + A);
+    return '<div class="verlauf"><svg viewBox="0 0 ' + breite + ' ' + H + '" width="' + breite + '" height="' + H + '" role="img" aria-label="Verlauf der letzten ' + h.length + ' Runden">' +
+      '<defs><linearGradient id="eg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#B8922A"/><stop offset="1" stop-color="#E8C97D"/></linearGradient></defs>' + saeulen + '</svg>' +
+      '<span class="klein">letzte ' + plural(h.length, 'Runde', 'Runden') + ' · gestrichelt = nicht geschafft</span></div>';
+  }
+
+  function themaKarte(fid, tid, t, vorher) {
+    var neu = vorher ? t.n - vorher.n : 0;
+    var fehler = (t.a || []).map(function (a) {
+      return '<li><span>' + esc(a[0]) + '</span><b>' + a[2] + ' von ' + (a[1] + a[2]) + ' falsch</b></li>';
+    }).join('');
+    return '<article class="thema bericht-thema"><h3>' + esc(t.ti || (TITEL[fid] && TITEL[fid][tid]) || tid) + '</h3>' +
+      '<div class="kennzahlen"><span class="chip">' + plural(t.n, 'Runde', 'Runden') + (neu > 0 ? ' <b class="neu">+' + neu + '</b>' : '') + '</span>' +
+      '<span class="chip">' + prozent(t.r, t.g) + ' % richtig</span><span class="chip">' + t.ok + ' geschafft</span><span class="chip">zuletzt ' + datum(t.z) + '</span></div>' +
+      verlauf(t.h) +
+      (fehler ? '<details><summary>Fehlerschwerpunkte</summary><ul class="fehler">' + fehler + '</ul></details>' : '') +
+      '</article>';
+  }
+
+  // Stand von vor der Aufzeichnung (aus den Apps selbst), nur für Themen ohne Protokoll
+  function frueher(fid, s, protokoll) {
+    if (!s) return '';
+    var zeilen = [];
+    if (fid === 'latein') {
+      if (s.fertig || s.xp) zeilen.push('<li>' + plural(s.fertig, 'Lektion', 'Lektionen') + ' abgeschlossen, ' + s.xp + ' XP</li>');
+    } else {
+      Object.keys(s).forEach(function (tid) {
+        if (protokoll && protokoll[tid]) return;
+        var w = s[tid], titel = esc((TITEL[fid] && TITEL[fid][tid]) || tid);
+        if (fid === 'mathematik' && w[0]) zeilen.push('<li>' + titel + ': ' + plural(w[0], 'Übung', 'Übungen') + ', ' + sterne(w[1]) + '</li>');
+        if (fid === 'geschichte' && w[1]) zeilen.push('<li>' + titel + ': bestes Quiz ' + w[0] + ' von ' + w[1] + '</li>');
+      });
+    }
+    return zeilen.length ? '<div class="frueher"><p class="klein">Vor Beginn der Aufzeichnung:</p><ul>' + zeilen.join('') + '</ul></div>' : '';
+  }
+
+  var FAECHER = [['mathematik', 'Mathematik', '🧮'], ['latein', 'Latein', '🦉'], ['geschichte', 'Geschichte', '📜']];
+
+  function kindAnsicht(id) {
+    var k = daten.kinder[id], b = k.berichte[k.berichte.length - 1], vorher = k.berichte[k.berichte.length - 2];
+    var html = '<section class="karte"><h2 class="kind">' + esc(k.name) + '</h2><p class="klein">Bericht vom ' + zeitpunkt(b.t) +
+      (vorher ? ' · vorheriger Bericht ' + zeitpunkt(vorher.t) : '') + '</p>' + tageLeiste(b) + '</section>';
+    var leer = true;
+    FAECHER.forEach(function (fa) {
+      var fid = fa[0], f = b.f[fid], s = b.s && b.s[fid];
+      var themen = f ? Object.keys(f.th).sort(function (x, y) { return f.th[y].z < f.th[x].z ? -1 : 1; }) : [];
+      var alt = frueher(fid, s, f && f.th);
+      if (!themen.length && !alt) return;
+      leer = false;
+      var vf = vorher && vorher.f[fid];
+      html += '<h2 class="fach-titel">' + fa[2] + ' ' + fa[1] + '</h2>' +
+        themen.map(function (tid) { return themaKarte(fid, tid, f.th[tid], vf && vf.th[tid]); }).join('') + alt;
+    });
+    if (leer) html += '<p class="karte">In diesem Bericht ist noch nichts geübt worden.</p>';
+    html += '<button class="btn btn-ghost btn-breit" id="loeschen">Berichte von ' + esc(k.name) + ' löschen</button>';
+    return html;
+  }
+
+  function zeige(meldung) {
+    var ids = Object.keys(daten.kinder);
+    if (!gewaehlt || !daten.kinder[gewaehlt]) gewaehlt = ids[0];
+    var kopf = '<header class="kopf"><a class="zurueck" href="../" aria-label="Zur Startseite">←</a><h1 class="gold">Elternansicht</h1></header>';
+    var hinweis = meldung ? '<p class="karte meldung-' + meldung[0] + '">' + meldung[1] + '</p>' : '';
+    if (!ids.length) {
+      app.innerHTML = '<div class="wrap">' + kopf + hinweis + '<section class="karte"><h2>Noch kein Bericht</h2>' +
+        '<p>Hier erscheinen die Berichte, die Ihr Kind aus der App schickt: Startseite oder Fach öffnen, dann <b>„📤 Bericht an deine Eltern“</b> antippen und per WhatsApp, Signal oder Mail senden.</p>' +
+        '<p>Tippen Sie den Link auf diesem Handy an. Der Bericht wird hier gespeichert, mit jedem weiteren Bericht entsteht ein Verlauf. Die Daten werden nicht ins Internet übertragen.</p></section></div>';
+      return;
+    }
+    var reiter = ids.length > 1 ? '<div class="reihe kinder">' + ids.map(function (id) {
+      return '<button class="btn ' + (id === gewaehlt ? 'btn-gold' : 'btn-ghost') + '" data-kind="' + id + '">' + esc(daten.kinder[id].name) + '</button>';
+    }).join('') + '</div>' : '';
+    app.innerHTML = '<div class="wrap">' + kopf + hinweis + reiter + kindAnsicht(gewaehlt) +
+      '<footer class="fuss"><p>Die Berichte bleiben auf diesem Gerät.</p></footer></div>';
+    app.querySelectorAll('[data-kind]').forEach(function (b) { b.onclick = function () { gewaehlt = b.dataset.kind; zeige(); }; });
+    document.getElementById('loeschen').onclick = function () {
+      if (!confirm('Alle Berichte von ' + daten.kinder[gewaehlt].name + ' auf diesem Gerät löschen?')) return;
+      delete daten.kinder[gewaehlt]; gewaehlt = null; speichern(); zeige();
+    };
+  }
+
+  // Link mit Bericht? Aufnehmen, dann den #-Teil entfernen (Neuladen nimmt ihn nicht doppelt auf).
+  // Auch bei offener Seite (hashchange), denn ein weiterer Link ändert dann nur den #-Teil.
+  function verarbeite() {
+    var code = location.hash.indexOf('#b=') === 0 ? location.hash.slice(3) : '';
+    if (!code) return zeige();
+    E.auspacken(code).then(function (b) {
+      var neu = !(daten.kinder[b.i] && daten.kinder[b.i].berichte.some(function (x) { return x.t === b.t; }));
+      gewaehlt = aufnehmen(b);
+      history.replaceState(null, '', location.pathname);
+      zeige(['ok', neu ? '✓ Neuer Bericht von ' + esc(b.n) + ' gespeichert.' : 'Diesen Bericht von ' + esc(b.n) + ' gibt es schon.']);
+    }).catch(function () {
+      zeige(['fehler', 'Dieser Link ist unvollständig. Bitte den Bericht noch einmal schicken lassen.']);
+    });
+  }
+  window.addEventListener('hashchange', verarbeite);
+  verarbeite();
+})();
+</script>
+<style>
+.update-banner{position:fixed;left:12px;right:12px;bottom:12px;z-index:60;max-width:456px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:14px 16px;min-height:52px;border:1px solid #C9A84C;border-radius:14px;background:#002B36;color:#F5F0E6;font:600 15px/1.3 Inter,system-ui,sans-serif;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.45);cursor:pointer;animation:ub-rein .25s ease-out}
+.update-banner[hidden]{display:none}.update-banner:disabled{opacity:.7}
+.update-banner .ub-text{flex:1;min-width:0}
+.update-banner .ub-aktion{flex-shrink:0;padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,#B8922A,#E8C97D);color:#000;font-weight:700}
+@keyframes ub-rein{from{transform:translateY(140%);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.update-banner{animation:none}}
+</style>
+<button id="update-banner" class="update-banner" type="button" hidden><span aria-hidden="true">⬆️</span><span class="ub-text">Neue Inhalte verfügbar</span><span class="ub-aktion">Aktualisieren</span></button>
+<script>
+(function () {
+  if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
+  var banner = document.getElementById('update-banner');
+  function zeigen() { banner.hidden = false; }
+  // erst neu laden, wenn die neue Version übernommen hat – ein Neuladen mitten im Wechsel kann hängen bleiben
+  var neuLaden = function () { neuLaden = function () {}; location.reload(); };
+  banner.addEventListener('click', function () {
+    banner.disabled = true;
+    banner.querySelector('.ub-aktion').textContent = '…';
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg || !reg.waiting) return neuLaden();
+      navigator.serviceWorker.addEventListener('controllerchange', function () { neuLaden(); });
+      setTimeout(function () { neuLaden(); }, 3000);
+      reg.waiting.postMessage('SKIP_WAITING');
+    }).catch(function () { neuLaden(); });
+  });
+  navigator.serviceWorker.register('../sw.js', { scope: '../' }).then(function (reg) {
+    // beim allerersten Besuch (noch kein Controller) gibt es nichts zu aktualisieren
+    var hatteController = !!navigator.serviceWorker.controller;
+    if (reg.waiting && hatteController) zeigen();
+    reg.addEventListener('updatefound', function () {
+      var neu = reg.installing;
+      if (neu) neu.addEventListener('statechange', function () { if (neu.state === 'installed' && hatteController) zeigen(); });
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', function () { if (hatteController) zeigen(); });
+    reg.update().catch(function () {});
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reg.update().catch(function () {}); });
+  }).catch(function () {});
+})();
+</script></body></html>

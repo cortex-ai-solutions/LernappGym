@@ -58,6 +58,7 @@ aufgaben:
     schwierigkeit: 1
     prioritaet: 3
   - id: mal-zehner
+    bezeichnung: "Komma verschieben: mal 10, 100, 1000"
     typ: rechnung
     generator: komma-verschieben
     parameter: { operationen: ["*"] }
@@ -66,6 +67,7 @@ aufgaben:
     schwierigkeit: 1
     prioritaet: 1
   - id: durch-zehner
+    bezeichnung: "Komma verschieben: geteilt durch 10, 100, 1000"
     typ: rechnung
     generator: komma-verschieben
     parameter: { operationen: [":"] }
@@ -89,6 +91,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 1
   - id: plus-minus
+    bezeichnung: "Kommazahlen plus und minus"
     typ: rechnung
     generator: komma-rechnen
     parameter: { operationen: ["+", "-"] }
@@ -97,6 +100,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 1
   - id: mal-geteilt
+    bezeichnung: "Kommazahlen mal und geteilt"
     typ: rechnung
     generator: komma-rechnen
     parameter: { operationen: ["*", ":"], maxGanz: 9 }
@@ -113,6 +117,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 2
   - id: einkauf
+    bezeichnung: "Sachaufgabe Einkauf mit Kommazahlen"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [einkauf] }

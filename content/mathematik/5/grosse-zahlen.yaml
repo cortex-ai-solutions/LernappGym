@@ -33,6 +33,7 @@ aufgaben:
     schwierigkeit: 1
     prioritaet: 3
   - id: in-ziffern-mio
+    bezeichnung: "Zahl in Ziffern (bis Millionen)"
     typ: eingabe
     generator: zahl-in-ziffern
     parameter: { bereich: [100000, 99999999] }
@@ -73,6 +74,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 3
   - id: in-ziffern-mrd
+    bezeichnung: "Zahl in Ziffern (Milliarden)"
     typ: eingabe
     generator: zahl-in-ziffern
     parameter: { bereich: [1000000000, 999999999999] }

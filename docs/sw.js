@@ -1,7 +1,8 @@
 // Offline-Cache für LERNWERK – automatisch erzeugt von generator/webapp.js
-const CACHE = 'lernwerk-dfeff391cf';
+const CACHE = 'lernwerk-e8d3615934';
 const DATEIEN = [
   "./",
+  "eltern/",
   "geschichte/",
   "latein/",
   "mathe/",
@@ -21,6 +22,7 @@ const DATEIEN = [
   "blaetter/mathematik/sachaufgaben_A_loesung.pdf",
   "blaetter/mathematik/zeit_A.pdf",
   "blaetter/mathematik/zeit_A_loesung.pdf",
+  "eltern/index.html",
   "fonts/inter-latin-400-normal.woff2",
   "fonts/inter-latin-500-normal.woff2",
   "fonts/inter-latin-600-normal.woff2",

@@ -40,6 +40,7 @@ aufgaben:
     schwierigkeit: 1
     prioritaet: 2
   - id: ablesen
+    bezeichnung: "Säulendiagramm ablesen"
     typ: diagramm
     generator: diagramm
     parameter: { modus: ablesen, art: saeule, kategorien: 5 }
@@ -48,6 +49,7 @@ aufgaben:
     schwierigkeit: 1
     prioritaet: 1
   - id: ablesen-balken
+    bezeichnung: "Balkendiagramm ablesen"
     typ: diagramm
     generator: diagramm
     parameter: { modus: ablesen, art: balken, kategorien: 4 }
@@ -56,6 +58,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 2
   - id: saeulen-zeichnen
+    bezeichnung: "Säulendiagramm zeichnen"
     typ: diagramm
     generator: diagramm
     parameter: { modus: zeichnen, art: saeule, quelle: strichliste, kategorien: 5, max: 10 }
@@ -63,6 +66,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 1
   - id: balken-zeichnen
+    bezeichnung: "Balkendiagramm zeichnen"
     typ: diagramm
     generator: diagramm
     parameter: { modus: zeichnen, art: balken, quelle: tabelle, kategorien: 5, max: 10 }

@@ -18,6 +18,7 @@ wissenswertes:
   - "Rückwärts rechnen ist ein Profi-Trick: Wenn du das Ende kennst, gehst du mit den Umkehraufgaben zum Anfang zurück."
 aufgaben:
   - id: tierbeine
+    bezeichnung: "Sachaufgabe Tierbeine"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [tierbeine] }
@@ -25,6 +26,7 @@ aufgaben:
     schwierigkeit: 1
     prioritaet: 1
   - id: rueckgeld
+    bezeichnung: "Sachaufgabe Rückgeld"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [rueckgeld] }
@@ -32,6 +34,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 2
   - id: sparen
+    bezeichnung: "Sachaufgabe Sparen"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [sparen] }
@@ -39,6 +42,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 2
   - id: busse
+    bezeichnung: "Sachaufgabe Busse (Rest beachten)"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [busse] }
@@ -46,6 +50,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 2
   - id: mitglieder
+    bezeichnung: "Sachaufgabe Mitglieder (Zu- und Abgang)"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [mitglieder] }
@@ -53,6 +58,7 @@ aufgaben:
     schwierigkeit: 3
     prioritaet: 1
   - id: fahrkarten
+    bezeichnung: "Sachaufgabe Fahrkarten"
     typ: rechnung
     generator: sachaufgabe
     parameter: { vorlagen: [fahrkarten] }

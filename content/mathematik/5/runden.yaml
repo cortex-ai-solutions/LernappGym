@@ -34,6 +34,7 @@ aufgaben:
     schwierigkeit: 1
     prioritaet: 2
   - id: runden-einfach
+    bezeichnung: "Runden"
     typ: rechnung
     generator: runden
     parameter: { stellen: [zehner, hunderter, tausender], ziffern: [5, 6] }
@@ -42,6 +43,7 @@ aufgaben:
     schwierigkeit: 1
     prioritaet: 1
   - id: runden-reihe
+    bezeichnung: "Eine Zahl auf alle Stellen runden"
     typ: rechnung
     generator: runden-reihe
     parameter: { stellen: [zehner, hunderter, tausender, zehntausender, hunderttausender], ziffern: [7] }
@@ -49,6 +51,7 @@ aufgaben:
     schwierigkeit: 2
     prioritaet: 1
   - id: runden-uebertrag
+    bezeichnung: "Runden mit Übertrag"
     typ: rechnung
     generator: runden
     parameter: { stellen: [hunderter, tausender], ziffern: [5, 6], uebertrag: true }

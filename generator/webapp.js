@@ -61,13 +61,17 @@ function updateBanner(prefix) {
   if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
   var banner = document.getElementById('update-banner');
   function zeigen() { banner.hidden = false; }
+  // erst neu laden, wenn die neue Version übernommen hat – ein Neuladen mitten im Wechsel kann hängen bleiben
+  var neuLaden = function () { neuLaden = function () {}; location.reload(); };
   banner.addEventListener('click', function () {
     banner.disabled = true;
     banner.querySelector('.ub-aktion').textContent = '…';
-    navigator.serviceWorker.getRegistration()
-      .then(function (reg) { if (reg && reg.waiting) reg.waiting.postMessage('SKIP_WAITING'); })
-      .catch(function () {})
-      .then(function () { location.reload(); });
+    navigator.serviceWorker.getRegistration().then(function (reg) {
+      if (!reg || !reg.waiting) return neuLaden();
+      navigator.serviceWorker.addEventListener('controllerchange', function () { neuLaden(); });
+      setTimeout(function () { neuLaden(); }, 3000);
+      reg.waiting.postMessage('SKIP_WAITING');
+    }).catch(function () { neuLaden(); });
   });
   navigator.serviceWorker.register('${prefix}sw.js', { scope: '${prefix}' }).then(function (reg) {
     // beim allerersten Besuch (noch kein Controller) gibt es nichts zu aktualisieren
@@ -83,6 +87,25 @@ function updateBanner(prefix) {
   }).catch(function () {});
 })();
 </script>`;
+}
+
+// Gemeinsamer Teil aller Seiten: Name, Lernprotokoll, Bericht an die Eltern (templates/lernwerk.js).
+// Kinder-Seiten fragen beim ersten Besuch nach dem Namen, die Elternansicht nicht.
+function lernwerkSkript({ nameFragen }) {
+  return `<script>${fs.readFileSync(path.join(TPL, 'lernwerk.js'), 'utf8')}</script>${nameFragen ? '\n<script>LERNWERK.start();</script>' : ''}`;
+}
+
+// Themen-Titel für die Elternansicht (für Stände von vor dem Protokoll, die nur die id kennen)
+function titelKatalog() {
+  const katalog = {};
+  for (const fach of FAECHER) {
+    katalog[fach.id] = Object.fromEntries(ladeFach(fach.id, '').map((t) => [t.thema, t.titel]));
+  }
+  // Geschichte: Lektionen aus der Bestands-App lesen (id, week, title stehen dort direkt untereinander)
+  const ge = fs.readFileSync(path.join(ROOT, 'legacy', 'geschichte-lernapp.html'), 'utf8');
+  katalog.geschichte = Object.fromEntries([...ge.matchAll(/id: "(l\d+)",\s*week: \d+,\s*title: "([^"]+)"/g)].map((m) => [m[1], m[2]]));
+  if (!Object.keys(katalog.geschichte).length) throw new Error('Geschichte: keine Lektionstitel gefunden');
+  return katalog;
 }
 
 function kopf({ titel, prefix, beschreibung }) {
@@ -118,8 +141,19 @@ function fachSeite(fach, lwBundle) {
 <body><div id="app"><p class="wrap">Die App wird geladen …</p></div>
 <noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
 <script>${lwBundle}</script>
+${lernwerkSkript({ nameFragen: true })}
 <script>window.FACH = ${jsonScript(daten)};</script>
 <script>${fs.readFileSync(path.join(TPL, 'app.js'), 'utf8')}</script>
+${updateBanner('../')}</body></html>`;
+}
+
+function elternSeite() {
+  return `${kopf({ titel: 'Elternansicht – LERNWERK', prefix: '../', beschreibung: 'Lernberichte der Kinder ansehen' })}
+<body><div id="app"><p class="wrap">Die Elternansicht wird geladen …</p></div>
+<noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
+${lernwerkSkript({ nameFragen: false })}
+<script>window.TITEL = ${jsonScript(titelKatalog())};</script>
+<script>${fs.readFileSync(path.join(TPL, 'eltern.js'), 'utf8')}</script>
 ${updateBanner('../')}</body></html>`;
 }
 
@@ -129,9 +163,25 @@ function startSeite() {
     .join('\n');
   return `${kopf({ titel: 'LERNWERK – Lernen Klasse 5', prefix: '', beschreibung: 'Üben für Klasse 5: Mathematik, Latein, Geschichte' })}
 <body><div class="wrap"><header style="margin:20px 0 22px"><h1 class="gold" style="font-size:32px;letter-spacing:.05em">LERNWERK</h1>
-<p style="color:var(--text-secondary)">Üben für Klasse 5 – such dir ein Fach aus!</p></header>
+<p class="hallo" id="hallo">Üben für Klasse 5 – such dir ein Fach aus!</p></header>
 ${karten}
-<footer class="fuss"><p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p></footer></div>
+<footer class="fuss"><button class="btn btn-ghost btn-breit" id="bericht">📤 Bericht an deine Eltern</button>
+<p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p><p><a class="eltern-link" href="eltern/">Für Eltern: Berichte ansehen</a></p></footer></div>
+${lernwerkSkript({ nameFragen: false })}
+<script>
+(function () {
+  var p = document.getElementById('hallo');
+  function hallo() {
+    var name = LERNWERK.profil().name;
+    if (!name) return;
+    p.innerHTML = '<span>Hallo, ' + LERNWERK.esc(name) + '! Such dir ein Fach aus.</span><button aria-label="Name ändern">✎</button>';
+    p.querySelector('button').onclick = function () { LERNWERK.frageName(hallo); };
+  }
+  hallo();
+  if (!LERNWERK.profil().name) LERNWERK.frageName(hallo);
+  document.getElementById('bericht').onclick = function () { LERNWERK.senden(''); };
+})();
+</script>
 ${updateBanner('')}</body></html>`;
 }
 
@@ -219,14 +269,19 @@ async function baueWeb() {
     fs.mkdirSync(path.join(DOCS, fach.ordner), { recursive: true });
     fs.writeFileSync(path.join(DOCS, fach.ordner, 'index.html'), fachSeite(fach, lw));
   }
-  // Bestands-Apps übernehmen, nur das Update-Banner kommt dazu
+  // Bestands-Apps übernehmen; dazu kommen Lernprotokoll/Name (vor dem App-Skript) und das Update-Banner
   for (const b of BESTAND) {
     fs.mkdirSync(path.join(DOCS, b.ordner), { recursive: true });
     const html = fs.readFileSync(path.join(ROOT, 'legacy', b.quelle), 'utf8');
+    const anfang = html.indexOf('<body');
     const ende = html.lastIndexOf('</body>');
-    if (ende < 0) throw new Error(`${b.quelle}: </body> fehlt`);
-    fs.writeFileSync(path.join(DOCS, b.ordner, 'index.html'), html.slice(0, ende) + updateBanner('../') + html.slice(ende));
+    if (anfang < 0 || ende < 0) throw new Error(`${b.quelle}: <body> oder </body> fehlt`);
+    const nachBody = html.indexOf('>', anfang) + 1;
+    fs.writeFileSync(path.join(DOCS, b.ordner, 'index.html'),
+      html.slice(0, nachBody) + lernwerkSkript({ nameFragen: true }) + html.slice(nachBody, ende) + updateBanner('../') + html.slice(ende));
   }
+  fs.mkdirSync(path.join(DOCS, 'eltern'), { recursive: true });
+  fs.writeFileSync(path.join(DOCS, 'eltern', 'index.html'), elternSeite());
   fs.writeFileSync(path.join(DOCS, 'index.html'), startSeite());
   fs.writeFileSync(path.join(DOCS, '.nojekyll'), '');
   fs.writeFileSync(path.join(DOCS, 'manifest.webmanifest'), JSON.stringify({
