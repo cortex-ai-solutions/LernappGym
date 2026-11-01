@@ -9,6 +9,7 @@ const { marked } = require('marked');
 const { bundle } = require('./bundle');
 const { baueBlatt, VARIANTEN } = require('./worksheet');
 const { schliessen } = require('./pdf');
+const { pruefsumme } = require('./belohnung');
 
 const ROOT = path.join(__dirname, '..');
 const DOCS = path.join(ROOT, 'docs');
@@ -94,9 +95,16 @@ function updateBanner(prefix) {
 // Mit katze kommt die Lernkatze dazu (templates/katze.js); sie stellt sich nach dem Namen vor.
 function lernwerkSkript({ nameFragen, katze = false }) {
   const lw = `<script>${fs.readFileSync(path.join(TPL, 'lernwerk.js'), 'utf8')}</script>`;
-  const kz = katze ? `\n<script>${fs.readFileSync(path.join(TPL, 'katze.js'), 'utf8')}</script>` : '';
+  const kz = katze ? `\n<script>window.KATZE_DATEN = ${jsonScript(katzeDaten())};</script>\n<script>${fs.readFileSync(path.join(TPL, 'katze.js'), 'utf8')}</script>` : '';
   const start = !nameFragen ? '' : katze ? '\n<script>LERNWERK.start(function () { KATZE.start(); });</script>' : '\n<script>LERNWERK.start();</script>';
   return lw + kz + start;
+}
+
+// Für das Katzenalbum: Themen aller Fächer und Prüfsummen der Belohnungscodes (Prüfsumme → fach/thema/Variante)
+const CODES = {};
+function katzeDaten() {
+  const themen = FAECHER.flatMap((f) => ladeFach(f.id, '').map((t) => ({ fach: f.id, fachTitel: f.titel, thema: t.thema, titel: t.titel })));
+  return { themen, codes: CODES };
 }
 
 // Themen-Titel für die Elternansicht (für Stände von vor dem Protokoll, die nur die id kennen)
@@ -183,13 +191,7 @@ ${lernwerkSkript({ nameFragen: false, katze: true })}
     p.querySelector('button').onclick = function () { LERNWERK.frageName(hallo); };
   }
   var kk = document.getElementById('katze-karte');
-  function katze() {
-    if (!KATZE.lies().name) return;
-    kk.hidden = false;
-    kk.innerHTML = KATZE.svg({ stimmung: 'hallo' }) + '<div><b>' + LERNWERK.esc(KATZE.name()) + '</b><p>' + LERNWERK.esc(KATZE.spruch('hallo')) + '</p>' +
-      '<button class="btn btn-ghost">🎨 Anpassen</button></div>';
-    kk.querySelector('button').onclick = function () { KATZE.anpassen(); };
-  }
+  function katze() { KATZE.karte(kk); }
   window.addEventListener('katze-geaendert', katze);
   hallo();
   katze();
@@ -271,6 +273,9 @@ async function baueWeb() {
       for (const v of VARIANTEN) {
         const r = await baueBlatt({ fach: fach.id, klasse: t.klasse, thema: t.thema, seed: v, datei: `${t.thema}_${v}` });
         for (const d of [r.blatt.datei, r.loesung.datei]) fs.copyFileSync(d, path.join(ziel, path.basename(d)));
+        const summe = pruefsumme(r.code);
+        if (CODES[summe]) throw new Error(`Belohnungscode doppelt: ${fach.id}/${t.thema}/${v} und ${CODES[summe]}`);
+        CODES[summe] = `${fach.id}/${t.thema}/${v}`;
         seiten.push(`${v} ${r.blatt.seiten}+${r.loesung.seiten}`);
       }
       console.log(`  Blätter ${fach.id}/${t.thema}: ${seiten.join(', ')} Seiten`);

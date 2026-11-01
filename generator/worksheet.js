@@ -7,6 +7,7 @@ const yaml = require('js-yaml');
 const { instanz } = require('./generate');
 const { seite } = require('./render/print');
 const { htmlZuPdf, schliessen } = require('./pdf');
+const { belohnungscode } = require('./belohnung');
 
 const ROOT = path.join(__dirname, '..');
 const MIN = 6;
@@ -41,11 +42,12 @@ function waehleAufgaben(doc, seed) {
 async function baueBlatt({ fach, klasse, thema, seed = 'blatt', datei = thema }) {
   const doc = ladeThema(fach, klasse, thema);
   const aufgaben = waehleAufgaben(doc, seed);
+  const code = belohnungscode({ fach, thema, variante: seed, aufgaben });
   const ordner = path.join(ROOT, 'output', 'blaetter', fach);
   fs.mkdirSync(ordner, { recursive: true });
-  const ergebnis = {};
+  const ergebnis = { code };
   for (const loesung of [false, true]) {
-    const html = seite({ doc, aufgaben, art: 'blatt', loesung, seed });
+    const html = seite({ doc, aufgaben, art: 'blatt', loesung, seed, code });
     const name = `${datei}${loesung ? '_loesung' : ''}`;
     fs.writeFileSync(path.join(ordner, `${name}.html`), html);
     const { pdf, seiten } = await htmlZuPdf(html);

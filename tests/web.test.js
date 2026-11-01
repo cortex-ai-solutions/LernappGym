@@ -6,8 +6,11 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
+const { belohnungscode } = require('../generator/belohnung');
+const { ladeThema, waehleAufgaben } = require('../generator/worksheet');
 
-const DOCS = path.join(__dirname, '..', 'docs');
+const ROOT = path.join(__dirname, '..');
+const DOCS = path.join(ROOT, 'docs');
 const TYPEN = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webmanifest': 'application/manifest+json', '.svg': 'image/svg+xml', '.png': 'image/png', '.pdf': 'application/pdf', '.woff2': 'font/woff2' };
 
 // statischer Server unter /LernappGym/ wie bei GitHub Pages; s.swZusatz hängt Text an sw.js (simuliert ein Deploy)
@@ -87,10 +90,12 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
     await page.click('#katze-karte button');
     await page.click('.kz-knopf[data-feld="fell"][data-wert="rot"]');
     await page.click('.kz-knopf[data-feld="decke"][data-wert="rosa"]');
+    await page.click('.kz-knopf[data-feld="kopf"][data-wert="schleife"]');
+    assert.ok(await page.$('.kz-knopf[data-feld="kopf"][data-wert="krone"][disabled]'), 'Krone ist am Anfang gesperrt');
     await page.click('.kz-schrank [type="submit"]');
     await page.waitForSelector('.lw-schleier', { state: 'detached' });
     assert.deepStrictEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('lernwerk_katze_v1'))),
-      { name: 'Mimi', fell: 'rot', augen: 'gelbgruen', decke: 'rosa' });
+      { name: 'Mimi', fell: 'rot', augen: 'gelbgruen', decke: 'rosa', kopf: 'schleife', hals: 'aus' });
     assert.ok(await page.$('#katze-karte svg.katze path[fill="#f6c9d3"]'), 'rosa Decke wird gezeichnet');
     const themen = await page.$$eval('.thema', (els) => els.map((e) => e.dataset.thema));
     assert.ok(themen.length >= 8, `${themen.length} Themen`);
@@ -134,12 +139,39 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
       await page.waitForSelector('.ende');
       assert.match(await page.textContent('.ende h1'), /Geschafft/, `${thema}: Lektion nicht geschafft`);
       assert.ok(await page.$('.ende-katze svg.katze'), `${thema}: Katze fehlt auf dem Abschluss-Bildschirm`);
+      assert.ok(await page.$('.kz-neu-karte .kz-platz'), `${thema}: erstes Schaffen schaltet kein Album-Bild frei`);
       await page.click('#uebersicht');
       await page.waitForSelector('.thema');
     }
     const stand = await page.evaluate(() => JSON.parse(localStorage.getItem('lernwerk_v1')));
     assert.ok(stand.xp > 0 && stand.streak.tage === 1, 'XP und Streak gespeichert');
     for (const thema of themen) assert.strictEqual(stand.themen[`mathematik/${thema}`].lektionen, 1);
+    // Katzenalbum: Bilder der geschafften Themen sind neu, Belohnungscode vom Lösungsblatt schaltet Gold und Krone frei
+    // je Thema „geschafft“, bei Themen ohne Fehler (z. B. nur Zuordnungen) zusätzlich „3 Sterne“ und dann einmal der Ringelschal
+    const neuZahl = Number((await page.textContent('#katze-karte [data-kz="album"]')).match(/(\d+) neu/)[1]);
+    const dreiSterne = Object.values(stand.themen).filter((t) => t.sterne === 3).length;
+    assert.strictEqual(neuZahl, themen.length + dreiSterne + (dreiSterne ? 1 : 0));
+    await page.click('#katze-karte [data-kz="album"]');
+    await page.waitForSelector('.kz-album-dialog');
+    assert.strictEqual((await page.$$('.kz-album-dialog .kz-platz.neu')).length, neuZahl);
+    await page.fill('#kz-code', 'MIAU-ZZZZ');
+    await page.click('.kz-code [type="submit"]');
+    assert.match(await page.textContent('.kz-meldung'), /kenne ich nicht/);
+    const loesung = fs.readFileSync(path.join(ROOT, 'output', 'blaetter', 'mathematik', 'runden_A_loesung.html'), 'utf8');
+    const code = loesung.match(/MIAU-[A-Z0-9]{4}/)[0];
+    assert.strictEqual(code, belohnungscode({ fach: 'mathematik', thema: 'runden', variante: 'A', aufgaben: waehleAufgaben(ladeThema('mathematik', 5, 'runden'), 'A') }));
+    await page.fill('#kz-code', code.toLowerCase());
+    await page.click('.kz-code [type="submit"]');
+    assert.match(await page.textContent('.kz-meldung'), /Gold-Bild/);
+    assert.ok(await page.$('.kz-platz[data-id="motiv:mathematik/runden:gold"]:not(.zu)'), 'Gold-Bild Runden');
+    assert.ok(await page.$('.kz-platz[data-id="kopf:krone"]:not(.zu)'), 'Krone im Album');
+    await page.click('#kz-zu');
+    assert.doesNotMatch(await page.textContent('#katze-karte [data-kz="album"]'), /neu/, 'nach dem Anschauen nichts mehr neu');
+    await page.click('#katze-karte [data-kz="anpassen"]');
+    await page.click('.kz-knopf[data-feld="kopf"][data-wert="krone"]');
+    await page.click('.kz-schrank [type="submit"]');
+    assert.ok(await page.$('#katze-karte svg.katze path[fill="#E8C97D"]'), 'Katze trägt die Krone');
+
     // gewählte Variante bleibt gespeichert (nach 6× 🔄 wieder bei B)
     await page.reload();
     await page.waitForSelector('.thema');

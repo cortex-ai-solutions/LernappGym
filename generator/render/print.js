@@ -90,7 +90,7 @@ function aufgabeHtml(a, nr, { loesung, mitBe }) {
   return `<section class="aufgabe">${kopf}${koerper}</section>`;
 }
 
-function seite({ doc, aufgaben, art, loesung, seed, gesamtBe }) {
+function seite({ doc, aufgaben, art, loesung, seed, gesamtBe, code }) {
   const titelZusatz = { blatt: '', test: 'Testübung: ', }[art] ?? '';
   const kopfzeile = `<header class="kopf"><div><div class="fach">${FACH[doc.fach] || doc.fach} · Klasse ${doc.klasse}${loesung ? ' · Lösung' : ''}</div><h1>${esc(titelZusatz + doc.titel)}</h1></div><div class="marke">${WELLE}LERNWERK</div></header>`;
   const namen = loesung ? '<div style="height:4mm"></div>' : art === 'test'
@@ -104,6 +104,7 @@ function seite({ doc, aufgaben, art, loesung, seed, gesamtBe }) {
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>${esc(doc.titel)}${loesung ? ' – Lösung' : ''}</title>
 <style>${fontFaceCss()}\n${CSS}</style></head>
 <body class="${loesung ? 'loesung' : ''}">${kopfzeile}${namen}${merke}<main>${liste}</main>
+${loesung && code ? `<div class="belohnung"><div><b>Belohnungscode für volle Punktzahl</b><br>Gebt ihn eurem Kind: Im Katzenalbum der App eingetippt, schaltet er ein Gold-Bild frei.</div><span class="code">${esc(code)}</span></div>` : ''}
 <p class="fuss-hinweis">${lehrplan} · Variante ${esc(seed)}</p></body></html>`;
 }
 

@@ -83,3 +83,7 @@ h1, h2, .kopf, .nr, .be, .merke-label { font-family: 'Montserrat', 'Inter', Aria
 .weg b { font-family: 'Montserrat', sans-serif; font-size: 9.5pt; letter-spacing: 0.06em; text-transform: uppercase; }
 
 .fuss-hinweis { margin-top: 4mm; font-size: 8.5pt; color: var(--grau); }
+
+/* Belohnungscode auf dem Lösungsblatt (Gold-Bild im Katzenalbum der App) */
+.belohnung { display: flex; align-items: center; justify-content: space-between; gap: 6mm; margin-top: 6mm; padding: 3mm 4mm; border: 1.5pt dashed var(--linie); border-radius: 3mm; font-size: 10pt; break-inside: avoid; }
+.belohnung .code { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 16pt; font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; }

@@ -135,6 +135,29 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .kz-knopf[aria-pressed="true"] span::after { content: ' ✓'; color: var(--gold-light); }
 .kz-farbe { width: 22px; height: 22px; border-radius: 50%; flex: none; border: 2px solid #f6eedf; }
 .kz-keine { background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(246, 238, 223, .5) 4px 6px); }
+.kz-icon { width: 22px; flex: none; text-align: center; font-style: normal; font-size: 18px; }
+.kz-knopf small { display: block; font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.kz-knopf.zu { opacity: .75; border-style: dashed; cursor: default; }
+.katze-karte .kz-knoepfe { display: flex; gap: 8px; flex-wrap: wrap; }
+.kz-neu { display: inline-block; margin-left: 4px; padding: 1px 7px; border-radius: 10px; background: #e0607a; color: #fff; font-size: 12px; font-weight: 700; }
+/* Katzenalbum */
+.kz-album-dialog h3 { margin: 20px 0 4px; font: 700 18px/1.3 'Montserrat', sans-serif; color: var(--gold-light); }
+.kz-album-dialog h4 { margin: 12px 0 6px; font-size: 15px; font-weight: 600; color: var(--text); }
+.kz-album { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kz-platz { margin: 0; padding: 6px 4px 8px; border: 1px solid rgba(200, 168, 76, .3); border-radius: 12px; text-align: center; font-size: 12px; line-height: 1.3; color: var(--text-muted); position: relative; background: rgba(0, 0, 0, .15); }
+.kz-platz .katze { width: 100%; height: auto; aspect-ratio: 1; padding: 4px; }
+.kz-platz b { display: block; color: var(--text); font-size: 12px; }
+.kz-platz.zu .katze { filter: brightness(0) invert(1) opacity(.14); }
+.kz-platz.glaenzt:not(.zu) { border-color: var(--gold-light); background: rgba(232, 201, 125, .1); }
+.kz-platz.neu::after { content: 'NEU'; position: absolute; top: -6px; right: -4px; padding: 1px 6px; border-radius: 8px; background: #e0607a; color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .05em; }
+.kz-code { margin: 12px 0 4px; }
+.kz-code-reihe { display: flex; gap: 8px; }
+.kz-code-reihe input { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: .08em; }
+.kz-code-reihe .lw-knopf { width: auto; margin-top: 0; padding: 0 16px; }
+.kz-meldung { min-height: 1.4em; margin: 6px 0 0 !important; font-size: 14px; }
+.kz-neu-karte { text-align: center; }
+.kz-neu-karte p { margin-top: 10px; font-size: 14px; color: var(--text-secondary); }
+.kz-neu-karte .kz-album { grid-template-columns: repeat(auto-fit, minmax(96px, 120px)); justify-content: center; }
 
 /* Merke / Ende */
 .karte { padding: 20px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); margin-bottom: 16px; }

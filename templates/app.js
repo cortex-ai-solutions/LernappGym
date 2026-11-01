@@ -125,14 +125,7 @@
 
   // Lernkatze (templates/katze.js): begrüßt in der Übersicht, „Anpassen“ öffnet den Kleiderschrank
   var KZ = window.KATZE;
-  function katzeKarte() {
-    var kk = document.getElementById('katze-karte');
-    if (!KZ || !kk || !KZ.lies().name) return;
-    kk.hidden = false;
-    kk.innerHTML = KZ.svg({ stimmung: 'hallo' }) + '<div><b>' + esc(KZ.name()) + '</b><p>' + esc(KZ.spruch('hallo')) + '</p>' +
-      '<button class="btn btn-ghost">🎨 Anpassen</button></div>';
-    kk.querySelector('button').onclick = function () { KZ.anpassen(); };
-  }
+  function katzeKarte() { if (KZ) KZ.karte(document.getElementById('katze-karte')); }
   window.addEventListener('katze-geaendert', katzeKarte);
   function katzeMit(stimmung, art, bewegung) {
     if (!KZ) return '';
@@ -385,6 +378,7 @@
         '<h1 class="gold">Geschafft!</h1>' + (KZ ? '<p class="katze-zeile">' + esc(KZ.spruch(st === 3 ? 'perfekt' : 'geschafft')) + '</p>' : '') +
         '<div class="sterne" aria-label="' + st + ' von 3 Sternen">' + sterne(st) + '</div>' +
         '<div class="werte"><span class="chip">⭐ +' + gewinn + ' XP</span><span class="chip">🔥 ' + streakAktuell() + ' ' + (streakAktuell() === 1 ? 'Tag' : 'Tage') + '</span></div>' +
+        (KZ ? KZ.neuHtml(KZ.aktualisiere()) : '') +
         (wissen ? '<section class="karte wissen"><h2>Wusstest du schon?</h2><p>' + esc(wissen) + '</p></section>' : '');
     } else {
       html = (KZ ? '<div class="ende-katze">' + KZ.svg({ stimmung: 'troest', bewegung: 'wiegen' }) + '</div>' : '<div class="gross" aria-hidden="true">💪</div>') +
