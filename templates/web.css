@@ -208,3 +208,7 @@ ul.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; 
 .kinder .btn { flex: 0 1 auto; min-height: 44px; }
 .meldung-ok { border-color: var(--ok); }
 .meldung-fehler { border-color: var(--fehler); }
+
+/* Version und Update-Suche (Startseite) */
+.version { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.version .btn { min-height: 44px; font-size: 13px; flex: 0 1 auto; }

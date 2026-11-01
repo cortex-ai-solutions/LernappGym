@@ -219,6 +219,10 @@ ul.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; 
 .kinder .btn { flex: 0 1 auto; min-height: 44px; }
 .meldung-ok { border-color: var(--ok); }
 .meldung-fehler { border-color: var(--fehler); }
+
+/* Version und Update-Suche (Startseite) */
+.version { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.version .btn { min-height: 44px; font-size: 13px; flex: 0 1 auto; }
 </style></head>
 <body><div id="app"><p class="wrap">Die App wird geladen …</p></div>
 <noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
@@ -2716,6 +2720,25 @@ module.exports.text = text;
     navigator.serviceWorker.addEventListener('controllerchange', function () { if (hatteController) zeigen(); });
     reg.update().catch(function () {});
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reg.update().catch(function () {}); });
+    // Startseite: Version anzeigen und von Hand nach Updates suchen
+    var v = document.getElementById('version');
+    if (!v) return;
+    var text = v.querySelector('span'), knopf = v.querySelector('button');
+    navigator.serviceWorker.addEventListener('message', function (e) {
+      if (e.data && e.data.version) text.textContent = 'Version ' + String(e.data.version).replace('lernwerk-', '').slice(0, 7);
+    });
+    if (navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage('VERSION');
+    knopf.hidden = false;
+    knopf.addEventListener('click', function () {
+      knopf.disabled = true; knopf.textContent = 'Suche …';
+      reg.update().then(function () {
+        var laedt = reg.installing || reg.waiting;
+        if (reg.waiting) zeigen();
+        knopf.textContent = laedt ? (reg.waiting ? 'Update bereit – unten tippen' : 'Update wird geladen …') : '✓ Neueste Version';
+        if (reg.installing) reg.installing.addEventListener('statechange', function () { if (reg.waiting) knopf.textContent = 'Update bereit – unten tippen'; });
+      }).catch(function () { knopf.textContent = 'Kein Internet – später noch mal'; })
+        .then(function () { setTimeout(function () { knopf.disabled = false; }, 1500); });
+    });
   }).catch(function () {});
 })();
 </script></body></html>

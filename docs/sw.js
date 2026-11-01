@@ -1,5 +1,5 @@
 // Offline-Cache für LERNWERK – automatisch erzeugt von generator/webapp.js
-const CACHE = 'lernwerk-07e902a547';
+const CACHE = 'lernwerk-e23a985612';
 const DATEIEN = [
   "./",
   "eltern/",
@@ -47,6 +47,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('message', (e) => {
   if (e.data === 'SKIP_WAITING') self.skipWaiting();
+  if (e.data === 'VERSION' && e.source) e.source.postMessage({ version: CACHE });
 });
 
 self.addEventListener('activate', (e) => {

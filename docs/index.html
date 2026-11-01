@@ -219,6 +219,10 @@ ul.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; 
 .kinder .btn { flex: 0 1 auto; min-height: 44px; }
 .meldung-ok { border-color: var(--ok); }
 .meldung-fehler { border-color: var(--fehler); }
+
+/* Version und Update-Suche (Startseite) */
+.version { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.version .btn { min-height: 44px; font-size: 13px; flex: 0 1 auto; }
 </style></head>
 <body><div class="wrap"><header style="margin:20px 0 22px"><h1 class="gold" style="font-size:32px;letter-spacing:.05em">LERNWERK</h1>
 <p class="hallo" id="hallo">Üben für Klasse 5 – such dir ein Fach aus!</p></header>
@@ -227,7 +231,8 @@ ul.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; 
 <a class="thema" href="latein/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">🦉</span><div><h2>Latein</h2><div class="meta">Vokabeln, Grammatik, Römer</div></div></div></a>
 <a class="thema" href="geschichte/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">📜</span><div><h2>Geschichte</h2><div class="meta">Lektionen, Quiz, Karteikarten</div></div></div></a>
 <footer class="fuss"><button class="btn btn-ghost btn-breit" id="bericht">📤 Bericht an deine Eltern</button>
-<p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p><p><a class="eltern-link" href="eltern/">Für Eltern: Berichte ansehen</a></p></footer></div>
+<p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p><p><a class="eltern-link" href="eltern/">Für Eltern: Berichte ansehen</a></p>
+<p class="version" id="version"><span></span> <button class="btn btn-ghost" type="button" hidden>Nach Updates suchen</button></p></footer></div>
 <script>/* LERNWERK – gemeinsamer Teil aller Seiten (Mathe, Latein, Geschichte, Start, Eltern):
    Name des Kindes, Lernprotokoll je Fach/Thema, Bericht an die Eltern als Link.
    Alles bleibt auf dem Gerät. Der Bericht steckt im #-Teil des Links, und der wird nie an einen Server geschickt. */
@@ -947,6 +952,25 @@ ul.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; 
     navigator.serviceWorker.addEventListener('controllerchange', function () { if (hatteController) zeigen(); });
     reg.update().catch(function () {});
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reg.update().catch(function () {}); });
+    // Startseite: Version anzeigen und von Hand nach Updates suchen
+    var v = document.getElementById('version');
+    if (!v) return;
+    var text = v.querySelector('span'), knopf = v.querySelector('button');
+    navigator.serviceWorker.addEventListener('message', function (e) {
+      if (e.data && e.data.version) text.textContent = 'Version ' + String(e.data.version).replace('lernwerk-', '').slice(0, 7);
+    });
+    if (navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage('VERSION');
+    knopf.hidden = false;
+    knopf.addEventListener('click', function () {
+      knopf.disabled = true; knopf.textContent = 'Suche …';
+      reg.update().then(function () {
+        var laedt = reg.installing || reg.waiting;
+        if (reg.waiting) zeigen();
+        knopf.textContent = laedt ? (reg.waiting ? 'Update bereit – unten tippen' : 'Update wird geladen …') : '✓ Neueste Version';
+        if (reg.installing) reg.installing.addEventListener('statechange', function () { if (reg.waiting) knopf.textContent = 'Update bereit – unten tippen'; });
+      }).catch(function () { knopf.textContent = 'Kein Internet – später noch mal'; })
+        .then(function () { setTimeout(function () { knopf.disabled = false; }, 1500); });
+    });
   }).catch(function () {});
 })();
 </script></body></html>

@@ -2104,6 +2104,25 @@ renderHome();
     navigator.serviceWorker.addEventListener('controllerchange', function () { if (hatteController) zeigen(); });
     reg.update().catch(function () {});
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reg.update().catch(function () {}); });
+    // Startseite: Version anzeigen und von Hand nach Updates suchen
+    var v = document.getElementById('version');
+    if (!v) return;
+    var text = v.querySelector('span'), knopf = v.querySelector('button');
+    navigator.serviceWorker.addEventListener('message', function (e) {
+      if (e.data && e.data.version) text.textContent = 'Version ' + String(e.data.version).replace('lernwerk-', '').slice(0, 7);
+    });
+    if (navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage('VERSION');
+    knopf.hidden = false;
+    knopf.addEventListener('click', function () {
+      knopf.disabled = true; knopf.textContent = 'Suche …';
+      reg.update().then(function () {
+        var laedt = reg.installing || reg.waiting;
+        if (reg.waiting) zeigen();
+        knopf.textContent = laedt ? (reg.waiting ? 'Update bereit – unten tippen' : 'Update wird geladen …') : '✓ Neueste Version';
+        if (reg.installing) reg.installing.addEventListener('statechange', function () { if (reg.waiting) knopf.textContent = 'Update bereit – unten tippen'; });
+      }).catch(function () { knopf.textContent = 'Kein Internet – später noch mal'; })
+        .then(function () { setTimeout(function () { knopf.disabled = false; }, 1500); });
+    });
   }).catch(function () {});
 })();
 </script></body>

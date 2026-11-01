@@ -85,6 +85,25 @@ function updateBanner(prefix) {
     navigator.serviceWorker.addEventListener('controllerchange', function () { if (hatteController) zeigen(); });
     reg.update().catch(function () {});
     document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') reg.update().catch(function () {}); });
+    // Startseite: Version anzeigen und von Hand nach Updates suchen
+    var v = document.getElementById('version');
+    if (!v) return;
+    var text = v.querySelector('span'), knopf = v.querySelector('button');
+    navigator.serviceWorker.addEventListener('message', function (e) {
+      if (e.data && e.data.version) text.textContent = 'Version ' + String(e.data.version).replace('lernwerk-', '').slice(0, 7);
+    });
+    if (navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage('VERSION');
+    knopf.hidden = false;
+    knopf.addEventListener('click', function () {
+      knopf.disabled = true; knopf.textContent = 'Suche …';
+      reg.update().then(function () {
+        var laedt = reg.installing || reg.waiting;
+        if (reg.waiting) zeigen();
+        knopf.textContent = laedt ? (reg.waiting ? 'Update bereit – unten tippen' : 'Update wird geladen …') : '✓ Neueste Version';
+        if (reg.installing) reg.installing.addEventListener('statechange', function () { if (reg.waiting) knopf.textContent = 'Update bereit – unten tippen'; });
+      }).catch(function () { knopf.textContent = 'Kein Internet – später noch mal'; })
+        .then(function () { setTimeout(function () { knopf.disabled = false; }, 1500); });
+    });
   }).catch(function () {});
 })();
 </script>`;
@@ -179,7 +198,8 @@ function startSeite() {
 <section class="katze-karte" id="katze-karte" hidden></section>
 ${karten}
 <footer class="fuss"><button class="btn btn-ghost btn-breit" id="bericht">📤 Bericht an deine Eltern</button>
-<p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p><p><a class="eltern-link" href="eltern/">Für Eltern: Berichte ansehen</a></p></footer></div>
+<p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p><p><a class="eltern-link" href="eltern/">Für Eltern: Berichte ansehen</a></p>
+<p class="version" id="version"><span></span> <button class="btn btn-ghost" type="button" hidden>Nach Updates suchen</button></p></footer></div>
 ${lernwerkSkript({ nameFragen: false, katze: true })}
 <script>
 (function () {
@@ -215,6 +235,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('message', (e) => {
   if (e.data === 'SKIP_WAITING') self.skipWaiting();
+  if (e.data === 'VERSION' && e.source) e.source.postMessage({ version: CACHE });
 });
 
 self.addEventListener('activate', (e) => {

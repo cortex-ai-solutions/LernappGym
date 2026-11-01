@@ -310,10 +310,25 @@ test('Webapp: neue Version wird per Banner angeboten und nach Tippen geladen', {
       await page.evaluate(() => navigator.serviceWorker.ready);
       assert.ok(await page.$('#update-banner[hidden]'), `${seite || 'Start'}: Banner fehlt oder ist beim ersten Besuch sichtbar`);
     }
+    // Startseite: Version sichtbar, „Nach Updates suchen“ meldet zuerst „neueste Version“, nach einem Deploy das Banner
+    await page.goto(basis);
+    await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+    await page.reload();
+    const cache = fs.readFileSync(path.join(DOCS, 'sw.js'), 'utf8').match(/lernwerk-([0-9a-f]+)/)[1];
+    await page.waitForFunction((v) => document.querySelector('#version span').textContent === 'Version ' + v.slice(0, 7), cache);
+    await page.click('#version button');
+    await page.waitForFunction(() => /Neueste Version/.test(document.querySelector('#version button').textContent));
+    s.swZusatz = '\n// Deploy-Simulation 1\n';
+    await page.waitForFunction(() => !document.querySelector('#version button').disabled);
+    await page.click('#version button');
+    await page.waitForSelector('#update-banner:not([hidden])', { timeout: 20000 });
+    await Promise.all([page.waitForEvent('load'), page.click('#update-banner')]);
+    await page.waitForFunction(() => navigator.serviceWorker.getRegistration().then((r) => !r.waiting));
+
     await page.goto(`${basis}mathe/`);
     await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
 
-    s.swZusatz = '\n// Deploy-Simulation\n';
+    s.swZusatz = '\n// Deploy-Simulation 2\n';
     await page.evaluate(() => navigator.serviceWorker.getRegistration().then((r) => r.update()));
     await page.waitForSelector('#update-banner:not([hidden])', { timeout: 20000 });
     await Promise.all([page.waitForEvent('load'), page.click('#update-banner')]);
