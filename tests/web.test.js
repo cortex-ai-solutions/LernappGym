@@ -30,6 +30,16 @@ async function gibNamen(page, name) {
   await page.waitForSelector('#lw-name');
   await page.fill('#lw-name', name);
   await page.click('.lw-dialog [type="submit"]');
+  await page.waitForSelector('#lw-name', { state: 'detached' });
+}
+
+// Nach dem Namen stellt sich die Lernkatze vor (Kleiderschrank, Name ist Pflicht)
+async function gibKatze(page, name) {
+  await page.waitForSelector('#kz-name');
+  await page.click('.kz-schrank [type="submit"]');
+  assert.ok(await page.$('#kz-name'), 'Kleiderschrank schließt nicht ohne Namen');
+  await page.fill('#kz-name', name);
+  await page.click('.kz-schrank [type="submit"]');
   await page.waitForSelector('.lw-schleier', { state: 'detached' });
 }
 
@@ -68,8 +78,20 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
   try {
     await page.goto(basis);
     await gibNamen(page, 'Testkind');
+    await gibKatze(page, 'Mimi');
+    assert.match(await page.textContent('#katze-karte'), /Mimi/, 'Startseite zeigt die Katze');
     await page.click('a[href="mathe/"]');
     await page.waitForSelector('.thema');
+    assert.strictEqual(await page.$('.lw-schleier'), null, 'Katze wird nur einmal vorgestellt');
+    // Kleiderschrank: Fell und Decke wählen, bleibt gespeichert
+    await page.click('#katze-karte button');
+    await page.click('.kz-knopf[data-feld="fell"][data-wert="rot"]');
+    await page.click('.kz-knopf[data-feld="decke"][data-wert="rosa"]');
+    await page.click('.kz-schrank [type="submit"]');
+    await page.waitForSelector('.lw-schleier', { state: 'detached' });
+    assert.deepStrictEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('lernwerk_katze_v1'))),
+      { name: 'Mimi', fell: 'rot', augen: 'gelbgruen', decke: 'rosa' });
+    assert.ok(await page.$('#katze-karte svg.katze path[fill="#f6c9d3"]'), 'rosa Decke wird gezeichnet');
     const themen = await page.$$eval('.thema', (els) => els.map((e) => e.dataset.thema));
     assert.ok(themen.length >= 8, `${themen.length} Themen`);
     assert.strictEqual(await page.evaluate(() => document.documentElement.scrollWidth), 393, 'kein seitliches Scrollen');
@@ -101,12 +123,17 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
         const klasse = await page.getAttribute('#leiste', 'class');
         const t = await page.evaluate(() => window.LERNWERK_TEST.loesung());
         if (t.eingabe !== 'paare') assert.match(klasse, falsch ? /fehler/ : /ok/, `${thema}, Übung ${n + 1} (${t.eingabe}): ${t.text}`);
+        assert.ok(await page.$('#leiste .katze-sagt svg.katze'), `${thema}, Übung ${n + 1}: Katze fehlt in der Leiste`);
+        const weiter = await page.evaluate(() => document.getElementById('weiter').getBoundingClientRect().toJSON());
+        assert.ok(weiter.bottom <= 851, `${thema}, Übung ${n + 1}: „Weiter“ ragt aus dem Bildschirm`);
+        assert.ok(weiter.left >= 16 && weiter.right <= 393 - 16, `${thema}, Übung ${n + 1}: Leiste ohne Rand (${weiter.left}–${weiter.right})`);
         await page.click('#weiter');
         n++;
         assert.ok(n < 40, 'Lektion endet nicht');
       }
       await page.waitForSelector('.ende');
       assert.match(await page.textContent('.ende h1'), /Geschafft/, `${thema}: Lektion nicht geschafft`);
+      assert.ok(await page.$('.ende-katze svg.katze'), `${thema}: Katze fehlt auf dem Abschluss-Bildschirm`);
       await page.click('#uebersicht');
       await page.waitForSelector('.thema');
     }
@@ -172,6 +199,7 @@ test('Elternbericht: Kind übt Mathe, Latein, Geschichte → Link → Elternansi
 
     // Mathe: eine Runde Runden mit lauter richtigen Antworten
     await page.goto(`${basis}mathe/`);
+    await gibKatze(page, 'Maurice');
     await page.click('[data-thema="runden"] [data-aktion="ueben"]');
     while (await page.$('.lektion')) {
       await page.waitForSelector('.uebung');
@@ -239,7 +267,10 @@ test('Webapp: neue Version wird per Banner angeboten und nach Tippen geladen', {
   const basis = `http://127.0.0.1:${s.address().port}/LernappGym/`;
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 393, height: 851 }, isMobile: true, hasTouch: true });
-  await context.addInitScript(() => localStorage.setItem('lernwerk_profil', JSON.stringify({ id: 'test', name: 'Testkind' })));
+  await context.addInitScript(() => {
+    localStorage.setItem('lernwerk_profil', JSON.stringify({ id: 'test', name: 'Testkind' }));
+    localStorage.setItem('lernwerk_katze_v1', JSON.stringify({ name: 'Mimi' }));
+  });
   const page = await context.newPage();
   try {
     for (const seite of ['', 'mathe/', 'latein/', 'geschichte/', 'eltern/']) {

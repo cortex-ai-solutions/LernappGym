@@ -98,6 +98,7 @@
     app.innerHTML = '<div class="wrap">' +
       '<header class="kopf"><a class="zurueck" href="../" aria-label="Zur Fächerwahl">←</a><h1 class="gold">' + esc(FACH.titel) + '</h1>' +
       '<div class="chips"><span class="chip" title="Tage in Folge">🔥 ' + streakAktuell() + '</span><span class="chip" title="Erfahrungspunkte">⭐ ' + stand.xp + '</span></div></header>' +
+      '<section class="katze-karte" id="katze-karte" hidden></section>' +
       karten +
       '<footer class="fuss"><button class="btn btn-ghost btn-breit" data-aktion="bericht">📤 Bericht an deine Eltern</button><p>Dein Lernstand bleibt auf diesem Gerät.</p><div class="reihe"><button class="btn btn-ghost" data-aktion="export">Lernstand sichern</button><label class="btn btn-ghost">Lernstand laden<input type="file" accept="application/json" class="versteckt" id="import"></label></div></footer></div>';
     app.querySelectorAll('[data-aktion]').forEach(function (b) {
@@ -119,6 +120,23 @@
       zeigeBlatt(karte, FACH.themen.find(function (x) { return x.thema === karte.dataset.thema; }));
     });
     document.getElementById('import').addEventListener('change', importieren);
+    katzeKarte();
+  }
+
+  // Lernkatze (templates/katze.js): begrüßt in der Übersicht, „Anpassen“ öffnet den Kleiderschrank
+  var KZ = window.KATZE;
+  function katzeKarte() {
+    var kk = document.getElementById('katze-karte');
+    if (!KZ || !kk || !KZ.lies().name) return;
+    kk.hidden = false;
+    kk.innerHTML = KZ.svg({ stimmung: 'hallo' }) + '<div><b>' + esc(KZ.name()) + '</b><p>' + esc(KZ.spruch('hallo')) + '</p>' +
+      '<button class="btn btn-ghost">🎨 Anpassen</button></div>';
+    kk.querySelector('button').onclick = function () { KZ.anpassen(); };
+  }
+  window.addEventListener('katze-geaendert', katzeKarte);
+  function katzeMit(stimmung, art, bewegung) {
+    if (!KZ) return '';
+    return '<div class="katze-sagt">' + KZ.svg({ stimmung: stimmung, bewegung: bewegung }) + '<p>„' + esc(KZ.spruch(art)) + '“</p></div>';
   }
 
   // Arbeitsblatt-Vorrat: 🔄 schaltet zur nächsten Variante, Blatt und Lösung tragen denselben Buchstaben
@@ -333,8 +351,10 @@
     else if (!erg.richtig) erklaer = 'Richtige Lösung: <b>' + esc(u.t.eingabe === 'richtig_falsch' ? (u.t.loesung ? 'richtig' : 'falsch') : u.t.antwort) + '</b>';
     if (!erg.richtig && u.a.weg) erklaer += '<br>So geht’s: ' + esc(u.a.weg);
     leiste.className = 'leiste ' + (erg.richtig ? 'ok' : 'fehler');
-    leiste.innerHTML = '<div class="leiste-innen" role="status"><p class="meldung">' + (erg.richtig ? '✓ ' + LOB[Math.floor(Math.random() * LOB.length)] : '✗ Nicht ganz.') + '</p>' +
-      (erklaer ? '<p class="erklaer">' + erklaer + '</p>' : '') + '<button class="btn btn-gold btn-breit" id="weiter">Weiter</button></div>';
+    var katze = erg.richtig ? katzeMit('froh', 'froh', 'huepf')
+      : katzeMit('troest', L.herzen === 1 ? 'letztesHerz' : 'troest', 'wiegen');
+    leiste.innerHTML = '<div class="leiste-innen" role="status"><div class="leiste-kopf"><div><p class="meldung">' + (erg.richtig ? '✓ ' + LOB[Math.floor(Math.random() * LOB.length)] : '✗ Nicht ganz.') + '</p>' +
+      (erklaer ? '<p class="erklaer">' + erklaer + '</p>' : '') + '</div>' + katze + '</div><button class="btn btn-gold btn-breit" id="weiter">Weiter</button></div>';
     app.querySelector('.herzen').textContent = '♥ ' + L.herzen;
     var weiter = document.getElementById('weiter');
     weiter.focus();
@@ -361,12 +381,14 @@
       streakZaehlen();
       speichern();
       var wissen = t.wissenswertes && t.wissenswertes.length ? t.wissenswertes[Math.floor(Math.random() * t.wissenswertes.length)] : '';
-      html = '<div class="gross" aria-hidden="true">' + (st === 3 ? '🏆' : '🎉') + '</div><h1 class="gold">Geschafft!</h1>' +
+      html = (KZ ? '<div class="ende-katze">' + KZ.svg({ stimmung: 'froh', bewegung: 'huepf' }) + '</div>' : '<div class="gross" aria-hidden="true">' + (st === 3 ? '🏆' : '🎉') + '</div>') +
+        '<h1 class="gold">Geschafft!</h1>' + (KZ ? '<p class="katze-zeile">' + esc(KZ.spruch(st === 3 ? 'perfekt' : 'geschafft')) + '</p>' : '') +
         '<div class="sterne" aria-label="' + st + ' von 3 Sternen">' + sterne(st) + '</div>' +
         '<div class="werte"><span class="chip">⭐ +' + gewinn + ' XP</span><span class="chip">🔥 ' + streakAktuell() + ' ' + (streakAktuell() === 1 ? 'Tag' : 'Tage') + '</span></div>' +
         (wissen ? '<section class="karte wissen"><h2>Wusstest du schon?</h2><p>' + esc(wissen) + '</p></section>' : '');
     } else {
-      html = '<div class="gross" aria-hidden="true">💪</div><h1>Keine Herzen mehr</h1><p style="margin:8px 0 24px">Das war schwer – aber Üben macht stark! Schau dir das Merke an und versuch es noch einmal.</p>';
+      html = (KZ ? '<div class="ende-katze">' + KZ.svg({ stimmung: 'troest', bewegung: 'wiegen' }) + '</div>' : '<div class="gross" aria-hidden="true">💪</div>') +
+        '<h1>Keine Herzen mehr</h1><p style="margin:8px 0 24px">' + (KZ ? esc(KZ.spruch('verloren')) + ' ' : 'Das war schwer – aber Üben macht stark! ') + 'Schau dir das Merke an und versuch es noch einmal.</p>';
     }
     app.innerHTML = '<div class="wrap ende">' + html + '<div class="stapel"><button class="btn btn-gold btn-breit" id="nochmal">' + (geschafft ? '▶ Nochmal üben' : '▶ Nochmal versuchen') + '</button>' +
       (geschafft ? '' : '<button class="btn btn-ghost btn-breit" id="merke">💡 Merke ansehen</button>') +

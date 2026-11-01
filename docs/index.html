@@ -71,7 +71,7 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .fortschritt { flex: 1; height: 14px; border-radius: 7px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
 .fortschritt span { display: block; height: 100%; background: var(--gradient-gold); border-radius: 7px; transition: width 0.3s; }
 .herzen { font-weight: 700; color: var(--fehler-hell); font-size: 18px; white-space: nowrap; }
-.uebung { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 8px 16px 160px; }
+.uebung { flex: 1; max-width: 560px; width: 100%; margin: 0 auto; padding: 8px 16px 230px; }
 .kontext { font-size: 15px; color: var(--text-secondary); margin-bottom: 6px; overflow-wrap: anywhere; }
 .frage { font-size: 22px; font-weight: 600; line-height: 1.4; margin-bottom: 20px; overflow-wrap: anywhere; hyphens: auto; }
 .frage.lang { font-size: 19px; font-weight: 500; }
@@ -110,6 +110,42 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .leiste.ok .meldung { color: var(--ok-hell); }
 .leiste.fehler .meldung { color: var(--fehler-hell); }
 .erklaer { font-size: 15px; margin-bottom: 12px; color: var(--text); }
+
+/* Lernkatze (templates/katze.js) */
+.katze { display: block; overflow: visible; }
+.katze-karte { display: flex; align-items: center; gap: 14px; padding: 12px 16px; margin-bottom: 16px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); }
+.katze-karte .katze { width: 92px; height: 92px; flex: none; }
+.katze-karte b { font-family: 'Montserrat', sans-serif; font-size: 18px; color: var(--gold-light); }
+.katze-karte p { font-size: 15px; color: var(--text); margin: 2px 0 8px; }
+.katze-karte .btn { min-height: 44px; font-size: 14px; padding: 0 14px; }
+.leiste-kopf { display: flex; align-items: flex-start; gap: 10px; }
+.leiste-kopf > div:first-child { flex: 1; min-width: 0; }
+.katze-sagt { flex: none; width: 112px; text-align: center; }
+.katze-sagt .katze { width: 72px; height: 72px; margin: -6px auto 2px; }
+.katze-sagt p { font-size: 12px; line-height: 1.3; color: var(--text); font-style: italic; margin-bottom: 8px; }
+.ende-katze .katze { width: 150px; height: 150px; margin: 0 auto 6px; }
+.katze-zeile { color: var(--text-secondary); margin-bottom: 4px; }
+.kz-huepf { animation: kz-huepf 1.4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+.kz-wiegen { animation: kz-wiegen 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 90%; }
+.kz-auge { animation: kz-blinzeln 4s infinite; transform-box: fill-box; transform-origin: center; }
+.kz-funke { animation: kz-funkeln 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.kz-funke:nth-of-type(2) { animation-delay: .4s; } .kz-funke:nth-of-type(3) { animation-delay: .8s; }
+@keyframes kz-huepf { 0%, 50%, 100% { transform: translateY(0); } 30% { transform: translateY(-10px); } 65% { transform: translateY(-4px); } }
+@keyframes kz-wiegen { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes kz-blinzeln { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+@keyframes kz-funkeln { 0%, 100% { opacity: .2; transform: scale(.7); } 50% { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .kz-huepf, .kz-wiegen, .kz-auge, .kz-funke { animation: none; } }
+/* Kleiderschrank (im Dialog von lernwerk.js) */
+.kz-vorschau .katze { width: 150px; height: 150px; margin: 4px auto 10px; }
+.kz-label { display: block; font-weight: 600; color: var(--gold-light); margin-bottom: 6px; }
+.kz-gruppe { border: 0; padding: 0; margin: 16px 0 0; min-width: 0; }
+.kz-gruppe legend { font-weight: 600; color: var(--gold-light); margin-bottom: 6px; padding: 0; }
+.kz-wahl { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.kz-knopf { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 6px 10px; border-radius: 12px; border: 2px solid rgba(200, 168, 76, .3); background: #00202A; color: var(--text); font-size: 14px; text-align: left; line-height: 1.2; }
+.kz-knopf[aria-pressed="true"] { border-color: var(--gold-light); background: rgba(232, 201, 125, .15); }
+.kz-knopf[aria-pressed="true"] span::after { content: ' ✓'; color: var(--gold-light); }
+.kz-farbe { width: 22px; height: 22px; border-radius: 50%; flex: none; border: 2px solid #f6eedf; }
+.kz-keine { background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(246, 238, 223, .5) 4px 6px); }
 
 /* Merke / Ende */
 .karte { padding: 20px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); margin-bottom: 16px; }
@@ -151,9 +187,9 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .verlauf svg { max-width: 100%; height: auto; }
 .bericht-thema details { margin-top: 10px; }
 .bericht-thema summary { cursor: pointer; color: var(--gold-base); font-weight: 600; min-height: 44px; display: flex; align-items: center; }
-.fehler { list-style: none; padding: 0; }
-.fehler li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 15px; }
-.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; }
+ul.fehler { list-style: none; padding: 0; }
+ul.fehler li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); font-size: 15px; }
+ul.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; }
 .frueher { margin: 0 0 14px; padding: 0 4px; }
 .frueher ul { padding-left: 20px; font-size: 15px; color: var(--text-secondary); }
 .kinder { flex-wrap: wrap; margin-bottom: 14px; }
@@ -163,6 +199,7 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 </style></head>
 <body><div class="wrap"><header style="margin:20px 0 22px"><h1 class="gold" style="font-size:32px;letter-spacing:.05em">LERNWERK</h1>
 <p class="hallo" id="hallo">Üben für Klasse 5 – such dir ein Fach aus!</p></header>
+<section class="katze-karte" id="katze-karte" hidden></section>
 <a class="thema" href="mathe/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">🧮</span><div><h2>Mathematik</h2><div class="meta">Üben und Arbeitsblätter je Thema</div></div></div></a>
 <a class="thema" href="latein/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">🦉</span><div><h2>Latein</h2><div class="meta">Vokabeln, Grammatik, Römer</div></div></div></a>
 <a class="thema" href="geschichte/" style="display:block;text-decoration:none;color:inherit"><div class="thema-kopf"><span class="thema-icon" aria-hidden="true">📜</span><div><h2>Geschichte</h2><div class="meta">Lektionen, Quiz, Karteikarten</div></div></div></a>
@@ -278,7 +315,7 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 
   // ---------- Oberfläche ----------
   var CSS = '.lw-schleier{position:fixed;inset:0;z-index:80;background:rgba(0,20,26,.82);display:flex;align-items:center;justify-content:center;padding:16px}' +
-    '.lw-dialog{width:100%;max-width:420px;background:#002B36;color:#F5F0E6;border:1px solid #C9A84C;border-radius:18px;padding:24px 20px;font:16px/1.45 Inter,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.5)}' +
+    '.lw-dialog{width:100%;max-width:420px;max-height:calc(100vh - 32px);overflow-y:auto;background:#002B36;color:#F5F0E6;border:1px solid #C9A84C;border-radius:18px;padding:24px 20px;font:16px/1.45 Inter,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.5)}' +
     '.lw-dialog h2{margin:0 0 6px;font:700 22px/1.25 Montserrat,Inter,system-ui,sans-serif;color:#E8C97D}' +
     '.lw-dialog p{margin:0 0 14px;color:#C9D4D6}' +
     '.lw-dialog input,.lw-dialog textarea{width:100%;box-sizing:border-box;min-height:52px;padding:12px 14px;border-radius:12px;border:1px solid rgba(200,168,76,.5);background:#00202A;color:#F5F0E6;font:inherit;font-size:18px}' +
@@ -338,18 +375,212 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
     });
   }
 
-  // Auf Kinder-Seiten: beim ersten Besuch nach dem Namen fragen
-  function start() {
-    if (profil().name) return;
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { frageName(); });
-    else frageName();
+  // Auf Kinder-Seiten: beim ersten Besuch nach dem Namen fragen, danach (oder sofort) fertig()
+  function start(fertig) {
+    function los() { if (profil().name) { if (fertig) fertig(); } else frageName(fertig); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', los);
+    else los();
   }
 
   window.LERNWERK = {
-    profil: profil, setzeName: setzeName, frageName: frageName, start: start,
+    profil: profil, setzeName: setzeName, frageName: frageName, start: start, dialog: dialog,
     protokolliere: protokolliere, bericht: bericht, berichtLink: berichtLink, senden: senden,
     packen: packen, auspacken: auspacken, tag: tag, esc: esc,
   };
+})();
+</script>
+<script>/* LERNWERK – die Lernkatze. Eigene Figur nach dem Familienkater Maurice (keine fremde Comicfigur).
+   Sie wird als SVG gezeichnet; Name, Fell, Augen und Kuscheldecke wählt das Kind im Kleiderschrank.
+   Alles bleibt auf dem Gerät. Braucht LERNWERK (templates/lernwerk.js) für den Dialog. */
+(function () {
+  'use strict';
+  var SPEICHER = 'lernwerk_katze_v1';
+  var LINIE = '#1d1512', STICKER = '#f6eedf', ROSA = '#e8919d';
+
+  // Auswahl im Kleiderschrank. Neue Einträge einfach anhängen, der erste ist jeweils der Standard.
+  var FELLE = {
+    hell: { titel: 'Maurice hell', fell: '#5c4b42', streifen: '#937d6c', bauch: '#6e5b50', zeichnung: '#f1e4d3' },
+    dunkel: { titel: 'Maurice dunkel', fell: '#3b302c', streifen: '#7a6656', bauch: '#4b3e37', zeichnung: '#f1e4d3' },
+    grau: { titel: 'Grau getigert', fell: '#9d9ca6', streifen: '#6c6b78', bauch: '#c2c1c9', zeichnung: '#2b2a33' },
+    rot: { titel: 'Rot getigert', fell: '#e09a5c', streifen: '#b8692e', bauch: '#f2c696', zeichnung: '#4a2a14' },
+    creme: { titel: 'Creme', fell: '#f0dcc0', streifen: '#d4b089', bauch: '#faefdf', zeichnung: '#4a3426' },
+  };
+  var AUGEN = {
+    gelbgruen: { titel: 'Gelbgrün', farbe: '#c6c95a' },
+    gruen: { titel: 'Grün', farbe: '#6fbf6a' },
+    blau: { titel: 'Blau', farbe: '#7fb7e6' },
+    bernstein: { titel: 'Bernstein', farbe: '#e3a43c' },
+  };
+  var DECKEN = {
+    aus: { titel: 'Keine' },
+    creme: { titel: 'Creme', farbe: '#efe3cc', rand: '#bfae8a', falte: '#d9c9a6' },
+    rosa: { titel: 'Rosa', farbe: '#f6c9d3', rand: '#d68fa0', falte: '#eab0bf' },
+    blau: { titel: 'Hellblau', farbe: '#cfe3f2', rand: '#8fb2cc', falte: '#b3cfe4' },
+    punkte: { titel: 'Pünktchen', farbe: '#efe3cc', rand: '#bfae8a', falte: '#d9c9a6', punkte: '#e8919d' },
+  };
+
+  function lies() {
+    var k;
+    try { k = JSON.parse(localStorage.getItem(SPEICHER)) || {}; } catch (e) { k = {}; }
+    return {
+      name: typeof k.name === 'string' ? k.name : '',
+      fell: FELLE[k.fell] ? k.fell : 'hell',
+      augen: AUGEN[k.augen] ? k.augen : 'gelbgruen',
+      decke: DECKEN[k.decke] ? k.decke : 'aus',
+    };
+  }
+  function schreib(k) {
+    try { localStorage.setItem(SPEICHER, JSON.stringify(k)); } catch (e) { /* privater Modus */ }
+    window.dispatchEvent(new Event('katze-geaendert'));
+  }
+  function name() { return lies().name || 'Deine Katze'; }
+
+  // ---------- Zeichnen ----------
+  // o.stimmung: hallo | froh | troest | schlaf; o.requisit: herz | …; o.bewegung: huepf | wiegen; o.aussehen: Vorschau im Kleiderschrank
+  function svg(o) {
+    o = o || {};
+    var k = o.aussehen || lies();
+    var e = FELLE[k.fell], augFarbe = AUGEN[k.augen].farbe, decke = DECKEN[k.decke].farbe ? DECKEN[k.decke] : null;
+    var stimmung = o.stimmung || 'hallo';
+    var requisit = o.requisit || (stimmung === 'troest' ? 'herz' : null);
+    var augen = { froh: 'froh', troest: 'sanft', schlaf: 'schlaefrig' }[stimmung] || 'offen';
+    var Z = e.zeichnung;
+    var s = [];
+    // Sticker-Rand, damit die Katze auf dem dunklen Hintergrund steht
+    s.push('<g fill="' + STICKER + '" stroke="' + STICKER + '" stroke-width="12" stroke-linejoin="round" stroke-linecap="round">' +
+      (decke ? '' : '<path d="' + SCHWANZ + '" fill="none" stroke-width="30"/>') +
+      '<ellipse cx="100" cy="145" rx="50" ry="44"/>' + OHREN + '<ellipse cx="100" cy="88" rx="56" ry="47"/>' +
+      (decke ? '<path d="' + DECKE + '"/>' : '<ellipse cx="84" cy="184" rx="13" ry="9"/><ellipse cx="116" cy="184" rx="13" ry="9"/>') + '</g>');
+    if (!decke) s.push('<path d="' + SCHWANZ + '" fill="none" stroke="' + LINIE + '" stroke-width="19" stroke-linecap="round"/>' +
+      '<path d="' + SCHWANZ + '" fill="none" stroke="' + e.fell + '" stroke-width="13" stroke-linecap="round"/>' +
+      '<path d="M176 136 l-9 2 M174 148 l-9 -1" stroke="' + e.streifen + '" stroke-width="3" stroke-linecap="round"/>');
+    // Körper mit Bauch und Seitenstreifen
+    s.push('<ellipse cx="100" cy="145" rx="50" ry="44" fill="' + e.fell + '" stroke="' + LINIE + '" stroke-width="3"/>' +
+      '<ellipse cx="100" cy="152" rx="29" ry="28" fill="' + e.bauch + '"/>' +
+      '<path d="M55 130 Q64 133 66 142 M54 145 Q62 147 63 154 M145 130 Q136 133 134 142 M146 145 Q138 147 137 154" fill="none" stroke="' + e.streifen + '" stroke-width="3" stroke-linecap="round"/>');
+    if (decke) {
+      s.push('<path d="' + DECKE + '" fill="' + decke.farbe + '" stroke="' + decke.rand + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+        '<path d="M54 162 Q80 154 96 166 M104 158 Q128 150 146 162 M60 180 Q100 168 140 180" fill="none" stroke="' + decke.falte + '" stroke-width="2.5" stroke-linecap="round"/>');
+      if (decke.punkte) s.push('<g fill="' + decke.punkte + '">' + [[52, 172], [70, 186], [92, 178], [112, 188], [132, 176], [150, 168], [74, 160], [128, 158]]
+        .map(function (p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.2"/>'; }).join('') + '</g>');
+    }
+    if (requisit) s.push(REQUISITEN[requisit] || '');
+    // Pfoten: auf dem Boden, auf der Decke oder am Requisit
+    var pfY = requisit === 'lineal' ? 152 : requisit ? 162 : decke ? 150 : 184;
+    var pfX = requisit === 'herz' ? 22 : requisit && requisit !== 'lineal' ? 30 : 16;
+    s.push(pfote(100 - pfX, pfY, e) + pfote(100 + pfX, pfY, e));
+    // Kopf
+    s.push('<g fill="' + e.fell + '" stroke="' + LINIE + '" stroke-width="3" stroke-linejoin="round">' + OHREN + '</g>' +
+      '<g fill="' + ROSA + '" opacity=".8"><path d="M59 63 L56 36 L80 48 Z"/><path d="M141 63 L144 36 L120 48 Z"/></g>' +
+      '<ellipse cx="100" cy="88" rx="56" ry="47" fill="' + e.fell + '" stroke="' + LINIE + '" stroke-width="3"/>' +
+      '<path d="M84 62 L89 51 L100 59 L111 51 L116 62" fill="none" stroke="' + e.streifen + '" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<path d="M46 84 Q54 82 60 87 M47 95 Q55 94 60 98 M154 84 Q146 82 140 87 M153 95 Q145 94 140 98" fill="none" stroke="' + e.streifen + '" stroke-width="3" stroke-linecap="round"/>');
+    s.push(auge(78, augen, augFarbe, Z) + auge(122, augen, augFarbe, Z));
+    s.push('<ellipse cx="64" cy="105" rx="8" ry="4.5" fill="' + ROSA + '" opacity=".55"/><ellipse cx="136" cy="105" rx="8" ry="4.5" fill="' + ROSA + '" opacity=".55"/>' +
+      '<path d="M95.5 100 L104.5 100 L100 105.5 Z" fill="' + ROSA + '" stroke="' + ROSA + '" stroke-width="2" stroke-linejoin="round"/>');
+    s.push(stimmung === 'froh'
+      ? '<path d="M92 108 Q100 123 108 108 Q100 112 92 108 Z" fill="#c4566a" stroke="' + Z + '" stroke-width="2" stroke-linejoin="round"/>'
+      : '<path d="M100 105.5 Q97 112 91.5 109.5 M100 105.5 Q103 112 108.5 109.5" fill="none" stroke="' + Z + '" stroke-width="2.2" stroke-linecap="round"/>');
+    s.push('<path d="M58 102 L34 98 M58 108 L35 112 M142 102 L166 98 M142 108 L165 112" stroke="' + Z + '" stroke-width="1.6" stroke-linecap="round" opacity=".75"/>');
+    if (stimmung === 'froh') s.push(funke(28, 48, '#E8C97D') + funke(172, 40, ROSA) + funke(176, 92, '#E8C97D'));
+    var kl = o.bewegung ? ' class="kz-' + o.bewegung + '"' : '';
+    return '<svg class="katze" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><g' + kl + '>' + s.join('') + '</g></svg>';
+  }
+  var SCHWANZ = 'M140 162 C180 162 184 120 164 106';
+  var OHREN = '<path d="M54 72 L49 30 Q50 22 58 26 L88 45 Z"/><path d="M146 72 L151 30 Q150 22 142 26 L112 45 Z"/>';
+  // Kuscheldecke mit flauschigem Rand: kleine Bögen entlang einer flachen Kurve
+  var DECKE = (function () {
+    var d = 'M38 152';
+    for (var i = 1; i <= 10; i++) {
+      var t = i / 10, tm = (i - 0.5) / 10;
+      d += ' Q' + (38 + 124 * tm).toFixed(1) + ' ' + (145 - 44 * tm * (1 - tm)).toFixed(1) + ' ' + (38 + 124 * t).toFixed(1) + ' ' + (152 - 44 * t * (1 - t)).toFixed(1);
+    }
+    return d + ' L162 174 Q100 204 38 174 Z';
+  })();
+  var REQUISITEN = {
+    herz: '<path d="M100 172 C76 156 78 136 92 138 C97 139 100 144 100 147 C100 144 103 139 108 138 C122 136 124 156 100 172 Z" fill="#e0607a" stroke="' + LINIE + '" stroke-width="2.5" stroke-linejoin="round"/>',
+  };
+  function pfote(x, y, e) {
+    return '<ellipse cx="' + x + '" cy="' + y + '" rx="13" ry="9" fill="' + e.fell + '" stroke="' + LINIE + '" stroke-width="3"/>' +
+      '<path d="M' + (x - 4) + ' ' + (y + 2) + ' v5 M' + (x + 4) + ' ' + (y + 2) + ' v5" stroke="' + e.streifen + '" stroke-width="2" stroke-linecap="round"/>';
+  }
+  function auge(x, art, farbe, Z) {
+    if (art === 'froh') return '<path d="M' + (x - 9) + ' 93 Q' + x + ' 81 ' + (x + 9) + ' 93" fill="none" stroke="' + Z + '" stroke-width="3.5" stroke-linecap="round"/>';
+    if (art === 'sanft') return '<path d="M' + (x - 9) + ' 88 Q' + x + ' 97 ' + (x + 9) + ' 88" fill="none" stroke="' + Z + '" stroke-width="3.5" stroke-linecap="round"/>';
+    if (art === 'schlaefrig') return '<path d="M' + (x - 9) + ' 90 Q' + x + ' 100 ' + (x + 9) + ' 90 Z" fill="' + farbe + '" stroke="' + LINIE + '" stroke-width="2"/>' +
+      '<ellipse cx="' + x + '" cy="93.5" rx="2.6" ry="3" fill="' + LINIE + '"/><path d="M' + (x - 10) + ' 90 L' + (x + 10) + ' 90" stroke="' + Z + '" stroke-width="2.5" stroke-linecap="round"/>';
+    return '<g class="kz-auge"><ellipse cx="' + x + '" cy="90" rx="9" ry="10" fill="' + farbe + '" stroke="' + LINIE + '" stroke-width="2"/>' +
+      '<ellipse cx="' + x + '" cy="90.5" rx="3.6" ry="7.5" fill="' + LINIE + '"/><circle cx="' + (x - 3) + '" cy="85.5" r="2.6" fill="#fff"/></g>';
+  }
+  function funke(x, y, f) {
+    return '<path class="kz-funke" d="M' + x + ' ' + (y - 9) + ' Q' + (x + 2) + ' ' + (y - 2) + ' ' + (x + 9) + ' ' + y + ' Q' + (x + 2) + ' ' + (y + 2) + ' ' + x + ' ' + (y + 9) +
+      ' Q' + (x - 2) + ' ' + (y + 2) + ' ' + (x - 9) + ' ' + y + ' Q' + (x - 2) + ' ' + (y - 2) + ' ' + x + ' ' + (y - 9) + ' Z" fill="' + f + '"/>';
+  }
+
+  // ---------- Sprüche ----------
+  var SPRUECHE = {
+    hallo: ['{k} freut sich aufs Üben.', 'Bereit? {k} ist es!', '{k} hat schon auf dich gewartet.', 'Los geht’s – {k} ist dabei.'],
+    froh: ['{k} macht einen Freudensprung!', '{k} schnurrt zufrieden.', '{k} ist stolz auf dich!', '{k} wackelt mit den Ohren.', 'Pfote drauf – sagt {k}.'],
+    troest: ['Nicht schlimm – aus Fehlern lernt man.', 'Kopf hoch, beim nächsten Mal klappt’s!', 'Schau dir die Lösung in Ruhe an.', 'Fehler gehören zum Lernen dazu.', 'Du schaffst das!'],
+    letztesHerz: ['Nur noch ein Herz – {k} drückt dir die Pfoten!'],
+    geschafft: ['{k} feiert mit dir!', '{k} ist mächtig stolz auf dich!'],
+    perfekt: ['Alles richtig! {k} tanzt vor Freude.'],
+    verloren: ['Das war schwer. {k} kuschelt kurz mit dir – dann noch mal?'],
+  };
+  // gibt reinen Text zurück; beim Einbauen in HTML escapen
+  function spruch(art) {
+    var l = SPRUECHE[art] || SPRUECHE.hallo;
+    return l[Math.floor(Math.random() * l.length)].split('{k}').join(name());
+  }
+
+  // ---------- Kleiderschrank ----------
+  function anpassen(fertig) {
+    var k = lies();
+    var erstes = !k.name;
+    var esc = LERNWERK.esc;
+    function gruppe(titel, feld, liste, muster) {
+      return '<fieldset class="kz-gruppe"><legend>' + titel + '</legend><div class="kz-wahl">' + Object.keys(liste).map(function (id) {
+        return '<button type="button" class="kz-knopf" data-feld="' + feld + '" data-wert="' + id + '" aria-pressed="false">' + muster(liste[id]) + '<span>' + esc(liste[id].titel) + '</span></button>';
+      }).join('') + '</div></fieldset>';
+    }
+    function punkt(f) { return '<i class="kz-farbe" style="background:' + f + '"></i>'; }
+    var d = LERNWERK.dialog('<form class="kz-schrank"><h2>' + (erstes ? 'Das ist deine Lernkatze!' : 'Kleiderschrank') + '</h2>' +
+      '<p>' + (erstes ? 'Sie übt mit dir und freut sich mit dir. Gib ihr einen Namen und such dir aus, wie sie aussieht.' : 'Such dir aus, wie deine Katze aussieht.') + '</p>' +
+      '<div class="kz-vorschau"></div>' +
+      '<label class="kz-label" for="kz-name">Name</label><input id="kz-name" maxlength="16" autocomplete="off" placeholder="z. B. Maurice" value="' + esc(k.name) + '" required>' +
+      gruppe('Fell', 'fell', FELLE, function (f) { return punkt(f.fell); }) +
+      gruppe('Augen', 'augen', AUGEN, function (a) { return punkt(a.farbe); }) +
+      gruppe('Kuscheldecke', 'decke', DECKEN, function (x) { return x.farbe ? punkt(x.farbe) : '<i class="kz-farbe kz-keine"></i>'; }) +
+      '<button class="lw-knopf" type="submit">' + (erstes ? 'Los geht’s!' : 'Fertig') + '</button></form>');
+    var vorschau = d.querySelector('.kz-vorschau');
+    function zeigen() {
+      vorschau.innerHTML = svg({ aussehen: k, stimmung: 'froh', bewegung: 'huepf' });
+      d.querySelectorAll('.kz-knopf').forEach(function (b) { b.setAttribute('aria-pressed', String(k[b.dataset.feld] === b.dataset.wert)); });
+    }
+    d.querySelectorAll('.kz-knopf').forEach(function (b) {
+      b.onclick = function () { k[b.dataset.feld] = b.dataset.wert; zeigen(); };
+    });
+    zeigen();
+    var feld = d.querySelector('#kz-name');
+    if (erstes) feld.focus();
+    d.querySelector('form').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var n = feld.value.trim();
+      if (!n) return feld.focus();
+      k.name = n;
+      schreib(k);
+      d.remove();
+      if (fertig) fertig();
+    });
+  }
+
+  // Beim ersten Besuch (nach dem Namen des Kindes) die Katze vorstellen
+  function start(fertig) {
+    if (lies().name) { if (fertig) fertig(); return; }
+    anpassen(fertig);
+  }
+
+  window.KATZE = { svg: svg, spruch: spruch, name: name, anpassen: anpassen, start: start, lies: lies, FELLE: FELLE, AUGEN: AUGEN, DECKEN: DECKEN };
 })();
 </script>
 <script>
@@ -361,8 +592,18 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
     p.innerHTML = '<span>Hallo, ' + LERNWERK.esc(name) + '! Such dir ein Fach aus.</span><button aria-label="Name ändern">✎</button>';
     p.querySelector('button').onclick = function () { LERNWERK.frageName(hallo); };
   }
+  var kk = document.getElementById('katze-karte');
+  function katze() {
+    if (!KATZE.lies().name) return;
+    kk.hidden = false;
+    kk.innerHTML = KATZE.svg({ stimmung: 'hallo' }) + '<div><b>' + LERNWERK.esc(KATZE.name()) + '</b><p>' + LERNWERK.esc(KATZE.spruch('hallo')) + '</p>' +
+      '<button class="btn btn-ghost">🎨 Anpassen</button></div>';
+    kk.querySelector('button').onclick = function () { KATZE.anpassen(); };
+  }
+  window.addEventListener('katze-geaendert', katze);
   hallo();
-  if (!LERNWERK.profil().name) LERNWERK.frageName(hallo);
+  katze();
+  LERNWERK.start(function () { hallo(); KATZE.start(); });
   document.getElementById('bericht').onclick = function () { LERNWERK.senden(''); };
 })();
 </script>

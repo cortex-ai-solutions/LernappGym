@@ -91,8 +91,12 @@ function updateBanner(prefix) {
 
 // Gemeinsamer Teil aller Seiten: Name, Lernprotokoll, Bericht an die Eltern (templates/lernwerk.js).
 // Kinder-Seiten fragen beim ersten Besuch nach dem Namen, die Elternansicht nicht.
-function lernwerkSkript({ nameFragen }) {
-  return `<script>${fs.readFileSync(path.join(TPL, 'lernwerk.js'), 'utf8')}</script>${nameFragen ? '\n<script>LERNWERK.start();</script>' : ''}`;
+// Mit katze kommt die Lernkatze dazu (templates/katze.js); sie stellt sich nach dem Namen vor.
+function lernwerkSkript({ nameFragen, katze = false }) {
+  const lw = `<script>${fs.readFileSync(path.join(TPL, 'lernwerk.js'), 'utf8')}</script>`;
+  const kz = katze ? `\n<script>${fs.readFileSync(path.join(TPL, 'katze.js'), 'utf8')}</script>` : '';
+  const start = !nameFragen ? '' : katze ? '\n<script>LERNWERK.start(function () { KATZE.start(); });</script>' : '\n<script>LERNWERK.start();</script>';
+  return lw + kz + start;
 }
 
 // Themen-Titel für die Elternansicht (für Stände von vor dem Protokoll, die nur die id kennen)
@@ -141,7 +145,7 @@ function fachSeite(fach, lwBundle) {
 <body><div id="app"><p class="wrap">Die App wird geladen …</p></div>
 <noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
 <script>${lwBundle}</script>
-${lernwerkSkript({ nameFragen: true })}
+${lernwerkSkript({ nameFragen: true, katze: true })}
 <script>window.FACH = ${jsonScript(daten)};</script>
 <script>${fs.readFileSync(path.join(TPL, 'app.js'), 'utf8')}</script>
 ${updateBanner('../')}</body></html>`;
@@ -164,10 +168,11 @@ function startSeite() {
   return `${kopf({ titel: 'LERNWERK – Lernen Klasse 5', prefix: '', beschreibung: 'Üben für Klasse 5: Mathematik, Latein, Geschichte' })}
 <body><div class="wrap"><header style="margin:20px 0 22px"><h1 class="gold" style="font-size:32px;letter-spacing:.05em">LERNWERK</h1>
 <p class="hallo" id="hallo">Üben für Klasse 5 – such dir ein Fach aus!</p></header>
+<section class="katze-karte" id="katze-karte" hidden></section>
 ${karten}
 <footer class="fuss"><button class="btn btn-ghost btn-breit" id="bericht">📤 Bericht an deine Eltern</button>
 <p>Kein Konto, keine Werbung – dein Lernstand bleibt auf diesem Gerät.</p><p><a class="eltern-link" href="eltern/">Für Eltern: Berichte ansehen</a></p></footer></div>
-${lernwerkSkript({ nameFragen: false })}
+${lernwerkSkript({ nameFragen: false, katze: true })}
 <script>
 (function () {
   var p = document.getElementById('hallo');
@@ -177,8 +182,18 @@ ${lernwerkSkript({ nameFragen: false })}
     p.innerHTML = '<span>Hallo, ' + LERNWERK.esc(name) + '! Such dir ein Fach aus.</span><button aria-label="Name ändern">✎</button>';
     p.querySelector('button').onclick = function () { LERNWERK.frageName(hallo); };
   }
+  var kk = document.getElementById('katze-karte');
+  function katze() {
+    if (!KATZE.lies().name) return;
+    kk.hidden = false;
+    kk.innerHTML = KATZE.svg({ stimmung: 'hallo' }) + '<div><b>' + LERNWERK.esc(KATZE.name()) + '</b><p>' + LERNWERK.esc(KATZE.spruch('hallo')) + '</p>' +
+      '<button class="btn btn-ghost">🎨 Anpassen</button></div>';
+    kk.querySelector('button').onclick = function () { KATZE.anpassen(); };
+  }
+  window.addEventListener('katze-geaendert', katze);
   hallo();
-  if (!LERNWERK.profil().name) LERNWERK.frageName(hallo);
+  katze();
+  LERNWERK.start(function () { hallo(); KATZE.start(); });
   document.getElementById('bericht').onclick = function () { LERNWERK.senden(''); };
 })();
 </script>

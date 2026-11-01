@@ -47,3 +47,12 @@ Neueste oben. Format: Datum · Entscheidung · Grund.
 - **Latein und Geschichte** melden über kleine Haken in `legacy/` an dasselbe Protokoll (Latein je Einheit und Vokabel, Geschichte je Lektion und Quizfrage). Stände von vor der Aufzeichnung kommen als Zusammenfassung mit.
 - Mathe-Aufgaben haben jetzt ein optionales Feld `bezeichnung`, wenn die Anweisung Zufallswerte enthält oder im Thema doppelt ist. Ein Test erzwingt das.
 - **Update-Banner korrigiert:** Neu geladen wird erst nach `controllerchange`. Vorher konnte ein Neuladen mitten im Versionswechsel hängen bleiben (im Test etwa jedes vierte bis zehnte Mal). Dasselbe Muster steckt im Busplan.
+
+## 2026-11-01 – Eigene Katze statt Pusheen
+
+- **Wunsch der Tochter: mehr „Pusheen“.** Echte Pusheen-Bilder kommen nicht in die App. Die Figur ist urheber- und markenrechtlich geschützt (Pusheen Corp.), das Repo ist öffentlich, und ein Einbinden über GIPHY bräche „offline“ und „keine Datenübertragung“. Stattdessen gibt es eine **eigene, selbst gezeichnete SVG-Katze** im runden, knuddeligen Stil, die das Kind selbst benennt.
+- Die Katze begleitet vor allem die **Übungen mit Sofort-Feedback** (freut sich bzw. tröstet) und den Abschluss-Bildschirm.
+- **Katzenalbum** als Anreiz: Motive je Thema bei ★ und ★★★, Streak-Motive, Gold-Motiv für volle Punktzahl auf einem Arbeitsblatt.
+- **Belohnungscode auf dem Lösungsblatt:** Je Thema und Variante (A–E) ein eigener Code, berechnet aus Thema + Variante. Die App prüft ihn ohne Server. Die Eltern geben ihn bei voller Punktzahl weiter.
+- **Umsetzung Schritt 1 (01.11.2026):** Die Katze steckt in `templates/katze.js` (`window.KATZE`) und wird zur Laufzeit als SVG gezeichnet, ohne Bilddateien. Fell, Augen und Decke stehen als Tabellen oben in der Datei: Neue Farben sind ein Eintrag, und gespeicherte Stände bleiben gültig (unbekannte Werte fallen auf den Standard zurück). Gespeichert wird in `lernwerk_katze_v1`. Die Katze stellt sich nach dem Namen des Kindes vor (Kleiderschrank, Name Pflicht). Zu sehen ist sie auf Startseite und Mathe-Übersicht, in der Feedback-Leiste (freut sich / tröstet, eigener Spruch beim letzten Herz) und auf dem Abschluss-Bildschirm. Latein und Geschichte (Bestands-Apps) bekommen sie später.
+- Nebenbei behoben: Die Regel `.fehler` der Elternansicht nahm der roten Feedback-Leiste den Innenabstand. Sie gilt jetzt nur für `ul.fehler`.

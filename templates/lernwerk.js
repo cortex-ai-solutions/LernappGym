@@ -108,7 +108,7 @@
 
   // ---------- Oberfläche ----------
   var CSS = '.lw-schleier{position:fixed;inset:0;z-index:80;background:rgba(0,20,26,.82);display:flex;align-items:center;justify-content:center;padding:16px}' +
-    '.lw-dialog{width:100%;max-width:420px;background:#002B36;color:#F5F0E6;border:1px solid #C9A84C;border-radius:18px;padding:24px 20px;font:16px/1.45 Inter,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.5)}' +
+    '.lw-dialog{width:100%;max-width:420px;max-height:calc(100vh - 32px);overflow-y:auto;background:#002B36;color:#F5F0E6;border:1px solid #C9A84C;border-radius:18px;padding:24px 20px;font:16px/1.45 Inter,system-ui,sans-serif;box-shadow:0 12px 40px rgba(0,0,0,.5)}' +
     '.lw-dialog h2{margin:0 0 6px;font:700 22px/1.25 Montserrat,Inter,system-ui,sans-serif;color:#E8C97D}' +
     '.lw-dialog p{margin:0 0 14px;color:#C9D4D6}' +
     '.lw-dialog input,.lw-dialog textarea{width:100%;box-sizing:border-box;min-height:52px;padding:12px 14px;border-radius:12px;border:1px solid rgba(200,168,76,.5);background:#00202A;color:#F5F0E6;font:inherit;font-size:18px}' +
@@ -168,15 +168,15 @@
     });
   }
 
-  // Auf Kinder-Seiten: beim ersten Besuch nach dem Namen fragen
-  function start() {
-    if (profil().name) return;
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { frageName(); });
-    else frageName();
+  // Auf Kinder-Seiten: beim ersten Besuch nach dem Namen fragen, danach (oder sofort) fertig()
+  function start(fertig) {
+    function los() { if (profil().name) { if (fertig) fertig(); } else frageName(fertig); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', los);
+    else los();
   }
 
   window.LERNWERK = {
-    profil: profil, setzeName: setzeName, frageName: frageName, start: start,
+    profil: profil, setzeName: setzeName, frageName: frageName, start: start, dialog: dialog,
     protokolliere: protokolliere, bericht: bericht, berichtLink: berichtLink, senden: senden,
     packen: packen, auspacken: auspacken, tag: tag, esc: esc,
   };

@@ -1,5 +1,5 @@
 // Offline-Cache für LERNWERK – automatisch erzeugt von generator/webapp.js
-const CACHE = 'lernwerk-e8d3615934';
+const CACHE = 'lernwerk-92c8e39ccc';
 const DATEIEN = [
   "./",
   "eltern/",
