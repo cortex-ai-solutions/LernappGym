@@ -64,3 +64,7 @@ Neueste oben. Format: Datum · Entscheidung · Grund.
 ## 2026-11-01 – Versionsanzeige
 
 - Auf zwei Pixel-Handys erschien kein Update-Banner, auf einem dritten Handy schon. Vermutete Ursache: Wird die installierte App ganz geschlossen (aus den letzten Apps gewischt), aktiviert Android die wartende Version beim nächsten Start von selbst, das Banner kommt dann nicht. Darum zeigt die Startseite jetzt unten die Version (aus dem aktiven Service Worker, Nachricht `VERSION`) und den Knopf „Nach Updates suchen“.
+
+## 2026-11-02 – Arbeitsblatt-Auswahl als Klappliste
+
+- Der Elternteil fand nur Blatt A: Der ↻-Knopf zum Weiterschalten wurde nicht als Auswahl erkannt. Jetzt hat jede Themenkarte die Knöpfe „🖨 Arbeitsblatt ▾“ und „✓ Lösung ▾“, die je eine Liste A–E aufklappen. Eine gemerkte Variante gibt es nicht mehr, alle Blätter sind direkt erreichbar.

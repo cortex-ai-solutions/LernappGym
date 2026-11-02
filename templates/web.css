@@ -41,8 +41,12 @@ h1, h2, h3, .btn, .chip, .titel { font-family: 'Montserrat', 'Inter', sans-serif
 .reihe { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; position: relative; z-index: 1; }
 .reihe .btn { flex: 1 1 auto; }
 .reihe-druck { display: flex; gap: 8px; margin-top: 8px; position: relative; z-index: 1; }
-.reihe-druck .btn { flex: 1; font-size: 14px; }
-.reihe-druck .btn-neu { flex: 0 0 52px; padding: 0; font-size: 26px; font-family: system-ui, sans-serif; }
+.reihe-druck .btn { flex: 1; font-size: 14px; padding: 0 8px; white-space: nowrap; }
+.reihe-druck .btn[aria-expanded="true"] { background: rgba(200, 168, 76, 0.18); border-color: var(--gold-light); }
+.reihe-druck .btn[aria-expanded="true"] span { display: inline-block; transform: rotate(180deg); }
+.druck-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; padding: 8px; border-radius: 12px; background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); position: relative; z-index: 1; }
+.druck-liste[hidden] { display: none; }
+.druck-liste .btn { font-size: 15px; padding: 0 8px; }
 
 /* Buttons */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 52px; padding: 0 18px; border-radius: 12px; border: 1px solid transparent; font-size: 16px; font-weight: 700; text-decoration: none; transition: transform 0.08s, background 0.15s; }

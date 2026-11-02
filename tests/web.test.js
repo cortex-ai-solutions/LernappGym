@@ -102,19 +102,22 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
     assert.strictEqual(await page.evaluate(() => document.documentElement.scrollWidth), 393, 'kein seitliches Scrollen');
 
     for (const thema of themen) {
-      // Blatt-Vorrat: ↻ schaltet A → B → … → A, Blatt und Lösung passen zusammen, alle PDFs vorhanden
-      const druckLinks = () => page.$$eval(`[data-thema="${thema}"] .reihe-druck a`, (as) => as.map((a) => [a.getAttribute('href'), a.textContent]));
-      const gesehen = [];
-      for (let i = 0; i < 6; i++) {
-        const [[blatt, blattText], [loesung, loesungText]] = await druckLinks();
-        const v = blattText.slice(-1);
-        assert.strictEqual(loesungText.slice(-1), v, `${thema}: Lösung passt nicht zum Blatt`);
-        assert.strictEqual(loesung, blatt.replace('.pdf', '_loesung.pdf'));
-        for (const href of [blatt, loesung]) assert.ok(fs.existsSync(path.join(DOCS, 'mathe', href)), `${thema}: ${href} fehlt`);
-        gesehen.push(v);
-        await page.click(`[data-thema="${thema}"] [data-aktion="neues-blatt"]`);
-      }
-      assert.strictEqual(gesehen.join(''), 'ABCDEA', `${thema}: Reihenfolge der Varianten`);
+      // Blatt-Vorrat: „Arbeitsblatt“ und „Lösung“ klappen je eine Liste A–E auf, Blatt und Lösung passen zusammen, alle PDFs vorhanden
+      const karte = `[data-thema="${thema}"]`;
+      const liste = () => page.$$eval(`${karte} .druck-liste:not([hidden]) a`, (as) => as.map((a) => [a.getAttribute('href'), a.textContent]));
+      assert.deepStrictEqual(await liste(), [], `${thema}: Liste anfangs zu`);
+      await page.click(`${karte} [data-aktion="druck"][data-rolle="blatt"]`);
+      const blaetter = await liste();
+      await page.click(`${karte} [data-aktion="druck"][data-rolle="loesung"]`);
+      const loesungen = await liste();
+      assert.strictEqual(blaetter.map(([, s]) => s.slice(-1)).join(''), 'ABCDE', `${thema}: Arbeitsblätter A–E`);
+      assert.strictEqual(loesungen.map(([, s]) => s.slice(-1)).join(''), 'ABCDE', `${thema}: Lösungen A–E`);
+      blaetter.forEach(([blatt], i) => {
+        assert.strictEqual(loesungen[i][0], blatt.replace('.pdf', '_loesung.pdf'), `${thema}: Lösung passt nicht zum Blatt`);
+        for (const href of [blatt, loesungen[i][0]]) assert.ok(fs.existsSync(path.join(DOCS, 'mathe', href)), `${thema}: ${href} fehlt`);
+      });
+      await page.click(`${karte} [data-aktion="druck"][data-rolle="loesung"]`);
+      assert.deepStrictEqual(await liste(), [], `${thema}: zweites Tippen klappt zu`);
       await page.click(`[data-thema="${thema}"] [data-aktion="ueben"]`);
       let n = 0;
       while (await page.$('.lektion')) {
@@ -171,11 +174,6 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
     await page.click('.kz-knopf[data-feld="kopf"][data-wert="krone"]');
     await page.click('.kz-schrank [type="submit"]');
     assert.ok(await page.$('#katze-karte svg.katze path[fill="#E8C97D"]'), 'Katze trägt die Krone');
-
-    // gewählte Variante bleibt gespeichert (nach 6× 🔄 wieder bei B)
-    await page.reload();
-    await page.waitForSelector('.thema');
-    assert.match(await page.textContent(`[data-thema="${themen[0]}"] [data-rolle="blatt"]`), /Blatt B$/);
 
     // offline: Service Worker muss alles gecacht haben
     await page.evaluate(() => navigator.serviceWorker.ready);
