@@ -62,6 +62,7 @@ function alleThemen() {
   for (const fach of fs.readdirSync(path.join(ROOT, 'content'))) {
     for (const klasse of fs.readdirSync(path.join(ROOT, 'content', fach))) {
       for (const f of fs.readdirSync(path.join(ROOT, 'content', fach, klasse))) {
+        if (f.startsWith('_')) continue; // _uebergreifend.yaml: Klassenarbeitsaufgaben, kein Thema
         liste.push({ fach, klasse, thema: f.replace(/\.ya?ml$/, '') });
       }
     }

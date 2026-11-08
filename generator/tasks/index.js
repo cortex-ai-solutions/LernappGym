@@ -7,6 +7,7 @@ const MODULE = [
   require('./math/diagramm'),
   require('./math/groessen'),
   require('./math/kommazahlen'),
+  require('./math/anspruchsvoll'),
 ];
 
 const GENERATOREN = {};

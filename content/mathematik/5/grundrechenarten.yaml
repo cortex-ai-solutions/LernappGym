@@ -98,3 +98,71 @@ aufgaben:
     be: 1
     schwierigkeit: 2
     prioritaet: 3
+
+# Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
+klassenarbeit:
+  - id: ka-kopfrechnen
+    bezeichnung: "Klassenarbeit: Kopfrechnen mit größeren Zahlen"
+    typ: rechnung
+    generator: kopfrechnen
+    parameter: { operationen: ["+", "-", "*", ":"], bereich: [12, 300], faktor: [11, 25] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-platzhalter
+    bezeichnung: "Klassenarbeit: Platzhalteraufgaben"
+    typ: rechnung
+    generator: platzhalter
+    parameter: { operationen: ["+", "-", "*", ":"], bereich: [12, 300], faktor: [11, 25] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-fachbegriffe
+    bezeichnung: "Klassenarbeit: Fachbegriffe (Summe, Differenz, Produkt, Quotient)"
+    typ: rechnung
+    generator: fachbegriffe
+    parameter: { operationen: ["+", "-", "*", ":"], bereich: [12, 250], faktor: [11, 20] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-vorteilhaft
+    bezeichnung: "Klassenarbeit: Vorteilhaft rechnen"
+    typ: rechnung
+    generator: vorteilhaft
+    anzahl: 3
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-verkettet
+    bezeichnung: "Klassenarbeit: Rechnen mit Fachbegriffen"
+    typ: rechnung
+    generator: verkettet
+    parameter: { operationen: ["+", "-"], bereich: [20, 120] }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-probe
+    typ: multiple_choice
+    frage: "Jonas hat 1 008 : 12 = 84 gerechnet. Mit welcher Rechnung kann er die Probe machen?"
+    optionen: ["84 · 12", "1 008 · 12", "84 + 12", "1 008 − 84"]
+    loesung: "84 · 12"
+    be: 1
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-durch-null
+    typ: freitext
+    frage: "0 : 7 = 0 ist richtig. Aber 7 : 0 kann man nicht ausrechnen. Erkläre, warum."
+    optionen:
+      - "Die Probe müsste ? · 0 = 7 sein. Jede Zahl mal 0 ergibt aber 0, nie 7."
+      - "7 : 0 = 7, weil sich durch 0 nichts ändert."
+      - "7 : 0 = 0, weil man 0 Teile bekommt."
+      - "Weil 7 eine ungerade Zahl ist."
+    loesung: "Die Probe müsste ? · 0 = 7 sein. Jede Zahl mal 0 ergibt aber 0, nie 7."
+    erwartung: "Zur Division gehört die Umkehraufgabe: 7 : 0 = ? müsste ? · 0 = 7 bedeuten. Jede Zahl mal 0 ergibt 0, nie 7. Deshalb kann man nicht durch 0 teilen."
+    be: 2
+    schwierigkeit: 3
+    afb: 3

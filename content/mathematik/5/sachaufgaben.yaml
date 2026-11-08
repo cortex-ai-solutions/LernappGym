@@ -65,3 +65,67 @@ aufgaben:
     be: 2
     schwierigkeit: 3
     prioritaet: 1
+
+# Klassenarbeit: "be" gilt für die ganze Aufgabe (mit Rechnung und Antwortsatz), "afb" ist der Anforderungsbereich I–III
+klassenarbeit:
+  - id: ka-tierbeine
+    bezeichnung: "Klassenarbeit: Sachaufgabe Tierbeine"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [tierbeine] }
+    be: 2
+    schwierigkeit: 1
+    afb: 1
+  - id: ka-rueckgeld
+    bezeichnung: "Klassenarbeit: Sachaufgabe Rückgeld"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [rueckgeld] }
+    be: 3
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-klassenfahrt
+    bezeichnung: "Klassenarbeit: Sachaufgabe Klassenfahrt"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [klassenfahrt] }
+    be: 4
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-mitglieder
+    bezeichnung: "Klassenarbeit: Sachaufgabe Mitglieder (rückwärts rechnen)"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [mitglieder] }
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-fahrkarten
+    bezeichnung: "Klassenarbeit: Sachaufgabe Fahrkarten"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [fahrkarten] }
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-sparen
+    bezeichnung: "Klassenarbeit: Sachaufgabe Sparen"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [sparen] }
+    be: 3
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-rest-deuten
+    typ: freitext
+    frage: "143 Kinder fahren ins Schullandheim. In einen Bus passen 30 Kinder. Paul rechnet 143 : 30 = 4 Rest 23 und sagt: „4 Busse reichen.“ Hat Paul recht? Begründe."
+    optionen:
+      - "Nein. 23 Kinder bleiben übrig, für sie braucht man noch einen Bus. Es sind 5 Busse nötig."
+      - "Ja. Der Rest wird beim Teilen immer weggelassen."
+      - "Nein. Man braucht 6 Busse, weil man immer zwei Busse dazunimmt."
+      - "Ja. 4 Busse mit je 30 Kindern sind 143 Kinder."
+    loesung: "Nein. 23 Kinder bleiben übrig, für sie braucht man noch einen Bus. Es sind 5 Busse nötig."
+    erwartung: "Paul hat nicht recht. In 4 Busse passen nur 4 · 30 = 120 Kinder. Die übrigen 23 Kinder brauchen einen weiteren Bus, also sind 5 Busse nötig."
+    be: 2
+    schwierigkeit: 3
+    afb: 3

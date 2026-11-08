@@ -73,3 +73,77 @@ aufgaben:
     be: 6
     schwierigkeit: 2
     prioritaet: 2
+
+# Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
+klassenarbeit:
+  - id: ka-saeulen-zeichnen
+    bezeichnung: "Klassenarbeit: Säulendiagramm zeichnen"
+    typ: diagramm
+    generator: diagramm
+    parameter: { modus: zeichnen, art: saeule, quelle: strichliste, kategorien: 5, max: 12 }
+    be: 5
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-balken-zeichnen
+    bezeichnung: "Klassenarbeit: Balkendiagramm zeichnen"
+    typ: diagramm
+    generator: diagramm
+    parameter: { modus: zeichnen, art: balken, quelle: tabelle, kategorien: 6, max: 14 }
+    be: 5
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-ablesen
+    bezeichnung: "Klassenarbeit: Diagramm ablesen und vergleichen"
+    typ: diagramm
+    generator: diagramm
+    parameter: { modus: ablesen, art: saeule, kategorien: 6 }
+    anzahl: 4
+    be: 4
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-ablesen-balken
+    bezeichnung: "Klassenarbeit: Balkendiagramm ablesen und vergleichen"
+    typ: diagramm
+    generator: diagramm
+    parameter: { modus: ablesen, art: balken, kategorien: 5 }
+    anzahl: 3
+    be: 3
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-strichliste
+    typ: multiple_choice
+    frage: "Bei einer Umfrage wurde „Fahrrad“ 23-mal genannt. Wie sieht die Strichliste dafür aus?"
+    optionen:
+      - "4 Fünferpäckchen und 3 einzelne Striche"
+      - "3 Fünferpäckchen und 4 einzelne Striche"
+      - "2 Fünferpäckchen und 3 einzelne Striche"
+      - "4 Fünferpäckchen und 2 einzelne Striche"
+    loesung: "4 Fünferpäckchen und 3 einzelne Striche"
+    be: 1
+    schwierigkeit: 1
+    afb: 1
+  - id: ka-rangliste
+    typ: multiple_choice
+    frage: "Die Häufigkeiten einer Umfrage sind: Hund 7, Katze 12, Pferd 3, Hamster 9. Welche Rangliste (von der häufigsten zur seltensten Nennung) stimmt?"
+    optionen:
+      - "Katze, Hamster, Hund, Pferd"
+      - "Hund, Katze, Pferd, Hamster"
+      - "Katze, Hund, Hamster, Pferd"
+      - "Pferd, Hund, Hamster, Katze"
+    loesung: "Katze, Hamster, Hund, Pferd"
+    be: 1
+    schwierigkeit: 1
+    afb: 1
+  - id: ka-irrefuehrend
+    typ: freitext
+    frage: "Zwei Klassen haben Kastanien gesammelt: die 5a 42 kg, die 5b 48 kg. In einem Säulendiagramm beginnt die Achse erst bei 40 kg. Dadurch ist die Säule der 5b viermal so hoch wie die der 5a. Was ist an diesem Diagramm irreführend?"
+    optionen:
+      - "Die Achse beginnt nicht bei 0. So sieht der Unterschied viel größer aus, als er ist: 48 kg sind nicht viermal so viel wie 42 kg."
+      - "Nichts, die 5b hat wirklich viermal so viel gesammelt."
+      - "Die Säulen müssten waagerecht liegen."
+      - "Die Säule der 5a müsste höher sein als die der 5b."
+    loesung: "Die Achse beginnt nicht bei 0. So sieht der Unterschied viel größer aus, als er ist: 48 kg sind nicht viermal so viel wie 42 kg."
+    erwartung: "Die Achse beginnt bei 40 kg statt bei 0. Die 5a hat nur 6 kg weniger gesammelt (48 − 42 = 6), die Säulen täuschen aber einen viermal so großen Wert vor. Richtig wäre eine Achse ab 0."
+    be: 2
+    schwierigkeit: 3
+    afb: 3

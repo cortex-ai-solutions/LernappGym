@@ -4,7 +4,19 @@ const { fmt } = require('../../lib/zahlen');
 
 const { gr, euro: euroCt } = require('./groessen');
 
+const { runden } = require('../../lib/zahlen');
+
 const euro = (x) => `${fmt(x)} €`;
+// Portostufen (ausgedacht, keine echten Preise): [bis Gramm, Preis in ct]
+const PORTO = [[1000, 450], [2000, 590], [5000, 740], [10000, 990]];
+const SCHULWEG = ['zu Fuß', 'Fahrrad', 'Bus', 'Auto', 'Straßenbahn'];
+// Abfahrt/Ankunft über eine volle Stunde hinweg (wie in „fahrzeit“), auch für übergreifende Aufgaben
+const VORLAGEN_ZEIT = {
+  fahrzeit: (rng) => {
+    const ab = 60 * rng.int(7, 16) + 5 * rng.int(1, 11);
+    return { ab, an: ab + 5 * rng.int(Math.ceil((60 - (ab % 60)) / 5) + 1, 34) };
+  },
+};
 const uhr = (min) => `${Math.floor(min / 60)}:${String(min % 60).padStart(2, '0')}`;
 const zeitspanne = (min) => (min % 60 ? `${Math.floor(min / 60)} h ${min % 60} min` : `${min / 60} h`);
 
@@ -160,10 +172,7 @@ const VORLAGEN = {
 
   fahrzeit: {
     // Zeitspanne zwischen zwei Uhrzeiten, über die volle Stunde gerechnet
-    ziehe: (rng) => {
-      const ab = 60 * rng.int(7, 16) + 5 * rng.int(1, 11);
-      return { ab, an: ab + 5 * rng.int(Math.ceil((60 - (ab % 60)) / 5) + 1, 34) };
-    },
+    ziehe: VORLAGEN_ZEIT.fahrzeit,
     loese: ({ ab, an }) => an - ab,
     text: ({ ab, an }) =>
       `Der Zug fährt um ${uhr(ab)} Uhr ab und kommt um ${uhr(an)} Uhr an. Wie lange dauert die Fahrt? Gib die Dauer in Minuten an.`,
@@ -200,6 +209,199 @@ const VORLAGEN = {
       { text: 'Minuten (min)', loesung: l.min },
     ],
   },
+
+  // ---------- Klassenarbeit: mehrere Rechenschritte (Lehrplan 2.1.2 „mehrere Rechenoperationen verknüpfen“) ----------
+  // Divisoren bleiben bei einstelligen Zahlen und 10, 12, 20, 25, 30, 50 (Lernausgangslage Grundschule).
+
+  klassenfahrt: {
+    ziehe: (rng) => {
+      const kinder = rng.pick([20, 25, 30]);
+      const busJeKind = rng.int(8, 20);
+      return { kinder, busJeKind, bus: kinder * busJeKind, eintritt: rng.int(3, 9), naechte: rng.int(2, 4), nacht: rng.int(18, 32), ziel: rng.pick(['an die Ostsee', 'in den Harz', 'in den Thüringer Wald', 'nach Berlin']) };
+    },
+    loese: ({ kinder, bus, eintritt, naechte, nacht }) => {
+      const proKind = bus / kinder + naechte * nacht + eintritt;
+      return { proKind, klasse: proKind * kinder };
+    },
+    text: ({ kinder, bus, eintritt, naechte, nacht, ziel }) =>
+      `Die Klasse 5b fährt mit ${kinder} Kindern ${ziel}. Der Bus kostet für alle zusammen ${euro(bus)}. Jedes Kind bezahlt außerdem ${naechte} Übernachtungen zu je ${euro(nacht)} und ${euro(eintritt)} Eintritt für ein Museum. Wie viel muss jedes Kind bezahlen? Wie viel kostet die Fahrt für die ganze Klasse?`,
+    weg: ({ kinder, bus, busJeKind, eintritt, naechte, nacht }, l) =>
+      `Bus je Kind: ${fmt(bus)} : ${kinder} = ${busJeKind}; Übernachtungen: ${naechte} · ${nacht} = ${naechte * nacht}; ${busJeKind} + ${naechte * nacht} + ${eintritt} = ${l.proKind}; ganze Klasse: ${l.proKind} · ${kinder} = ${fmt(l.klasse)}`,
+    satz: (_, l) => `Jedes Kind bezahlt ${euro(l.proKind)}. Die Fahrt kostet für die ganze Klasse ${euro(l.klasse)}.`,
+    teile: (l) => [
+      { text: 'Preis für ein Kind (in €)', loesung: l.proKind },
+      { text: 'Preis für die ganze Klasse (in €)', loesung: l.klasse },
+    ],
+  },
+
+  bretter: {
+    // Rest ist nie 0, sonst fehlt der Schritt „Rest deuten“
+    ziehe: (rng) => {
+      let cm, stueck;
+      do { cm = 10 * rng.int(15, 40); stueck = rng.pick([12, 15, 20, 25, 30, 40, 50]); } while (cm % stueck === 0 || cm < 3 * stueck);
+      return { cm, stueck, name: rng.pick(['Lukas', 'Mila', 'Ole', 'Hanna']) };
+    },
+    loese: ({ cm, stueck }) => ({ stuecke: Math.floor(cm / stueck), rest: cm % stueck }),
+    text: ({ cm, stueck, name }) =>
+      `Ein Brett ist ${gr(cm / 100, 'm')} lang. ${name} sägt davon Stücke von je ${gr(stueck, 'cm')} ab. Wie viele ganze Stücke bekommt ${name}? Wie viele Zentimeter bleiben übrig?`,
+    weg: ({ cm, stueck }, l) => `${gr(cm / 100, 'm')} = ${gr(cm, 'cm')}; ${cm} : ${stueck} = ${l.stuecke} Rest ${l.rest}`,
+    satz: ({ name }, l) => `${name} bekommt ${l.stuecke} Stücke, es bleiben ${gr(l.rest, 'cm')} übrig.`,
+    teile: (l) => [
+      { text: 'Anzahl der Stücke', loesung: l.stuecke },
+      { text: 'Rest (in cm)', loesung: l.rest },
+    ],
+  },
+
+  umstieg: {
+    ziehe: (rng) => {
+      let f1, warte, f2;
+      do { f1 = rng.int(25, 75); warte = rng.int(6, 25); f2 = rng.int(20, 59); } while ((f1 + warte + f2) % 60 === 0);
+      return { ab: 60 * rng.int(6, 15) + rng.int(0, 59), f1, warte, f2, name: rng.pick(['Emma', 'Paul', 'Greta', 'Milan']) };
+    },
+    loese: ({ ab, f1, warte, f2 }) => {
+      const dauer = f1 + warte + f2;
+      return { dauer, an: ab + dauer };
+    },
+    text: ({ ab, f1, warte, f2, name }) =>
+      `${name} fährt mit dem Zug zu den Großeltern. Der erste Zug fährt um ${uhr(ab)} Uhr ab und braucht ${f1} Minuten. Beim Umsteigen wartet ${name} ${warte} Minuten. Der zweite Zug braucht ${f2} Minuten. Wie lange ist ${name} insgesamt unterwegs? Um wie viel Uhr kommt ${name} an?`,
+    weg: ({ ab, f1, warte, f2 }, l) =>
+      `${f1} min + ${warte} min + ${f2} min = ${l.dauer} min = ${zeitspanne(l.dauer)}; ${uhr(ab)} Uhr + ${zeitspanne(l.dauer)} = ${uhr(l.an)} Uhr`,
+    satz: ({ name }, l) => `${name} ist ${zeitspanne(l.dauer)} unterwegs und kommt um ${uhr(l.an)} Uhr an.`,
+    teile: (l) => [
+      { text: 'Fahrzeit: ∎ h ∎ min', eingabe: 'felder', felder: ['h', 'min'], loesung: [Math.floor(l.dauer / 60), l.dauer % 60], antwort: zeitspanne(l.dauer) },
+      { text: 'Ankunft: ∎ Uhr ∎ min', eingabe: 'felder', felder: ['Uhr', 'min'], loesung: [Math.floor(l.an / 60), l.an % 60], antwort: `${uhr(l.an)} Uhr` },
+    ],
+  },
+
+  preisvergleich: {
+    // Stückpreise sind ganze Cent und verschieden, damit genau eine Packung günstiger ist
+    ziehe: (rng) => {
+      const [cA, cB] = rng.distinct(2, 5, 19).map((x) => 5 * x);
+      const nA = rng.int(3, 6);
+      const nB = rng.pick([8, 10, 12]);
+      return { ding: rng.pick(['Müsliriegel', 'Joghurts', 'Bleistifte', 'Brötchen']), nA, nB, pA: nA * cA, pB: nB * cB };
+    },
+    loese: ({ nA, nB, pA, pB }) => {
+      const cA = pA / nA, cB = pB / nB;
+      return { guenstiger: cA < cB ? 'Packung A' : 'Packung B', ersparnis: Math.abs(cA - cB), cA, cB };
+    },
+    text: ({ ding, nA, nB, pA, pB }) =>
+      `Im Supermarkt gibt es ${ding} in zwei Packungen. Packung A: ${nA} Stück für ${euroCt(pA)}. Packung B: ${nB} Stück für ${euroCt(pB)}. Welche Packung ist günstiger, wenn man den Preis für ein Stück vergleicht? Wie viel Cent spart man pro Stück?`,
+    weg: ({ nA, nB, pA, pB }, l) =>
+      `A: ${fmt(pA)} ct : ${nA} = ${l.cA} ct; B: ${fmt(pB)} ct : ${nB} = ${l.cB} ct; ${Math.max(l.cA, l.cB)} ct − ${Math.min(l.cA, l.cB)} ct = ${l.ersparnis} ct`,
+    satz: (_, l) => `${l.guenstiger} ist günstiger. Man spart ${l.ersparnis} ct pro Stück.`,
+    teile: (l) => [
+      { text: 'Günstiger ist', eingabe: 'wahl', optionen: ['Packung A', 'Packung B'], loesung: l.guenstiger, antwort: l.guenstiger },
+      { text: 'Ersparnis pro Stück (in ct)', loesung: l.ersparnis },
+    ],
+  },
+
+  // ---------- übergreifend: verbinden zwei Lernbereiche ----------
+
+  einwohner: {
+    ziehe: (rng) => {
+      const [nameA, nameB] = rng.shuffle(['Lindenau', 'Birkenfeld', 'Eichenrode', 'Ahornstadt', 'Weidenbach']).slice(0, 2);
+      let a, b;
+      // beide Zahlen werden beim Runden wirklich verändert, und mindestens eine wird aufgerundet
+      do { a = rng.int(100000, 899999); b = rng.int(100000, 899999); } while (a === b || a % 1000 === 0 || b % 1000 === 0 || (a % 1000 < 500 && b % 1000 < 500));
+      return { nameA, nameB, a, b };
+    },
+    loese: ({ a, b }) => {
+      const rA = runden(a, 'tausender'), rB = runden(b, 'tausender');
+      return { rA, rB, summe: rA + rB, unterschied: Math.abs(a - b) };
+    },
+    text: ({ nameA, nameB, a, b }) =>
+      `Die Stadt ${nameA} hat ${fmt(a)} Einwohner, die Stadt ${nameB} hat ${fmt(b)} Einwohner. Runde beide Einwohnerzahlen auf Tausender. Berechne mit den gerundeten Zahlen, wie viele Einwohner beide Städte ungefähr zusammen haben. Berechne dann genau, wie viele Einwohner ${a > b ? nameA : nameB} mehr hat.`,
+    weg: ({ a, b }, l) =>
+      `${fmt(a)} ≈ ${fmt(l.rA)}; ${fmt(b)} ≈ ${fmt(l.rB)}; ${fmt(l.rA)} + ${fmt(l.rB)} = ${fmt(l.summe)}; ${fmt(Math.max(a, b))} − ${fmt(Math.min(a, b))} = ${fmt(l.unterschied)}`,
+    satz: ({ nameA, nameB, a, b }, l) => `Zusammen haben beide Städte ungefähr ${fmt(l.summe)} Einwohner. ${a > b ? nameA : nameB} hat ${fmt(l.unterschied)} Einwohner mehr.`,
+    teile: (l, { nameA, nameB }) => [
+      { text: `${nameA} ≈`, loesung: l.rA },
+      { text: `${nameB} ≈`, loesung: l.rB },
+      { text: 'zusammen ≈', loesung: l.summe },
+      { text: 'Unterschied', loesung: l.unterschied },
+    ],
+  },
+
+  ausflug: {
+    ziehe: (rng) => ({
+      ...VORLAGEN_ZEIT.fahrzeit(rng),
+      erwachsene: rng.int(1, 2),
+      kinder: rng.int(1, 3),
+      erw: 10 * rng.int(60, 190), // 6,00 € bis 19,00 €, Kinderpreis bleibt auf 5 ct genau
+      familie: rng.pick(['Berger', 'Schmidt', 'Yilmaz', 'Wagner']),
+    }),
+    loese: ({ ab, an, erwachsene, kinder, erw }) => ({ dauer: an - ab, kosten: (erwachsene * erw + kinder * (erw / 2)) / 100 }),
+    komma: true,
+    text: ({ ab, an, erwachsene, kinder, erw, familie }) =>
+      `Familie ${familie} fährt mit ${erwachsene === 1 ? 'einem Erwachsenen' : `${erwachsene} Erwachsenen`} und ${kinder === 1 ? 'einem Kind' : `${kinder} Kindern`} mit dem Zug in den Zoo. Der Zug fährt um ${uhr(ab)} Uhr ab und kommt um ${uhr(an)} Uhr an. Eine Fahrkarte kostet für Erwachsene ${euroCt(erw)}, Kinder zahlen die Hälfte. Wie lange dauert die Fahrt? Wie viel bezahlt die Familie für die Fahrkarten?`,
+    weg: (d, l) => {
+      const { erwachsene, kinder, erw } = d;
+      const kind = erw / 2;
+      return `${VORLAGEN.fahrzeit.weg(d, l.dauer)}; Kind: ${euroCt(erw)} : 2 = ${euroCt(kind)}; ${erwachsene} · ${euroCt(erw)} + ${kinder} · ${euroCt(kind)} = ${euroCt(erwachsene * erw)} + ${euroCt(kinder * kind)} = ${euroCt(Math.round(l.kosten * 100))}`;
+    },
+    satz: ({ familie }, l) => `Die Fahrt dauert ${l.dauer} Minuten. Familie ${familie} bezahlt ${euroCt(Math.round(l.kosten * 100))}.`,
+    teile: (l) => [
+      { text: 'Fahrzeit (in min)', loesung: l.dauer, komma: false },
+      { text: 'Preis für alle (in €)', loesung: l.kosten, antwort: euroCt(Math.round(l.kosten * 100)) },
+    ],
+  },
+
+  porto: {
+    // Gewicht nie genau auf einer Stufengrenze, damit die Portostufe eindeutig ist
+    ziehe: (rng) => {
+      let d;
+      do d = { buch: 100 * rng.int(8, 25), spiel: 50 * rng.int(6, 18), schuhe: 50 * rng.int(10, 20), karton: 50 * rng.int(4, 8), name: rng.pick(['Lina', 'Jonas', 'Ida', 'Theo']) };
+      while ((d.buch + d.spiel + d.schuhe + d.karton) % 1000 === 0);
+      return d;
+    },
+    loese: ({ buch, spiel, schuhe, karton }) => {
+      const g = buch + spiel + schuhe + karton;
+      return { kg: g / 1000, porto: PORTO.find(([bis]) => g <= bis)[1] / 100 };
+    },
+    komma: true,
+    text: ({ buch, spiel, schuhe, karton, name }) =>
+      `${name} verschickt ein Paket mit einem Buch (${gr(buch / 1000, 'kg')}), einem Spiel (${gr(spiel, 'g')}) und einem Paar Schuhe (${gr(schuhe, 'g')}). Der Karton selbst wiegt ${gr(karton, 'g')}. Das Porto kostet: ${PORTO.map(([bis, ct]) => `bis ${gr(bis / 1000, 'kg')}: ${euroCt(ct)}`).join('; ')}. Wie schwer ist das Paket? Wie viel Porto muss ${name} bezahlen?`,
+    weg: ({ buch, spiel, schuhe, karton }, l) =>
+      `${gr(buch / 1000, 'kg')} = ${gr(buch, 'g')}; ${fmt(buch)} g + ${fmt(spiel)} g + ${fmt(schuhe)} g + ${fmt(karton)} g = ${gr(Math.round(l.kg * 1000), 'g')} = ${gr(l.kg, 'kg')}; Stufe ${PORTO.find(([bis]) => Math.round(l.kg * 1000) <= bis).map((x, i) => (i ? euroCt(x) : `bis ${gr(x / 1000, 'kg')}`)).join(': ')}`,
+    satz: ({ name }, l) => `Das Paket wiegt ${gr(l.kg, 'kg')}. ${name} bezahlt ${euroCt(Math.round(l.porto * 100))} Porto.`,
+    teile: (l) => [
+      { text: 'Gewicht (in kg)', loesung: l.kg },
+      { text: 'Porto (in €)', loesung: l.porto, antwort: euroCt(Math.round(l.porto * 100)) },
+    ],
+  },
+
+  laufen: {
+    ziehe: (rng) => ({ runden: rng.int(5, 15), min: rng.int(1, 3), s: 5 * rng.int(1, 11), name: rng.pick(['Jana', 'Lio', 'Frieda', 'Karl']) }),
+    loese: ({ runden: r, min, s }) => {
+      const sek = r * (60 * min + s);
+      return { km: (r * 400) / 1000, min: Math.floor(sek / 60), s: sek % 60, sek };
+    },
+    text: ({ runden: r, min, s, name }) =>
+      `Beim Sportfest läuft ${name} ${r} Runden auf der 400-m-Bahn. Für jede Runde braucht ${name} ${min} min ${s} s. Wie viele Kilometer läuft ${name}? Wie lange ist ${name} insgesamt unterwegs?`,
+    weg: ({ runden: r, min, s }, l) =>
+      `${r} · 400 m = ${gr(r * 400, 'm')} = ${gr(l.km, 'km')}; ${min} min ${s} s = ${60 * min + s} s; ${r} · ${60 * min + s} s = ${fmt(l.sek)} s = ${l.min} min ${l.s} s`,
+    satz: ({ name }, l) => `${name} läuft ${gr(l.km, 'km')} und braucht ${l.min} min ${l.s} s.`,
+    teile: (l) => [
+      { text: 'Strecke (in km)', loesung: l.km, komma: true },
+      { text: 'Zeit: ∎ min ∎ s', eingabe: 'felder', felder: ['min', 's'], loesung: [l.min, l.s], antwort: `${l.min} min ${l.s} s` },
+    ],
+  },
+
+  monatskarten: {
+    // Diagramm ablesen und mit den abgelesenen Werten weiterrechnen
+    ziehe: (rng) => ({ werte: rng.distinct(5, 2, 12), preis: rng.pick([15, 18, 22, 25, 28, 32]), klasse: rng.pick(['5a', '5b', '5c']) }),
+    loese: ({ werte, preis }) => ({ befragt: werte.reduce((a, b) => a + b, 0), kosten: (werte[2] + werte[4]) * preis, karten: werte[2] + werte[4] }),
+    daten: ({ werte, klasse }) => ({ titel: `Schulweg der Klasse ${klasse}`, merkmal: 'Verkehrsmittel', kategorien: SCHULWEG, werte, art: 'saeule', zeigen: 'diagramm' }),
+    text: ({ preis, klasse }) =>
+      `Die Klasse ${klasse} hat eine Umfrage zum Schulweg gemacht. Wer mit dem Bus oder mit der Straßenbahn fährt, braucht eine Monatskarte für ${preis} €. Wie viele Kinder wurden befragt? Wie viel kosten die Monatskarten für alle Kinder der Klasse zusammen?`,
+    weg: ({ werte, preis }, l) => `${werte.join(' + ')} = ${l.befragt}; Bus und Straßenbahn: ${werte[2]} + ${werte[4]} = ${l.karten}; ${l.karten} · ${preis} = ${fmt(l.kosten)}`,
+    satz: (_, l) => `Es wurden ${l.befragt} Kinder befragt. Die Monatskarten kosten zusammen ${euro(l.kosten)}.`,
+    teile: (l) => [
+      { text: 'Anzahl der befragten Kinder', loesung: l.befragt },
+      { text: 'Kosten der Monatskarten (in €)', loesung: l.kosten },
+    ],
+  },
 };
 
 const sachaufgabe = {
@@ -213,9 +415,14 @@ const sachaufgabe = {
     const v = VORLAGEN[name];
     const daten = v.ziehe(rng);
     const l = v.loese(daten);
-    const teile = (v.teile ? v.teile(l) : [{ text: 'Ergebnis', loesung: l }])
-      .map((t) => ({ antwort: fmt(t.loesung), ...t, eingabe: 'zahl', ...(v.komma ? { komma: true } : {}) }));
+    // Teilantworten sind Zahlen; Ausnahmen (Auswahl, Felder wie „∎ h ∎ min“) bringen eingabe und antwort selbst mit
+    const teile = (v.teile ? v.teile(l, daten) : [{ text: 'Ergebnis', loesung: l }]).map((t) => {
+      const { komma, ...rest } = t;
+      const eingabe = t.eingabe || 'zahl';
+      return { antwort: fmt(t.loesung), ...rest, eingabe, ...(eingabe === 'zahl' && (komma ?? v.komma) ? { komma: true } : {}) };
+    });
     return {
+      ...(v.daten ? { daten: v.daten(daten) } : {}),
       anweisung: v.text(daten),
       teile,
       weg: v.weg(daten, l),

@@ -153,10 +153,12 @@ function ladeFach(fachId, prefixZurWurzel) {
   const themen = [];
   for (const klasse of fs.readdirSync(ordner)) {
     for (const f of fs.readdirSync(path.join(ordner, klasse))) {
+      if (f.startsWith('_')) continue; // _uebergreifend.yaml: siehe ladeUebergreifend
       const doc = yaml.load(fs.readFileSync(path.join(ordner, klasse, f), 'utf8'));
       themen.push({
         thema: doc.thema, titel: doc.titel, icon: doc.icon || '📘', reihenfolge: doc.reihenfolge || 99, klasse: doc.klasse,
         erklaerungHtml: marked.parse(doc.erklaerung), wissenswertes: doc.wissenswertes || [], aufgaben: doc.aufgaben,
+        klassenarbeit: doc.klassenarbeit || [],
         blaetter: VARIANTEN.map((v) => ({
           variante: v, blatt: `${prefixZurWurzel}blaetter/${fachId}/${doc.thema}_${v}.pdf`, loesung: `${prefixZurWurzel}blaetter/${fachId}/${doc.thema}_${v}_loesung.pdf`,
         })),
@@ -166,8 +168,76 @@ function ladeFach(fachId, prefixZurWurzel) {
   return themen.sort((a, b) => a.reihenfolge - b.reihenfolge);
 }
 
+// übergreifende Klassenarbeitsaufgaben (content/<fach>/<klasse>/_uebergreifend.yaml)
+function ladeUebergreifend(fachId) {
+  const ordner = path.join(ROOT, 'content', fachId);
+  return fs.readdirSync(ordner).flatMap((klasse) => fs.readdirSync(path.join(ordner, klasse))
+    .filter((f) => f.startsWith('_'))
+    .flatMap((f) => yaml.load(fs.readFileSync(path.join(ordner, klasse, f), 'utf8')).aufgaben));
+}
+
+// Druckseite der Klassenarbeit: stellt aus Auswahl und Variante im Link (#t=runden,zeit&s=K7Q3[&l=1]) die Arbeit
+// bzw. Lösung im Browser zusammen, dieselbe wie im Build (generator/klassenarbeit.js). Drucken oder „Als PDF speichern“.
+function klassenarbeitSeite(fach, lwBundle) {
+  const daten = {
+    themen: ladeFach(fach.id, '../').filter((t) => t.klassenarbeit.length).map(({ thema, titel, reihenfolge, klassenarbeit }) => ({ thema, titel, reihenfolge, klassenarbeit })),
+    uebergreifend: ladeUebergreifend(fach.id),
+  };
+  const schriften = [...SCHRIFTEN, ['JetBrains Mono', 'jetbrains-mono', [400, 500]]].flatMap(([f, d, ws]) => ws.map((w) =>
+    `@font-face{font-family:'${f}';font-weight:${w};font-display:swap;src:url(../fonts/${d}-latin-${w}-normal.woff2) format('woff2')}`)).join('\n');
+  return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="${THEME}">
+<link rel="manifest" href="../manifest.webmanifest"><link rel="icon" href="../icons/icon.svg" type="image/svg+xml"><title>Klassenarbeit – LERNWERK</title>
+<style>${schriften}
+${fs.readFileSync(path.join(TPL, 'print.css'), 'utf8')}
+@media screen {
+  html { overflow-x: hidden; }
+  body { background: #4f5f64; padding: 72px 8px 32px; overflow-x: hidden; }
+  #blatt { width: 210mm; margin: 0 auto; padding: 15mm; background: #fff; box-shadow: 0 6px 28px rgba(0, 0, 0, 0.45); }
+  .werkzeug { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; background: ${THEME}; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4); }
+  .werkzeug a, .werkzeug button { min-height: 48px; padding: 0 14px; border-radius: 10px; display: inline-flex; align-items: center; font: 600 15px Inter, system-ui, sans-serif; text-decoration: none; cursor: pointer; border: 1px solid #C9A84C; color: #E8C97D; background: transparent; }
+  .werkzeug #drucken { flex: 1; justify-content: center; border: 0; color: #000; background: linear-gradient(135deg, #8B6914, #C9A84C 45%, #E8C97D); }
+}
+@media print { .werkzeug, .update-banner { display: none !important; } #blatt { zoom: 1 !important; } }
+</style></head>
+<body><nav class="werkzeug"><a href="./#klassenarbeit">← Zurück</a><button id="drucken" type="button">🖨 Drucken / als PDF</button><a id="umschalten" href="#">Lösung</a></nav>
+<div id="blatt"><p>Die Klassenarbeit wird zusammengestellt …</p></div>
+<script>${lwBundle}</script>
+<script>window.KA_DATEN = ${jsonScript(daten)};</script>
+<script>
+(function () {
+  var p = {};
+  location.hash.slice(1).split('&').forEach(function (kv) { var i = kv.indexOf('='); if (i > 0) p[kv.slice(0, i)] = decodeURIComponent(kv.slice(i + 1)); });
+  var ids = (p.t || '').split(',').filter(Boolean), loesung = p.l === '1';
+  var themen = KA_DATEN.themen.filter(function (t) { return ids.indexOf(t.thema) >= 0; });
+  var blatt = document.getElementById('blatt');
+  window.addEventListener('hashchange', function () { location.reload(); });
+  if (!themen.length || !p.s) { blatt.innerHTML = '<p>Keine Lernbereiche gewählt. Bitte in der App unter Mathematik die Lernbereiche für die Klassenarbeit ankreuzen.</p>'; return; }
+  var ka = LW.stelleZusammen({ themen: themen, uebergreifend: KA_DATEN.uebergreifend, seed: p.s });
+  blatt.innerHTML = LW.klassenarbeitKoerper(ka, { loesung: loesung, fach: '${fach.id}', klasse: 5 });
+  document.body.classList.toggle('loesung', loesung);
+  document.title = 'Klassenarbeit ' + p.s + (loesung ? ' Lösung' : '') + ' – LERNWERK';
+  var um = document.getElementById('umschalten');
+  um.textContent = loesung ? 'Arbeit' : 'Lösung';
+  um.href = '#t=' + ids.join(',') + '&s=' + encodeURIComponent(p.s) + (loesung ? '' : '&l=1');
+  // auf dem Handy das A4-Blatt auf Bildschirmbreite verkleinern; gedruckt wird in Originalgröße
+  function passen() {
+    var breite = Math.min(window.innerWidth, document.documentElement.clientWidth, (window.visualViewport || {}).width || 1e9, screen.width || 1e9);
+    blatt.style.zoom = '';
+    blatt.style.zoom = Math.min(1, (breite - 16) / blatt.offsetWidth);
+  }
+  passen();
+  window.addEventListener('resize', passen);
+  window.addEventListener('beforeprint', function () { blatt.style.zoom = ''; });
+  window.addEventListener('afterprint', passen);
+  document.getElementById('drucken').onclick = function () { window.print(); };
+})();
+</script>
+${updateBanner('../')}</body></html>`;
+}
+
 function fachSeite(fach, lwBundle) {
-  const daten = { id: fach.id, titel: fach.titel, themen: ladeFach(fach.id, '../') };
+  const daten = { id: fach.id, titel: fach.titel, themen: ladeFach(fach.id, '../'), uebergreifend: ladeUebergreifend(fach.id) };
   return `${kopf({ titel: `${fach.titel} – LERNWERK`, prefix: '../', beschreibung: `${fach.titel} üben, Klasse 5` })}
 <body><div id="app"><p class="wrap">Die App wird geladen …</p></div>
 <noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
@@ -281,7 +351,8 @@ async function baueWeb() {
   fs.mkdirSync(DOCS, { recursive: true });
   // Schriften
   fs.mkdirSync(path.join(DOCS, 'fonts'), { recursive: true });
-  for (const [, d, ws] of SCHRIFTEN) for (const w of ws) fs.copyFileSync(path.join(TPL, 'fonts', `${d}-latin-${w}-normal.woff2`), path.join(DOCS, 'fonts', `${d}-latin-${w}-normal.woff2`));
+  // JetBrains Mono nur für die Druckseite der Klassenarbeit (Ziffern untereinander wie auf den Blättern)
+  for (const [, d, ws] of [...SCHRIFTEN, ['', 'jetbrains-mono', [400, 500]]]) for (const w of ws) fs.copyFileSync(path.join(TPL, 'fonts', `${d}-latin-${w}-normal.woff2`), path.join(DOCS, 'fonts', `${d}-latin-${w}-normal.woff2`));
   await icons();
 
   // Arbeitsblätter je Thema als Vorrat (Varianten A–E, je PDF + Lösung) – werden aus den Themenkarten verlinkt
@@ -309,6 +380,7 @@ async function baueWeb() {
   for (const fach of FAECHER) {
     fs.mkdirSync(path.join(DOCS, fach.ordner), { recursive: true });
     fs.writeFileSync(path.join(DOCS, fach.ordner, 'index.html'), fachSeite(fach, lw));
+    fs.writeFileSync(path.join(DOCS, fach.ordner, 'klassenarbeit.html'), klassenarbeitSeite(fach, lw));
   }
   // Bestands-Apps übernehmen; dazu kommen Lernprotokoll/Name (vor dem App-Skript) und das Update-Banner
   for (const b of BESTAND) {

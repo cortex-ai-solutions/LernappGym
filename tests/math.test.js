@@ -14,7 +14,7 @@ const { erzeugeThema } = require('../generator/generate');
 const SEEDS = 1000;
 
 // Größen und Kommazahlen: Text zurücklesen und mit eigener Einheitentabelle nachrechnen
-const KOMMA_VORLAGEN = ['pakete', 'schulweg', 'einkauf'];
+const KOMMA_VORLAGEN = ['pakete', 'schulweg', 'einkauf', 'bretter', 'preisvergleich', 'ausflug', 'porto', 'laufen'];
 const EINHEIT = { mm: 1, cm: 10, dm: 100, m: 1000, km: 1e6, mg: 1, g: 1e3, kg: 1e6, t: 1e9, s: 1, min: 60, h: 3600, d: 86400, ct: 1, '€': 100 };
 const nachkommastellen = (x) => (String(x).split('.')[1] || '').length;
 // "3,45 kg" bzw. "3 kg 50 g" → Wert in der kleinsten Einheit
@@ -236,11 +236,73 @@ test(`Sachaufgaben: ${SEEDS} Seeds je Vorlage, Probe am Sachverhalt`, () => {
       const d = inst.pruefung.daten;
       const komma = KOMMA_VORLAGEN.includes(vorlage);
       for (const t of inst.teile) {
-        if (komma) assert.ok(t.loesung > 0 && t.komma && nachkommastellen(t.loesung) <= 3, `${vorlage}: ${t.loesung}`);
+        if (t.eingabe === 'felder') assert.ok(t.loesung.every((w) => Number.isInteger(w) && w >= 0) && t.loesung[1] < 60 && t.felder.length === 2, `${vorlage}: ${t.loesung}`);
+        else if (t.eingabe === 'wahl') assert.ok(t.optionen.includes(t.loesung), `${vorlage}: ${t.loesung}`);
+        else if (t.komma) assert.ok(t.loesung > 0 && nachkommastellen(t.loesung) <= 3, `${vorlage}: ${t.loesung}`);
         else assert.ok(Number.isInteger(t.loesung) && t.loesung >= 1, `${vorlage}: ${t.loesung}`);
+        if (KOMMA_VORLAGEN.includes(vorlage) && t.eingabe === 'zahl' && !Number.isInteger(t.loesung)) assert.ok(t.komma, `${vorlage}: Kommazahl ohne komma`);
       }
       const l = inst.teile.map((t) => t.loesung);
+      const zahlen = (re) => [...inst.anweisung.matchAll(re)].map((m) => m.slice(1).map((x) => parseZahl(x)));
+      const uhrzeiten = () => [...inst.anweisung.matchAll(/(\d+):(\d\d) Uhr/g)].map((m) => Number(m[1]) * 60 + Number(m[2]));
       switch (vorlage) {
+        case 'klassenfahrt':
+          assert.ok([20, 25, 30].includes(d.kinder), 'Divisor wie in der Grundschule');
+          assert.strictEqual(l[0], d.bus / d.kinder + d.naechte * d.nacht + d.eintritt);
+          assert.strictEqual(l[1], l[0] * d.kinder);
+          break;
+        case 'bretter': {
+          const cm = groesseWert(inst.anweisung.match(/ist ([\d,]+\sm) lang/)[1]) / 10;
+          assert.strictEqual(cm, d.cm);
+          assert.ok(l[1] > 0 && l[1] < d.stueck, 'Rest kleiner als ein Stück');
+          assert.strictEqual(l[0] * d.stueck + l[1], cm);
+          break;
+        }
+        case 'umstieg': {
+          const [ab] = uhrzeiten();
+          const minuten = [...inst.anweisung.matchAll(/(\d+) Minuten/g)].reduce((s, m) => s + Number(m[1]), 0);
+          assert.strictEqual(l[0][0] * 60 + l[0][1], minuten);
+          assert.strictEqual(l[1][0] * 60 + l[1][1], ab + minuten);
+          assert.ok(l[1][0] < 24);
+          break;
+        }
+        case 'preisvergleich': {
+          const [[nA, eA, cA], [nB, eB, cB]] = zahlen(/(\d+) Stück für (\d+),(\d\d)/g);
+          const a = (eA * 100 + cA) / nA, b = (eB * 100 + cB) / nB;
+          assert.ok(Number.isInteger(a) && Number.isInteger(b) && a !== b, 'Stückpreise ganze, verschiedene Cent');
+          assert.strictEqual(l[0], a < b ? 'Packung A' : 'Packung B');
+          assert.strictEqual(l[1], Math.abs(a - b));
+          break;
+        }
+        case 'einwohner': {
+          const [[a], [b]] = zahlen(/hat ([\d\s]+) Einwohner/g);
+          assert.deepStrictEqual(l, [rundenRef(a, 3), rundenRef(b, 3), rundenRef(a, 3) + rundenRef(b, 3), Math.abs(a - b)]);
+          break;
+        }
+        case 'ausflug': {
+          const [ab, an] = uhrzeiten();
+          const [[e, c]] = zahlen(/Erwachsene (\d+),(\d\d)/g);
+          assert.strictEqual(l[0], an - ab);
+          assert.strictEqual(Math.round(l[1] * 100), d.erwachsene * (e * 100 + c) + d.kinder * (e * 100 + c) / 2);
+          break;
+        }
+        case 'porto': {
+          const gramm = ['Buch', 'Spiel', 'Schuhe', 'Karton selbst wiegt'].map((w) => groesseWert(inst.anweisung.match(new RegExp(`${w}\\D*?(\\d[\\d,\\s]*?\\sk?g)\\b`))[1]) / 1000);
+          const g = gramm.reduce((x, y) => x + y, 0);
+          assert.ok(g % 1000 !== 0, 'nicht genau auf einer Stufengrenze');
+          assert.strictEqual(Math.round(l[0] * 1000), g);
+          assert.strictEqual(Math.round(l[1] * 100), g <= 1000 ? 450 : g <= 2000 ? 590 : g <= 5000 ? 740 : 990);
+          break;
+        }
+        case 'laufen':
+          assert.strictEqual(Math.round(l[0] * 1000), d.runden * 400);
+          assert.strictEqual(l[1][0] * 60 + l[1][1], d.runden * (60 * d.min + d.s));
+          break;
+        case 'monatskarten':
+          assert.deepStrictEqual([inst.daten.kategorien[2], inst.daten.kategorien[4]], ['Bus', 'Straßenbahn']);
+          assert.strictEqual(l[0], inst.daten.werte.reduce((x, y) => x + y, 0));
+          assert.strictEqual(l[1], (inst.daten.werte[2] + inst.daten.werte[4]) * Number(inst.anweisung.match(/für (\d+) €/)[1]));
+          break;
         case 'pakete':
           assert.strictEqual(Math.round(l[0] * 1000), d.buecher + d.dinge[0][1] + d.dinge[1][1]);
           break;
@@ -374,6 +436,77 @@ test(`Kommazahlen: ${SEEDS} Seeds, exakt mit BigInt nachgerechnet`, () => {
   }
 });
 
+// ---------- Klassenarbeit: anspruchsvollere Generatoren, aus dem Text zurückgelesen ----------
+
+test(`Fehler finden: ${SEEDS} Seeds je Art, Behauptung und Berichtigung nachgerechnet`, () => {
+  for (const art of ['runden', 'komma', 'groessen']) {
+    let falsch = 0;
+    for (let s = 0; s < SEEDS; s++) {
+      const inst = erzeuge('fehler-finden', { art }, undefined, s);
+      const [rf, berichtigt] = inst.teile;
+      assert.strictEqual(rf.eingabe, 'richtig_falsch');
+      const zeile = inst.anweisung.match(/rechnet: (.+?)\.? Prüfe/)[1];
+      let stimmt;
+      if (art === 'runden') {
+        const m = zeile.match(/^([\d\s]+) auf (\S+) gerundet ergibt ([\d\s]+)$/);
+        const k = K[m[2].toLowerCase()];
+        assert.strictEqual(berichtigt.loesung, rundenRef(parseZahl(m[1]), k));
+        stimmt = parseZahl(m[3]) === berichtigt.loesung;
+      } else if (art === 'komma') {
+        const m = zeile.match(/^([\d\s,]+) (·|:) ([\d\s]+) = ([\d\s,]+)$/);
+        const f = BigInt(parseZahl(m[3]));
+        const x = skaliert(m[1]);
+        const erwartet = m[2] === '·' ? x * f : x / f;
+        if (m[2] === ':') assert.strictEqual(x % f, 0n, 'höchstens 6 Nachkommastellen');
+        assert.strictEqual(skaliert(berichtigt.antwort), erwartet, zeile);
+        assert.strictEqual(Math.round(berichtigt.loesung * 1e6), Number(erwartet));
+        stimmt = skaliert(m[4]) === erwartet;
+      } else {
+        const [links, rechts] = zeile.split(' = ');
+        assert.strictEqual(groesseWert(berichtigt.antwort), groesseWert(links), zeile);
+        stimmt = groesseWert(rechts) === groesseWert(links);
+      }
+      assert.strictEqual(rf.loesung, stimmt, zeile);
+      if (!stimmt) falsch++;
+    }
+    assert.ok(falsch > SEEDS * 0.5 && falsch < SEEDS * 0.9, `${art}: ${falsch} von ${SEEDS} Behauptungen falsch`);
+  }
+});
+
+test(`Ziffernkarten: ${SEEDS} Seeds gegen alle Anordnungen`, () => {
+  const anordnungen = (z) => (z.length <= 1 ? [z] : z.flatMap((d, i) => anordnungen([...z.slice(0, i), ...z.slice(i + 1)]).map((r) => [d, ...r])));
+  for (let s = 0; s < SEEDS; s++) {
+    const inst = erzeuge('ziffernkarten', {}, undefined, s);
+    const ziffern = inst.anweisung.match(/Ziffernkarten: ([\d, ]+)\./)[1].split(', ').map(Number);
+    const zahlen = anordnungen(ziffern).filter((r) => r[0] !== 0).map((r) => Number(r.join('')));
+    const [g, k, u] = inst.teile.map((t) => t.loesung);
+    assert.strictEqual(g, Math.max(...zahlen));
+    assert.strictEqual(k, Math.min(...zahlen));
+    assert.strictEqual(u, Math.max(...zahlen.filter((z) => z % 2 === 1)));
+    assert.ok(u !== g, 'ungerade ist nicht einfach die größte Zahl');
+  }
+});
+
+test(`Vorteilhaft rechnen und Überschlag: ${SEEDS} Seeds nachgerechnet`, () => {
+  for (let s = 0; s < SEEDS; s++) {
+    const inst = erzeuge('vorteilhaft', {}, 4, s);
+    for (const t of inst.teile) {
+      const term = t.text.replace(/ =$/, '').replace(/·/g, '*').replace(/−/g, '-');
+      assert.match(term, /^[\d +*-]+$/);
+      assert.strictEqual(t.loesung, Function(`return ${term}`)(), t.text);
+      assert.ok(t.antwort.endsWith(`= ${fmt(t.loesung)}`), t.antwort);
+    }
+    const u = erzeuge('ueberschlag', {}, undefined, s);
+    const [, a, op, b] = u.anweisung.match(/Berechne ([\d\s]+) (\+|−|·) ([\d\s]+)\./);
+    const [x, y] = [parseZahl(a), parseZahl(b)];
+    const f = { '+': (p, q) => p + q, '−': (p, q) => p - q, '·': (p, q) => p * q }[op];
+    const [rx, ry] = op === '·' ? [rundenRef(x, 2), y] : [rundenRef(x, 3), rundenRef(y, 3)];
+    assert.strictEqual(u.teile[0].loesung, f(rx, ry), u.anweisung);
+    assert.strictEqual(u.teile[1].loesung, f(x, y), u.anweisung);
+    assert.ok(u.teile[1].loesung > 0);
+  }
+});
+
 test('Größen und Kommazahlen: Handrechnungen', () => {
   assert.strictEqual(groesseWert('3,45 kg'), 3450000);
   assert.strictEqual(groesseWert('2 h 15 min'), 8100);
@@ -406,7 +539,7 @@ function inhaltsdateien() {
   const root = path.join(__dirname, '..', 'content', 'mathematik');
   const dateien = [];
   for (const klasse of fs.readdirSync(root)) {
-    for (const f of fs.readdirSync(path.join(root, klasse))) dateien.push(path.join(root, klasse, f));
+    for (const f of fs.readdirSync(path.join(root, klasse))) if (!f.startsWith('_')) dateien.push(path.join(root, klasse, f));
   }
   return dateien;
 }

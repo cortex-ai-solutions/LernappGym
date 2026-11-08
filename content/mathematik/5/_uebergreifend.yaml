@@ -1,0 +1,66 @@
+# Übergreifende Aufgaben für Klassenarbeiten: Jede Aufgabe verbindet zwei Lernbereiche und kommt nur dann in eine
+# Klassenarbeit, wenn alle unter "themen" genannten Lernbereiche ausgewählt sind.
+# "be" gilt für die ganze Aufgabe (mit Rechnung und Antwortsatz), "afb" ist der Anforderungsbereich I–III.
+# Dateien mit "_" am Anfang sind keine Themen: Sie erscheinen nicht als Karte und haben kein Arbeitsblatt.
+fach: mathematik
+klasse: 5
+titel: "Übergreifende Aufgaben für Klassenarbeiten"
+lehrplanbezug:
+  - "2.1.2 Sachaufgaben: Alltagsprobleme lösen, mehrere Rechenoperationen verknüpfen, Überschlag und Probe"
+  - "2.1.3 Größen: mit Größenangaben rechnen und Einheiten sinnvoll verwenden"
+verifiziert: true
+quelle: "Lehrplan Mathematik Gymnasium Thüringen 2026 (Erprobungsfassung), Kap. 2.1.2 und 2.1.3 – siehe curriculum/mathematik.yaml"
+aufgaben:
+  - id: einwohner
+    bezeichnung: "Klassenarbeit: Einwohnerzahlen runden und vergleichen"
+    themen: [grosse-zahlen, runden]
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [einwohner] }
+    be: 5
+    schwierigkeit: 3
+    afb: 2
+  - id: ueberschlag
+    bezeichnung: "Klassenarbeit: Überschlag und genaue Rechnung"
+    themen: [runden, grundrechenarten]
+    typ: rechnung
+    generator: ueberschlag
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ausflug
+    bezeichnung: "Klassenarbeit: Zugfahrt in den Zoo (Zeit und Geld)"
+    themen: [zeit, kommazahlen]
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [ausflug] }
+    be: 5
+    schwierigkeit: 3
+    afb: 2
+  - id: porto
+    bezeichnung: "Klassenarbeit: Paket wiegen und Porto bestimmen"
+    themen: [laengen-massen, kommazahlen]
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [porto] }
+    be: 4
+    schwierigkeit: 3
+    afb: 2
+  - id: laufen
+    bezeichnung: "Klassenarbeit: Runden laufen (Länge und Zeit)"
+    themen: [laengen-massen, zeit]
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [laufen] }
+    be: 4
+    schwierigkeit: 3
+    afb: 2
+  - id: monatskarten
+    bezeichnung: "Klassenarbeit: Diagramm ablesen und weiterrechnen"
+    themen: [daten-diagramme, grundrechenarten]
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [monatskarten] }
+    be: 4
+    schwierigkeit: 3
+    afb: 2

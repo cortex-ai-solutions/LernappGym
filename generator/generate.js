@@ -7,6 +7,16 @@ const { GENERATOREN } = require('./tasks');
 const BUCHSTABEN = 'abcdefghijkl';
 
 function feste(a) {
+  // Begründen/Erklären: auf Papier Schreibzeilen mit Erwartungshorizont, in der App die passende Erklärung wählen
+  if (a.typ === 'freitext' && a.optionen) {
+    return {
+      anweisung: a.frage,
+      teile: [{
+        text: '', eingabe: 'begruendung', optionen: a.optionen, loesung: a.loesung, antwort: a.erwartung || a.loesung,
+        schreibzeilen: a.zeilen || 3, frageWeb: a.frage_web || `${a.frage} Wähle die passende Erklärung.`,
+      }],
+    };
+  }
   const eingabe = a.typ === 'multiple_choice' ? 'wahl' : a.typ === 'richtig_falsch' ? 'richtig_falsch' : a.paare ? 'paare' : 'text';
   const antwort = a.typ === 'richtig_falsch' ? (a.loesung ? 'richtig' : 'falsch') : a.paare ? a.paare.map((p) => p.join(' – ')).join('; ') : String(a.loesung);
   return {
@@ -16,7 +26,7 @@ function feste(a) {
 }
 
 function instanz(aufgabe, seed) {
-  const basis = { id: aufgabe.id, typ: aufgabe.typ, be: aufgabe.be, schwierigkeit: aufgabe.schwierigkeit, prioritaet: aufgabe.prioritaet || 2, nur: aufgabe.nur, bezeichnung: aufgabe.bezeichnung };
+  const basis = { id: aufgabe.id, typ: aufgabe.typ, be: aufgabe.be, schwierigkeit: aufgabe.schwierigkeit, prioritaet: aufgabe.prioritaet || 2, nur: aufgabe.nur, bezeichnung: aufgabe.bezeichnung, afb: aufgabe.afb, thema: aufgabe.thema, themen: aufgabe.themen };
   let inhalt;
   if (aufgabe.generator) {
     const g = GENERATOREN[aufgabe.generator];

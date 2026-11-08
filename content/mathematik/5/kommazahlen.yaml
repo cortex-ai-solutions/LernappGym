@@ -124,3 +124,79 @@ aufgaben:
     be: 2
     schwierigkeit: 3
     prioritaet: 1
+
+# Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
+klassenarbeit:
+  - id: ka-verschieben
+    bezeichnung: "Klassenarbeit: Komma verschieben"
+    typ: rechnung
+    generator: komma-verschieben
+    parameter: { operationen: ["*", ":"] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-welcher-faktor
+    bezeichnung: "Klassenarbeit: Welche Zahl fehlt? (10, 100, 1 000)"
+    typ: rechnung
+    generator: komma-verschieben
+    parameter: { modus: platzhalter }
+    anzahl: 3
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-plus-minus
+    bezeichnung: "Klassenarbeit: Kommazahlen plus und minus"
+    typ: rechnung
+    generator: komma-rechnen
+    parameter: { operationen: ["+", "-"] }
+    anzahl: 3
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-mal-geteilt
+    bezeichnung: "Klassenarbeit: Kommazahlen mal und geteilt"
+    typ: rechnung
+    generator: komma-rechnen
+    parameter: { operationen: ["*", ":"], maxGanz: 9 }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-fehler
+    bezeichnung: "Klassenarbeit: Fehler beim Komma verschieben finden"
+    typ: rechnung
+    generator: fehler-finden
+    parameter: { art: komma }
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-preisvergleich
+    bezeichnung: "Klassenarbeit: Sachaufgabe Preisvergleich"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [preisvergleich] }
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-einkauf
+    bezeichnung: "Klassenarbeit: Sachaufgabe Einkauf"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [einkauf] }
+    be: 3
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-groesser
+    typ: freitext
+    frage: "Tim sagt: „0,45 ist größer als 0,5, weil 45 größer als 5 ist.“ Hat Tim recht? Begründe."
+    optionen:
+      - "Nein. 0,5 = 0,50. 50 Hundertstel sind mehr als 45 Hundertstel, also ist 0,5 größer."
+      - "Ja. Die Zahl mit mehr Ziffern nach dem Komma ist größer."
+      - "Ja. 45 ist größer als 5."
+      - "Nein. 0,45 und 0,5 sind gleich groß."
+    loesung: "Nein. 0,5 = 0,50. 50 Hundertstel sind mehr als 45 Hundertstel, also ist 0,5 größer."
+    erwartung: "Tim hat nicht recht. Man vergleicht Stelle für Stelle: Zehntel 5 bei 0,5 gegen 4 bei 0,45. Oder: 0,5 = 0,50, und 50 Hundertstel sind mehr als 45 Hundertstel."
+    be: 2
+    schwierigkeit: 3
+    afb: 3

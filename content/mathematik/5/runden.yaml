@@ -75,3 +75,70 @@ aufgaben:
     be: 1
     schwierigkeit: 3
     prioritaet: 2
+
+# Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
+klassenarbeit:
+  - id: ka-runden-reihe
+    bezeichnung: "Klassenarbeit: Eine Zahl auf alle Stellen runden"
+    typ: rechnung
+    generator: runden-reihe
+    parameter: { stellen: [zehner, hunderter, tausender, zehntausender, hunderttausender], ziffern: [7] }
+    be: 3
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-runden-gross
+    bezeichnung: "Klassenarbeit: Große Zahlen runden"
+    typ: rechnung
+    generator: runden
+    parameter: { stellen: [tausender, zehntausender, hunderttausender], ziffern: [7, 8] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-runden-uebertrag
+    bezeichnung: "Klassenarbeit: Runden mit Übertrag"
+    typ: rechnung
+    generator: runden
+    parameter: { stellen: [hunderter, tausender], ziffern: [6, 7], uebertrag: true }
+    anzahl: 3
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-rueckwaerts
+    bezeichnung: "Klassenarbeit: Rückwärts denken beim Runden"
+    typ: rechnung
+    generator: runden-rueckwaerts
+    parameter: { stellen: [hunderter, tausender] }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-fehler
+    bezeichnung: "Klassenarbeit: Fehler beim Runden finden"
+    typ: rechnung
+    generator: fehler-finden
+    parameter: { art: runden }
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-welche-zahl
+    typ: multiple_choice
+    frage: "Welche Zahl ergibt auf Tausender gerundet 48 000?"
+    optionen: ["47 499", "47 500", "48 500", "48 501"]
+    loesung: "47 500"
+    be: 1
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-zweimal-runden
+    typ: freitext
+    frage: "Max rundet 3 462 zuerst auf Hunderter und das Ergebnis dann auf Tausender. Er erhält 4 000. Direkt auf Tausender gerundet ergibt sich aber 3 000. Erkläre, woran das liegt."
+    optionen:
+      - "Max hat zweimal gerundet. Man rundet nur einmal und schaut dabei auf die Hunderterziffer 4."
+      - "Max hätte auf die Einerziffer schauen müssen."
+      - "Beide Ergebnisse sind richtig."
+      - "Beim Runden auf Tausender rundet man immer ab."
+    loesung: "Max hat zweimal gerundet. Man rundet nur einmal und schaut dabei auf die Hunderterziffer 4."
+    erwartung: "Beim ersten Runden wird 3 462 zu 3 500, beim zweiten 3 500 zu 4 000. So wird zweimal aufgerundet. Richtig ist, nur einmal zu runden: Für Tausender entscheidet die Hunderterziffer 4, also wird auf 3 000 abgerundet."
+    be: 2
+    schwierigkeit: 3
+    afb: 3

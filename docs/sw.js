@@ -1,5 +1,5 @@
 // Offline-Cache für LERNWERK – automatisch erzeugt von generator/webapp.js
-const CACHE = 'lernwerk-0a62d8e543';
+const CACHE = 'lernwerk-adc03245e9';
 const DATEIEN = [
   "./",
   "eltern/",
@@ -26,6 +26,8 @@ const DATEIEN = [
   "fonts/inter-latin-400-normal.woff2",
   "fonts/inter-latin-500-normal.woff2",
   "fonts/inter-latin-600-normal.woff2",
+  "fonts/jetbrains-mono-latin-400-normal.woff2",
+  "fonts/jetbrains-mono-latin-500-normal.woff2",
   "fonts/montserrat-latin-400-normal.woff2",
   "fonts/montserrat-latin-600-normal.woff2",
   "fonts/montserrat-latin-700-normal.woff2",
@@ -36,7 +38,8 @@ const DATEIEN = [
   "index.html",
   "latein/index.html",
   "manifest.webmanifest",
-  "mathe/index.html"
+  "mathe/index.html",
+  "mathe/klassenarbeit.html"
 ];
 
 // cache: 'reload' umgeht den HTTP-Cache (GitHub Pages liefert max-age=600), sonst landen kurz nach

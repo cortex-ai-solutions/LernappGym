@@ -87,3 +87,20 @@ h1, h2, .kopf, .nr, .be, .merke-label { font-family: 'Montserrat', 'Inter', Aria
 /* Belohnungscode auf dem Lösungsblatt (Gold-Bild im Katzenalbum der App) */
 .belohnung { display: flex; align-items: center; justify-content: space-between; gap: 6mm; margin-top: 6mm; padding: 3mm 4mm; border: 1.5pt dashed var(--linie); border-radius: 3mm; font-size: 10pt; break-inside: avoid; }
 .belohnung .code { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 16pt; font-weight: 600; letter-spacing: 0.08em; white-space: nowrap; }
+
+/* Klassenarbeit */
+.ka-info { margin: 2mm 0 3mm; font-size: 10.5pt; }
+.namenszeile span.note { flex: 0 0 26mm; }
+.erwartung { font-family: 'Inter', Arial, sans-serif; font-weight: 500; font-size: 11pt; margin-top: 1mm; }
+.erwartung b { font-family: 'Montserrat', sans-serif; font-size: 9.5pt; letter-spacing: 0.06em; text-transform: uppercase; }
+.viel-erfolg { margin-top: 6mm; text-align: right; font-family: 'Montserrat', 'Inter', Arial, sans-serif; font-size: 13pt; font-weight: 600; }
+.smiley { width: 6mm; height: 6mm; vertical-align: -1.2mm; }
+.bewertung { break-inside: avoid; margin-top: 6mm; }
+.bewertung h2 { font-size: 13pt; margin: 0 0 2mm; }
+.be-tabelle, .noten-tabelle { border-collapse: collapse; font-size: 10pt; }
+.be-tabelle th, .be-tabelle td, .noten-tabelle th, .noten-tabelle td { border: 0.6pt solid var(--linie); padding: 1mm 1.6mm; text-align: center; }
+.be-tabelle th, .noten-tabelle th { background: #eee; font-weight: 600; }
+.be-tabelle td { min-width: 6.5mm; height: 7mm; }
+.noten { display: flex; gap: 6mm; align-items: flex-start; margin-top: 4mm; font-size: 9.5pt; }
+.noten p { margin: 0; flex: 1; }
+.noten-tabelle td:first-child { text-align: left; }

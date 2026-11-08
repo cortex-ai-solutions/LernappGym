@@ -7,8 +7,12 @@ const yaml = require('js-yaml');
 const Ajv = require('ajv');
 const { instanz } = require('../generator/generate');
 
-const schema = require('./content.schema.json');
-const validateSchema = new Ajv({ allErrors: true, allowUnionTypes: true }).compile(schema);
+const ajv = new Ajv({ allErrors: true, allowUnionTypes: true });
+ajv.addSchema(require('./content.schema.json'));
+const validateThema = ajv.getSchema('lernwerk/content.schema.json');
+// Dateien mit "_" am Anfang (z. B. _uebergreifend.yaml) sind keine Themen, sondern Aufgaben für Klassenarbeiten
+const validateUebergreifend = ajv.compile(require('./uebergreifend.schema.json'));
+const istSonderdatei = (file) => path.basename(file).startsWith('_');
 
 function findYaml(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -19,16 +23,9 @@ function findYaml(dir) {
   });
 }
 
-function checkRules(doc, file) {
-  const errors = [];
-  const [fach, klasse, datei] = path.relative(path.join(file, '..', '..', '..'), file).split(path.sep);
-  if (doc.fach !== fach) errors.push(`fach "${doc.fach}" passt nicht zum Ordner "${fach}"`);
-  if (String(doc.klasse) !== klasse) errors.push(`klasse ${doc.klasse} passt nicht zum Ordner "${klasse}"`);
-  if (doc.thema !== datei.replace(/\.ya?ml$/, '')) errors.push(`thema "${doc.thema}" passt nicht zum Dateinamen`);
-  if (doc.verifiziert && !doc.quelle) errors.push('verifiziert: true braucht eine quelle');
-
-  const ids = new Set();
-  for (const a of doc.aufgaben) {
+// Regeln je Aufgabe; ids zählen über Arbeitsblatt- und Klassenarbeitsaufgaben eines Themas hinweg
+function pruefeAufgaben(liste, ids, errors) {
+  for (const a of liste) {
     const wo = `Aufgabe "${a.id}"`;
     if (ids.has(a.id)) errors.push(`${wo}: id doppelt`);
     ids.add(a.id);
@@ -41,16 +38,35 @@ function checkRules(doc, file) {
       }
       continue;
     }
-    if (a.typ === 'multiple_choice') {
-      if (!a.optionen || a.optionen.length < 2) errors.push(`${wo}: multiple_choice braucht mindestens 2 Optionen`);
+    if (a.typ === 'multiple_choice' || (a.typ === 'freitext' && a.optionen)) {
+      if (!a.optionen || a.optionen.length < 2) errors.push(`${wo}: ${a.typ} braucht mindestens 2 Optionen`);
       else {
         const norm = a.optionen.map((o) => String(o).trim().toLowerCase());
         if (new Set(norm).size !== norm.length) errors.push(`${wo}: doppelte Optionen`);
         if (!norm.includes(String(a.loesung).trim().toLowerCase())) errors.push(`${wo}: Lösung steht nicht unter den Optionen`);
       }
     }
+    if (a.typ === 'freitext' && a.optionen && !a.erwartung) errors.push(`${wo}: Begründungsaufgabe braucht einen Erwartungshorizont („erwartung:“)`);
     if (a.typ === 'richtig_falsch' && typeof a.loesung !== 'boolean') errors.push(`${wo}: richtig_falsch braucht loesung true/false`);
   }
+}
+
+function checkRules(doc, file) {
+  const errors = [];
+  const [fach, klasse, datei] = path.relative(path.join(file, '..', '..', '..'), file).split(path.sep);
+  if (doc.fach !== fach) errors.push(`fach "${doc.fach}" passt nicht zum Ordner "${fach}"`);
+  if (String(doc.klasse) !== klasse) errors.push(`klasse ${doc.klasse} passt nicht zum Ordner "${klasse}"`);
+  if (doc.verifiziert && !doc.quelle) errors.push('verifiziert: true braucht eine quelle');
+  if (istSonderdatei(file)) {
+    // übergreifende Aufgaben: genannte Lernbereiche müssen als Themendatei im selben Ordner liegen
+    const themen = fs.readdirSync(path.dirname(file)).filter((f) => !f.startsWith('_')).map((f) => f.replace(/\.ya?ml$/, ''));
+    for (const a of doc.aufgaben) {
+      for (const t of a.themen || []) if (!themen.includes(t)) errors.push(`Aufgabe "${a.id}": Lernbereich "${t}" gibt es nicht`);
+    }
+  } else if (doc.thema !== datei.replace(/\.ya?ml$/, '')) errors.push(`thema "${doc.thema}" passt nicht zum Dateinamen`);
+  const ids = new Set();
+  pruefeAufgaben(doc.aufgaben, ids, errors);
+  pruefeAufgaben(doc.klassenarbeit || [], ids, errors);
   return errors;
 }
 
@@ -65,6 +81,7 @@ function validateAll(root) {
       report.push({ file, errors: [`YAML-Fehler: ${e.message}`] });
       continue;
     }
+    const validateSchema = istSonderdatei(file) ? validateUebergreifend : validateThema;
     const errors = validateSchema(doc)
       ? checkRules(doc, file)
       : validateSchema.errors.map((e) => `${e.instancePath || '/'} ${e.message}`);

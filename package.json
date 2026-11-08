@@ -12,7 +12,8 @@
     "test": "node --test \"tests/**/*.test.js\"",
     "vorschau": "node generator/vorschau.js",
     "blatt": "node generator/worksheet.js",
-    "web": "node generator/webapp.js"
+    "web": "node generator/webapp.js",
+    "klassenarbeit": "node generator/klassenarbeit-pdf.js"
   },
   "dependencies": {
     "ajv": "^8.17.1",

@@ -17,7 +17,7 @@ const seed = arg('seed', String(Date.now() % 100000));
 const ordner = path.join(__dirname, '..', 'content', fach, klasse);
 
 if (!thema) {
-  console.log(`Themen in ${fach}/${klasse}: ${fs.readdirSync(ordner).map((f) => f.replace(/\.ya?ml$/, '')).join(', ')}`);
+  console.log(`Themen in ${fach}/${klasse}: ${fs.readdirSync(ordner).filter((f) => !f.startsWith('_')).map((f) => f.replace(/\.ya?ml$/, '')).join(', ')}`);
   console.log('Aufruf: npm run vorschau -- --thema <thema> [--seed 42]');
   process.exit(0);
 }

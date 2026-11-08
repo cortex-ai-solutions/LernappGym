@@ -4,7 +4,7 @@
 ## Meta
 id: lernapp-gym-1793297694589
 status: dev
-lastUpdate: 2026-11-01
+lastUpdate: 2026-11-08
 monthlyRevenue: 0
 monthlyRunningCost: 0
 
@@ -19,6 +19,7 @@ monthlyRunningCost: 0
 - [x] Neue Themen: Längen und Massen, Zeit, Kommazahlen (Komma verschieben, rechnen)
 - [x] Lernkatze nach Kater Maurice: Feedback, Kleiderschrank, Katzenalbum, Belohnungscode auf den Lösungsblättern
 - [x] Versionsanzeige und „Nach Updates suchen“ auf der Startseite
+- [x] Klassenarbeit: Lernbereiche auf den Karten wählen, Arbeit + Lösung mit Notentabelle drucken, Probe-Klassenarbeit am Handy
 - [ ] 1-Seiten-Test + Lösung mit Seitenlängenprüfung
 - [x] Mathe-App (PWA, offline) im Cortex-Design: je Aufgabengebiet Üben + Merke + Arbeitsblatt/Lösung
 - [x] GitHub-Repo cortex-ai-solutions/LernappGym angelegt
@@ -26,6 +27,7 @@ monthlyRunningCost: 0
 
 ## Offene Punkte
 🟡 [Mittel] Lehrbuch Mathematik und Lehrwerk Latein klären
+🟡 [Mittel] Notenschlüssel der Schule erfragen (Klassenarbeit nutzt bis dahin 50 %/20 %-Regel)
 🟢 [Niedrig] Latein- und Geschichts-App (legacy/) in das neue Inhaltsformat migrieren
 🟢 [Niedrig] Lernkatze auch in Latein und Geschichte
 
@@ -35,7 +37,7 @@ Fächer: Mathematik (im Aufbau), Latein + Geschichte (Bestands-Apps)
 Repo: https://github.com/cortex-ai-solutions/LernappGym
 URL: https://cortex-ai-solutions.github.io/LernappGym/
 Mathe-Themen: 8 (Kl. 5, Lehrplan 2.1.1, 2.1.2, 2.1.3, 2.1.5)
-Tests: 27 (Katzen-Motive und Belohnungscodes, 10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test, Update-Test, Elternbericht über zwei Geräte)
+Tests: 37 (Klassenarbeit über alle 255 Auswahlen, Katzen-Motive und Belohnungscodes, 10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test, Update-Test, Elternbericht über zwei Geräte)
 Mathe-App: https://cortex-ai-solutions.github.io/LernappGym/mathe/
 
 ## Notizen

@@ -216,3 +216,31 @@ ul.fehler b { white-space: nowrap; color: var(--fehler-hell); font-weight: 600; 
 /* Version und Update-Suche (Startseite) */
 .version { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
 .version .btn { min-height: 44px; font-size: 13px; flex: 0 1 auto; }
+
+/* Klassenarbeit: Auswahl auf den Themenkarten, Leiste unten, Übersichtsseite, Probe-Klassenarbeit */
+.ka-wahl { display: flex; align-items: center; gap: 12px; min-height: 52px; margin-top: 8px; padding: 0 14px; border-radius: 12px; border: 1px dashed var(--border-strong); position: relative; z-index: 1; cursor: pointer; font-weight: 600; font-size: 15px; color: var(--text); }
+.ka-wahl input { width: 26px; height: 26px; accent-color: var(--gold-base); flex-shrink: 0; cursor: pointer; }
+.ka-wahl:has(input:checked) { border-style: solid; border-color: var(--gold-light); background: rgba(200, 168, 76, 0.14); }
+.ka-leiste { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--bg-black); border-top: 1px solid var(--gold-base); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45); }
+.ka-leiste[hidden] { display: none; }
+.ka-leiste .btn { width: 100%; max-width: 528px; margin: 0 auto; display: flex; }
+body.mit-ka-leiste .wrap { padding-bottom: 110px; }
+.ka-themen { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.ka-themen .chip { white-space: normal; text-align: left; min-height: 32px; padding: 4px 12px; }
+.ka-fakten { list-style: none; padding: 0; margin: 0 0 6px; display: grid; gap: 6px; font-size: 15px; }
+.ka-fakten li::before { content: '✓ '; color: var(--gold-base); font-weight: 700; }
+.ka-hinweis { font-size: 14px; color: var(--text-muted); margin-top: 10px; }
+.ka-variante { font-family: 'JetBrains Mono', ui-monospace, monospace; color: var(--gold-light); }
+.ka-uhr { font-weight: 700; color: var(--gold-light); font-size: 17px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ka-uhr.um { color: var(--fehler-hell); }
+.ka-nr { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gold-base); margin-bottom: 4px; }
+.ka-ueberspringen { margin-top: 8px; width: 100%; }
+.ka-balken { height: 14px; border-radius: 7px; background: rgba(255, 255, 255, 0.1); overflow: hidden; margin: 6px 0 2px; }
+.ka-balken span { display: block; height: 100%; background: var(--gradient-gold); }
+.ka-bereich { text-align: left; margin-bottom: 12px; }
+.ka-bereich .zeile { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; }
+.ka-fehler { text-align: left; }
+.ka-fehler li { margin: 0 0 12px 18px; font-size: 15px; overflow-wrap: anywhere; }
+.ka-fehler .richtig { color: var(--ok-hell); font-weight: 600; }
+.ka-fehler .weg { color: var(--text-muted); font-size: 14px; }
+.ka-ergebnis { font-size: 44px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--gold-light); line-height: 1.1; }

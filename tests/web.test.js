@@ -338,3 +338,100 @@ test('Webapp: neue Version wird per Banner angeboten und nach Tippen geladen', {
     s.close();
   }
 });
+
+// Klassenarbeit: Lernbereiche auf den Karten ankreuzen → Seite Klassenarbeit → Druckseite (Arbeit/Lösung, wie im Build)
+// → Probe-Klassenarbeit am Handy komplett durchspielen → Auswertung in BE, ohne Note. Bildschirmfotos mit KA_FOTOS=<ordner>.
+test('Klassenarbeit: Auswahl, Druckseite und Probe am Handy', { timeout: 120000 }, async () => {
+  const { klassenarbeitHtml } = require('../generator/klassenarbeit-pdf');
+  const fotos = process.env.KA_FOTOS;
+  const foto = async (page, name) => { if (fotos) await page.screenshot({ path: path.join(fotos, `${name}.png`), fullPage: true }); };
+  const s = await server();
+  const basis = `http://127.0.0.1:${s.address().port}/LernappGym/`;
+  const browser = await chromium.launch();
+  const context = await browser.newContext({ viewport: { width: 393, height: 851 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'de-DE' });
+  await context.addInitScript(() => {
+    localStorage.setItem('lernwerk_profil', JSON.stringify({ id: 'test', name: 'Testkind' }));
+    localStorage.setItem('lernwerk_katze_v1', JSON.stringify({ name: 'Mimi' }));
+  });
+  const page = await context.newPage();
+  const fehler = [];
+  page.on('pageerror', (e) => fehler.push(e.message));
+  page.on('console', (m) => { if (m.type() === 'error') fehler.push(m.text()); });
+  try {
+    await page.goto(`${basis}mathe/`);
+    await page.waitForSelector('.thema');
+    assert.ok(await page.$('#ka-leiste[hidden]'), 'Leiste erst nach Auswahl sichtbar');
+    const wahl = ['runden', 'zeit', 'kommazahlen'];
+    for (const t of wahl) await page.check(`[data-ka="${t}"]`);
+    const kasten = await page.evaluate(() => document.querySelector('.ka-wahl').getBoundingClientRect().height);
+    assert.ok(kasten >= 48, `Tippfläche ${kasten} px`);
+    assert.match(await page.textContent('#ka-oeffnen'), /3 Lernbereichen/);
+    assert.strictEqual(await page.evaluate(() => document.documentElement.scrollWidth), 393, 'kein seitliches Scrollen');
+    await foto(page, '1-karten');
+    // Auswahl bleibt nach Neuladen erhalten
+    await page.reload();
+    await page.waitForSelector('.thema');
+    const gewaehlt = await page.$$eval('[data-ka]:checked', (els) => els.map((e) => e.dataset.ka));
+    assert.deepStrictEqual(gewaehlt.sort(), [...wahl].sort());
+
+    await page.click('#ka-oeffnen');
+    await page.waitForSelector('#ka-probe');
+    await foto(page, '2-klassenarbeit');
+    const variante = await page.textContent('.ka-variante');
+    const [arbeitLink, loesungLink] = await page.$$eval('.karte a.btn', (as) => as.map((a) => a.getAttribute('href')));
+    assert.strictEqual(arbeitLink, `klassenarbeit.html#t=runden,zeit,kommazahlen&s=${variante}`);
+    assert.strictEqual(loesungLink, `${arbeitLink}&l=1`);
+
+    // Druckseite: im Browser zusammengestellt, identisch mit dem Build
+    const erwartet = klassenarbeitHtml({ themen: wahl, seed: variante });
+    await page.click('.karte a.btn-gold');
+    await page.waitForSelector('#blatt .aufgabe');
+    assert.strictEqual((await page.$$('#blatt .aufgabe')).length, erwartet.ka.aufgaben.length);
+    const blattText = await page.textContent('#blatt');
+    assert.ok(blattText.includes(`BE: ____ / ${erwartet.ka.gesamtBe}`), 'BE-Feld im Kopf');
+    assert.match(blattText, /Viel Erfolg/);
+    assert.ok((await page.title()).includes(`Klassenarbeit ${variante}`), 'Titel nennt die Variante (Dateiname beim Speichern)');
+    const breiteBlatt = await page.evaluate(() => document.getElementById('blatt').getBoundingClientRect().width);
+    assert.ok(breiteBlatt <= 393, `A4-Blatt passt aufs Handy (${breiteBlatt} px)`);
+    await foto(page, '3-druckseite');
+    await page.click('#umschalten');
+    await page.waitForSelector('#blatt .noten-tabelle');
+    const loesungText = await page.textContent('#blatt');
+    assert.match(loesungText, /Lösung und Bewertung/);
+    assert.strictEqual((await page.$$('#blatt .noten-tabelle tr')).length, 7, 'Notentabelle mit 6 Noten');
+    assert.ok(!loesungText.includes('Name:'), 'Lösung ohne Namenszeile');
+    await foto(page, '4-loesung');
+    await page.click('.werkzeug a[href="./#klassenarbeit"]');
+    await page.waitForSelector('#ka-probe');
+
+    // Probe-Klassenarbeit: Uhr statt Herzen, kein Sofort-Feedback, jede zweite Antwort richtig, einmal überspringen
+    await page.click('#ka-probe');
+    let n = 0;
+    while (await page.$('.lektion')) {
+      await page.waitForSelector('.uebung');
+      assert.ok(await page.$('#ka-uhr'), 'Uhr läuft');
+      assert.strictEqual(await page.$('.herzen'), null, 'keine Herzen');
+      assert.match(await page.textContent('.ka-nr'), /^Aufgabe \d+/);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth) <= 393, `Übung ${n + 1} ragt über den Rand`);
+      if (n === 0) await foto(page, '5-probe');
+      if (n === 3) await page.click('#ka-skip');
+      else await beantworte(page, n % 2 === 0);
+      assert.strictEqual(await page.$('#weiter'), null, 'keine Auflösung zwischendurch');
+      n++;
+      assert.ok(n < 80, 'Probe endet nicht');
+    }
+    await page.waitForSelector('.ka-ergebnis');
+    await foto(page, '6-auswertung');
+    const text = await page.textContent('.ende');
+    assert.match(text, /Probe geschafft/);
+    assert.match(text, /\/ \d+(,5)? BE/);
+    assert.doesNotMatch(text, /Note|sehr gut|befriedigend|ausreichend|mangelhaft|ungenügend/, 'keine Note in der Probe');
+    assert.ok((await page.$$('.ka-fehler li')).length >= 1, 'falsche Antworten werden aufgelistet');
+    const protokoll = await page.evaluate(() => JSON.parse(localStorage.getItem('lernwerk_protokoll_v1')));
+    assert.strictEqual(protokoll.faecher.mathematik.th.klassenarbeit.n, 1, 'Probe steht im Lernprotokoll');
+    assert.deepStrictEqual(fehler, [], 'keine JavaScript-Fehler');
+  } finally {
+    await browser.close();
+    s.close();
+  }
+});

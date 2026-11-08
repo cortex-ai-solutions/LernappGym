@@ -95,3 +95,70 @@ aufgaben:
     be: 2
     schwierigkeit: 3
     prioritaet: 2
+
+# Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
+klassenarbeit:
+  - id: ka-gemischt
+    bezeichnung: "Klassenarbeit: Zeit gemischt umrechnen"
+    typ: rechnung
+    generator: umrechnen
+    parameter: { groesse: zeit, einheiten: [s, min, h], modus: gemischt }
+    anzahl: 3
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-zerlegen
+    bezeichnung: "Klassenarbeit: Zeitangaben zerlegen"
+    typ: rechnung
+    generator: umrechnen
+    parameter: { groesse: zeit, einheiten: [s, min, h], modus: zerlegen }
+    anzahl: 3
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-vergleichen
+    bezeichnung: "Klassenarbeit: Zeitspannen vergleichen"
+    typ: rechnung
+    generator: groessen-vergleichen
+    parameter: { groesse: zeit, einheiten: [s, min, h] }
+    anzahl: 3
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-fehler
+    bezeichnung: "Klassenarbeit: Fehler beim Umrechnen der Zeit finden"
+    typ: rechnung
+    generator: fehler-finden
+    parameter: { art: groessen, einheiten: [h, min] }
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-umstieg
+    bezeichnung: "Klassenarbeit: Sachaufgabe Zugfahrt mit Umsteigen"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [umstieg] }
+    be: 4
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-training
+    bezeichnung: "Klassenarbeit: Sachaufgabe Trainingszeit"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [training] }
+    be: 3
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-kein-komma
+    typ: freitext
+    frage: "Ole sagt: „2 h 30 min sind 2,30 h.“ Erkläre, warum das falsch ist."
+    optionen:
+      - "Eine Stunde hat 60 Minuten, nicht 100. Die Kommaschreibweise passt nur zu den Umrechnungszahlen 10, 100 und 1 000."
+      - "Es müsste 2,03 h heißen."
+      - "Es ist richtig, die 30 Minuten stehen hinter dem Komma."
+      - "Man darf Stunden und Minuten nie zusammen aufschreiben."
+    loesung: "Eine Stunde hat 60 Minuten, nicht 100. Die Kommaschreibweise passt nur zu den Umrechnungszahlen 10, 100 und 1 000."
+    erwartung: "Bei der Zeit ist die Umrechnungszahl 60 (1 h = 60 min). Hinter dem Komma stehen aber Zehntel und Hundertstel. 30 min sind eine halbe Stunde, nicht 30 Hundertstel Stunden."
+    be: 2
+    schwierigkeit: 3
+    afb: 3

@@ -82,3 +82,72 @@ aufgaben:
     be: 1
     schwierigkeit: 3
     prioritaet: 3
+
+# Klassenarbeit: anspruchsvollere Aufgaben. "be" gilt hier für die ganze Aufgabe, "afb" ist der Anforderungsbereich
+# (I Reproduzieren, II Zusammenhänge herstellen, III Verallgemeinern und Reflektieren).
+klassenarbeit:
+  - id: ka-in-ziffern
+    bezeichnung: "Klassenarbeit: Zahl in Ziffern (bis Milliarden)"
+    typ: eingabe
+    generator: zahl-in-ziffern
+    parameter: { bereich: [10000000, 999999999999] }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-in-worten
+    bezeichnung: "Klassenarbeit: Zahl in Worten (Millionen)"
+    typ: freitext
+    generator: zahl-in-worten
+    parameter: { bereich: [1000000, 99999999] }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-stellenwert
+    bezeichnung: "Klassenarbeit: Stellenwert großer Zahlen"
+    typ: multiple_choice
+    generator: stellenwert
+    parameter: { bereich: [10000000, 999999999] }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-vergleichen
+    bezeichnung: "Klassenarbeit: Große Zahlen vergleichen"
+    typ: multiple_choice
+    generator: vergleichen
+    parameter: { bereich: [1000000, 999999999] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-vorgaenger-nachfolger
+    bezeichnung: "Klassenarbeit: Vorgänger und Nachfolger"
+    typ: eingabe
+    generator: vorgaenger-nachfolger
+    parameter: { bereich: [1000000, 999999999] }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-ziffernkarten
+    bezeichnung: "Klassenarbeit: Ziffernkarten"
+    typ: rechnung
+    generator: ziffernkarten
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-mehr-ziffern
+    typ: freitext
+    frage: "Lea sagt: „Von zwei natürlichen Zahlen ist die Zahl mit mehr Ziffern immer die größere.“ Hat Lea recht? Begründe mit einem Beispiel."
+    optionen:
+      - "Ja. Bei mehr Ziffern ist eine höhere Stelle besetzt, zum Beispiel ist 10 000 größer als 9 999."
+      - "Nein. 9 999 ist größer als 10 000, weil 9 die größte Ziffer ist."
+      - "Nein. Es kommt nur auf die erste Ziffer an."
+      - "Ja, aber nur bei geraden Zahlen."
+    loesung: "Ja. Bei mehr Ziffern ist eine höhere Stelle besetzt, zum Beispiel ist 10 000 größer als 9 999."
+    erwartung: "Lea hat recht (natürliche Zahlen, keine Null vorn). Eine Zahl mit mehr Ziffern hat eine höhere Stelle besetzt. Beispiel: 10 000 hat 5 Ziffern und ist größer als 9 999 mit 4 Ziffern."
+    be: 2
+    schwierigkeit: 3
+    afb: 3

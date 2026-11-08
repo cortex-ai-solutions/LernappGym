@@ -125,3 +125,82 @@ aufgaben:
     be: 2
     schwierigkeit: 3
     prioritaet: 2
+
+# Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
+klassenarbeit:
+  - id: ka-laenge-komma
+    bezeichnung: "Klassenarbeit: Längen umrechnen mit Komma"
+    typ: rechnung
+    generator: umrechnen
+    parameter: { groesse: laenge, modus: komma }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-gemischt
+    bezeichnung: "Klassenarbeit: Längen und Massen gemischt umrechnen"
+    typ: rechnung
+    generator: umrechnen
+    parameter: { groessen: [laenge, masse], modus: gemischt, komma: true }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-vergleichen
+    bezeichnung: "Klassenarbeit: Längen und Massen vergleichen"
+    typ: rechnung
+    generator: groessen-vergleichen
+    parameter: { groessen: [laenge, masse] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-fehler
+    bezeichnung: "Klassenarbeit: Fehler beim Umrechnen finden"
+    typ: rechnung
+    generator: fehler-finden
+    parameter: { art: groessen, einheiten: [m, km, kg, t, cm] }
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-bretter
+    bezeichnung: "Klassenarbeit: Sachaufgabe Bretter sägen"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [bretter] }
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-pakete
+    bezeichnung: "Klassenarbeit: Sachaufgabe Paket (Massen)"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [pakete] }
+    be: 3
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-ordnen
+    typ: multiple_choice
+    frage: "Ordne die Strecken vom kürzesten zum längsten: 2,3 km; 2 080 m; 210 000 cm; 2 250 000 mm. Welche Reihenfolge stimmt?"
+    optionen:
+      - "2 080 m < 210 000 cm < 2 250 000 mm < 2,3 km"
+      - "2,3 km < 2 080 m < 210 000 cm < 2 250 000 mm"
+      - "210 000 cm < 2 080 m < 2,3 km < 2 250 000 mm"
+      - "2 080 m < 2,3 km < 210 000 cm < 2 250 000 mm"
+    loesung: "2 080 m < 210 000 cm < 2 250 000 mm < 2,3 km"
+    be: 2
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-komma-schreibweise
+    typ: freitext
+    frage: "Warum darf man 4 m 7 cm nicht als 4,7 m schreiben? Begründe und gib die richtige Schreibweise an."
+    optionen:
+      - "7 cm sind 7 Hundertstel Meter. Richtig ist 4,07 m. 4,7 m wären 4 m 70 cm."
+      - "Weil man Meter nie mit Komma schreibt."
+      - "4,7 m ist richtig, man darf es so schreiben."
+      - "Weil 1 m = 1 000 cm sind."
+    loesung: "7 cm sind 7 Hundertstel Meter. Richtig ist 4,07 m. 4,7 m wären 4 m 70 cm."
+    erwartung: "1 m = 100 cm, also ist 1 cm ein Hundertstel Meter. 7 cm stehen an der Hundertstelstelle: 4 m 7 cm = 4,07 m. 4,7 m wären 4 m 70 cm."
+    be: 2
+    schwierigkeit: 3
+    afb: 3
