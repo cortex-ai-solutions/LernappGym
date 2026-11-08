@@ -1,6 +1,6 @@
 // Druck-HTML (Inhalt von <body>) für Klassenarbeit und Lösung. Ohne Dateizugriff: läuft im Build (PDF) und im Browser
 // (Druckseite der Webapp). Kopf wie bei den echten Arbeiten: Name, Datum, BE und Note; auf der Lösung Punkteübersicht
-// und Notentabelle. Die Note wird nicht ausgerechnet, sondern von den Eltern anhand der Tabelle vergeben.
+// und Notentabelle nach dem Schlüssel der Schule. Die Note rechnet erst die App aus, wenn die Eltern am PC die BE eintragen.
 const { aufgabeHtml, esc, WELLE, FACH } = require('./aufgabe');
 
 const SMILEY = '<svg class="smiley" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#000" stroke-width="1.6"/><circle cx="8.5" cy="10" r="1.3"/><circle cx="15.5" cy="10" r="1.3"/><path d="M7.5 14.5 Q12 18.5 16.5 14.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -16,7 +16,8 @@ function punkteTabelle(ka) {
 function notenTabelle(ka) {
   const zeilen = ka.noten.map((n) => `<tr><td><b>${n.note}</b> (${esc(n.wort)})</td><td>${n.ab === n.bis ? n.ab : `${n.ab} – ${n.bis}`} BE</td></tr>`).join('');
   return `<div class="noten"><table class="noten-tabelle"><tr><th>Note</th><th>BE (von ${ka.gesamtBe})</th></tr>${zeilen}</table>
-<p>Orientierungswerte, keine amtliche Vorgabe: „ausreichend“ ab der Hälfte der BE, „ungenügend“ unter einem Fünftel, dazwischen gleich große Stufen. Gilt an der Schule ein anderer Schlüssel, zählt dieser.</p></div>`;
+<p>Notenschlüssel der Schule (Klassen 5 bis 10): 1 ab 96 %, 2 ab 80 %, 3 ab 64 %, 4 ab 48 %, 5 ab 32 %, darunter 6. Grenzen auf ganze BE gerundet.</p>
+<p>Belohnungscode ab Note 3: In der App unter „Klassenarbeit“ am PC die erreichten BE eintragen.</p></div>`;
 }
 
 function klassenarbeitKoerper(ka, { loesung = false, fach = 'mathematik', klasse = 5 } = {}) {

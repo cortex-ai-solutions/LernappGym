@@ -1,7 +1,7 @@
 // Klassenarbeit: Zusammenstellung über alle Kombinationen der Lernbereiche, Notentabelle, Druck-HTML und PDF.
 const test = require('node:test');
 const assert = require('node:assert');
-const { stelleZusammen, notentabelle, ZIEL_BE, TOLERANZ } = require('../generator/klassenarbeit');
+const { stelleZusammen, notentabelle, note, kaCode, ZIEL_BE, TOLERANZ } = require('../generator/klassenarbeit');
 const { ladeInhalte, klassenarbeitHtml } = require('../generator/klassenarbeit-pdf');
 const { instanz } = require('../generator/generate');
 const { htmlZuPdf, schliessen } = require('../generator/pdf');
@@ -66,16 +66,37 @@ test('Klassenarbeitsaufgaben: 100 Seeds ohne Fehler, Bezeichnung für den Eltern
   }
 });
 
-test('Notentabelle: lückenlos, ausreichend ab der Hälfte, ungenügend unter einem Fünftel', () => {
-  for (let g = 20; g <= 50; g++) {
+test('Notentabelle: lückenlos und genau wie der Notenschlüssel der Schule (8 bis 60 BE)', () => {
+  const schule = require('./fixtures/notenschluessel-schule.json');
+  for (let g = 8; g <= 60; g++) {
     const tab = notentabelle(g);
     assert.deepStrictEqual(tab.map((z) => z.note), [1, 2, 3, 4, 5, 6]);
     assert.strictEqual(tab[0].bis, g);
     assert.strictEqual(tab[5].ab, 0);
     for (let i = 1; i < 6; i++) assert.strictEqual(tab[i].bis, tab[i - 1].ab - 1, `${g} BE: Lücke vor Note ${i + 1}`);
-    assert.strictEqual(tab[3].ab, Math.ceil(g / 2), `${g} BE: ausreichend ab der Hälfte`);
-    assert.ok(tab[5].bis < g / 5 && tab[4].ab >= g / 5, `${g} BE: ungenügend unter einem Fünftel`);
+    assert.deepStrictEqual([...tab.slice(0, 5).map((z) => z.ab), tab[5].bis], schule[g], `${g} BE: weicht von der Schultabelle ab`);
   }
+});
+
+test('Note aus erreichten BE und Belohnungscode ab Note 3', () => {
+  // Beispiele aus der Schultabelle, 40 BE: 1 ab 38, 2 ab 32, 3 ab 26, 4 ab 19, 5 ab 13
+  const erwartet = [[40, 1], [38, 1], [37.5, 2], [35.5, 2], [32, 2], [31.5, 3], [26, 3], [25, 4], [19, 4], [18.5, 5], [13, 5], [12, 6], [0, 6]];
+  for (const [be, n] of erwartet) assert.strictEqual(note(be, 40).note, n, `${be} von 40 BE`);
+  assert.strictEqual(note(19, 40).wort, 'genügend');
+  const themen = ['runden', 'grosse-zahlen'];
+  const codes = new Set();
+  for (let s = 0; s < 300; s++) {
+    const seed = `V${s}`;
+    for (const n of [1, 2, 3]) {
+      const c = kaCode({ seed, themen, note: n });
+      assert.match(c, /^MIAU-[ABCDEFGHJKLMNPQRSTUVWXYZ2-9]{6}$/);
+      codes.add(c);
+    }
+    for (const n of [4, 5, 6]) assert.strictEqual(kaCode({ seed, themen, note: n }), null, `Note ${n}: kein Code`);
+    // Reihenfolge der Lernbereiche egal
+    assert.strictEqual(kaCode({ seed, themen: [...themen].reverse(), note: 1 }), kaCode({ seed, themen, note: 1 }));
+  }
+  assert.ok(codes.size > 890, 'Codes für verschiedene Arbeiten und Noten unterscheiden sich');
 });
 
 test('Druck-HTML: Arbeit mit Namenszeile und Platz, Lösung mit Antworten, Punkteübersicht und Notentabelle', () => {

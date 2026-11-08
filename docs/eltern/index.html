@@ -261,6 +261,18 @@ body.mit-ka-leiste .wrap { padding-bottom: 110px; }
 .kz-kopfzeile h2 { margin: 0; }
 .kz-x { flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--border-strong); background: transparent; color: var(--gold-light); font-size: 22px; line-height: 1; }
 .kz-x:hover { background: rgba(200, 168, 76, 0.12); }
+/* Klassenarbeit bewerten (nur am PC, für Eltern) */
+.ka-eltern p { font-size: 15px; }
+.ka-label { display: block; font-weight: 600; color: var(--gold-light); margin: 14px 0 6px; }
+.ka-eltern select, .ka-eltern input { width: 100%; min-height: 48px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--bg-black); color: var(--text); font: inherit; font-size: 16px; }
+.ka-be-reihe { display: flex; align-items: center; gap: 10px; }
+.ka-be-reihe input { width: 110px; flex: 0 0 110px; }
+.ka-be-reihe span { color: var(--text-muted); white-space: nowrap; }
+.ka-be-reihe .btn { margin-left: auto; }
+#ka-bewertung { margin-top: 14px; }
+.ka-note { font-size: 22px; color: var(--gold-light); }
+.ka-code { display: inline-block; margin-top: 6px; padding: 8px 16px; border: 2px dashed var(--gold-base); border-radius: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 24px; font-weight: 600; letter-spacing: .08em; color: var(--gold-light); user-select: all; }
+.ka-fehlertext { color: var(--fehler-hell); }
 </style></head>
 <body><div id="app"><p class="wrap">Die Elternansicht wird geladen …</p></div>
 <noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>

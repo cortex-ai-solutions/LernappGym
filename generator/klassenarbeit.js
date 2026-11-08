@@ -12,26 +12,53 @@ const AFB_ANTEIL = { 1: 0.3, 2: 0.6, 3: 0.1 };
 // Übergreifende Aufgaben höchstens bis zu diesem Anteil der BE
 const UEBERGREIFEND_ANTEIL = 0.3;
 
-// Notenschlüssel zur Orientierung, KEINE verbindliche Thüringer Vorgabe (die legt jede Fachkonferenz selbst fest).
-// Regel: „ausreichend“ ab der Hälfte, „ungenügend“ unter einem Fünftel, 1–4 in gleich großen Abständen.
+// Notenschlüssel der Schule (Klassen 5 bis 10, Tabelle der Eltern vom 08.11.2026): 1 ab 96 %, 2 ab 80 %, 3 ab 64 %,
+// 4 ab 48 %, 5 ab 32 %, darunter 6. Die Grenze in BE ist der Prozentwert der Gesamt-BE, kaufmännisch gerundet.
+// Das reproduziert alle 53 Spalten (8 bis 60 BE) der Schultabelle, ein Test prüft das.
 const NOTENSCHLUESSEL = [
-  { note: 1, wort: 'sehr gut', ab: 0.875 },
-  { note: 2, wort: 'gut', ab: 0.75 },
-  { note: 3, wort: 'befriedigend', ab: 0.625 },
-  { note: 4, wort: 'ausreichend', ab: 0.5 },
-  { note: 5, wort: 'mangelhaft', ab: 0.2 },
-  { note: 6, wort: 'ungenügend', ab: 0 },
+  { note: 1, wort: 'sehr gut', prozent: 96 },
+  { note: 2, wort: 'gut', prozent: 80 },
+  { note: 3, wort: 'befriedigend', prozent: 64 },
+  { note: 4, wort: 'genügend', prozent: 48 },
+  { note: 5, wort: 'mangelhaft', prozent: 32 },
+  { note: 6, wort: 'ungenügend', prozent: 0 },
 ];
 
-// Notentabelle in ganzen BE: [{ note, wort, ab, bis }]
+// Notentabelle in ganzen BE: [{ note, wort, prozent, ab, bis }]
 function notentabelle(gesamt) {
   let bis = gesamt;
-  return NOTENSCHLUESSEL.map(({ note, wort, ab }) => {
-    const abBe = Math.max(0, Math.ceil(ab * gesamt - 1e-9));
-    const zeile = { note, wort, ab: abBe, bis };
-    bis = abBe - 1;
+  return NOTENSCHLUESSEL.map(({ note, wort, prozent }) => {
+    const ab = Math.min(bis, Math.round((prozent * gesamt) / 100));
+    const zeile = { note, wort, prozent, ab, bis };
+    bis = ab - 1;
     return zeile;
   });
+}
+
+// Note zu erreichten BE (auch halbe BE), nach der Notentabelle
+function note(erreicht, gesamt) {
+  const zeile = notentabelle(gesamt).find((z) => erreicht >= z.ab) || notentabelle(gesamt)[5];
+  return { note: zeile.note, wort: zeile.wort };
+}
+
+// ---------- Belohnungscode für die Klassenarbeit (ab Note 3) ----------
+// Die Eltern tragen am PC die erreichten BE ein, die App rechnet die Note und zeigt einen Code MIAU-XXXXXX.
+// 3 Zeichen kennen die Arbeit (Variante + Lernbereiche), 3 Zeichen sind eine Prüfsumme über Kennung und Note.
+// Das Katzenalbum (templates/katze.js, gleiche Rechnung) erkennt daran die Note, ohne die Arbeit zu kennen.
+// Bewusst einfacher Schutz für Kinder, nicht gegen Angreifer.
+const CODE_ZEICHEN = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const CODE_NOTEN = [1, 2, 3];
+function fnv(s) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h;
+}
+function dreiZeichen(h) { return CODE_ZEICHEN[h & 31] + CODE_ZEICHEN[(h >>> 5) & 31] + CODE_ZEICHEN[(h >>> 10) & 31]; }
+function kaKennung(seed, themen) { return dreiZeichen(fnv(`ka|${seed}|${[...themen].sort().join(',')}`)); }
+function kaCode({ seed, themen, note: n }) {
+  if (!CODE_NOTEN.includes(n)) return null;
+  const k = kaKennung(seed, themen);
+  return `MIAU-${k}${dreiZeichen(fnv(`miau-ka|${k}|${n}`))}`;
 }
 
 // themen: [{ thema, titel, reihenfolge, klassenarbeit: [Aufgaben] }], uebergreifend: [Aufgaben mit themen]
@@ -99,4 +126,4 @@ function stelleZusammen({ themen, uebergreifend = [], seed, ziel = ZIEL_BE }) {
   return { seed: String(seed), aufgaben, gesamtBe: summe, themen: beJeThema, afb, dauer: DAUER_MIN, noten: notentabelle(summe) };
 }
 
-module.exports = { stelleZusammen, notentabelle, NOTENSCHLUESSEL, ZIEL_BE, TOLERANZ, DAUER_MIN };
+module.exports = { stelleZusammen, notentabelle, note, kaCode, kaKennung, CODE_NOTEN, NOTENSCHLUESSEL, ZIEL_BE, TOLERANZ, DAUER_MIN };

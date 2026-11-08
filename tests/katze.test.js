@@ -89,6 +89,19 @@ test('Belohnungscodes: Format, eindeutig je Blatt, Prüfsumme in App und Generat
   assert.strictEqual(KATZE.einloesen('MIAU').ok, false);
   assert.ok(KATZE.lies().frei.includes('kopf:krone'), 'Krone nach dem ersten Code');
   assert.ok(KATZE.lies().frei.includes(`motiv:${ziel.split('/').slice(0, 2).join('/')}:gold`), 'Gold-Bild des Themas');
+  // Klassenarbeit: Code aus generator/klassenarbeit.js erkennt die Note und schaltet den passenden Pokal frei
+  const { kaCode } = require('../generator/klassenarbeit');
+  assert.ok(!KATZE.lies().frei.includes('ka:2'));
+  const ka2 = kaCode({ seed: 'K7QX', themen: ['runden', 'zeit'], note: 2 });
+  const rk = KATZE.einloesen(ka2.toLowerCase().replace('-', ''));
+  assert.ok(rk.ok && rk.klassenarbeit && rk.note === 2 && !rk.schon, 'Klassenarbeits-Code Note 2');
+  assert.ok(KATZE.lies().frei.includes('ka:2') && !KATZE.lies().frei.includes('ka:1'), 'Silber-Pokal, kein Gold');
+  assert.ok(KATZE.einloesen(kaCode({ seed: 'K7QX', themen: ['runden', 'zeit'], note: 1 })).schon, 'dieselbe Arbeit nur einmal');
+  assert.ok(!KATZE.lies().frei.includes('ka:1'));
+  for (const n of [1, 3]) assert.strictEqual(KATZE.einloesen(kaCode({ seed: `X${n}`, themen: ['zeit'], note: n })).note, n);
+  assert.ok(['ka:1', 'ka:3'].every((id) => KATZE.lies().frei.includes(id)));
+  assert.strictEqual(KATZE.einloesen(ka2.slice(0, -1) + (ka2.endsWith('A') ? 'B' : 'A')).ok, false, 'verfälschter Code');
+  for (const n of [1, 2, 3]) assert.match(KATZE.beschreibe(`ka:${n}`).bild, /<\/svg>$/);
   // derselbe Code ändert sich, wenn sich das Blatt ändert
   assert.notStrictEqual(belohnungscode({ fach: 'm', thema: 't', variante: 'A', aufgaben: [1] }), belohnungscode({ fach: 'm', thema: 't', variante: 'A', aufgaben: [2] }));
 });

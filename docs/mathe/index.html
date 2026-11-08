@@ -261,6 +261,18 @@ body.mit-ka-leiste .wrap { padding-bottom: 110px; }
 .kz-kopfzeile h2 { margin: 0; }
 .kz-x { flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--border-strong); background: transparent; color: var(--gold-light); font-size: 22px; line-height: 1; }
 .kz-x:hover { background: rgba(200, 168, 76, 0.12); }
+/* Klassenarbeit bewerten (nur am PC, für Eltern) */
+.ka-eltern p { font-size: 15px; }
+.ka-label { display: block; font-weight: 600; color: var(--gold-light); margin: 14px 0 6px; }
+.ka-eltern select, .ka-eltern input { width: 100%; min-height: 48px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--bg-black); color: var(--text); font: inherit; font-size: 16px; }
+.ka-be-reihe { display: flex; align-items: center; gap: 10px; }
+.ka-be-reihe input { width: 110px; flex: 0 0 110px; }
+.ka-be-reihe span { color: var(--text-muted); white-space: nowrap; }
+.ka-be-reihe .btn { margin-left: auto; }
+#ka-bewertung { margin-top: 14px; }
+.ka-note { font-size: 22px; color: var(--gold-light); }
+.ka-code { display: inline-block; margin-top: 6px; padding: 8px 16px; border: 2px dashed var(--gold-base); border-radius: 12px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 24px; font-weight: 600; letter-spacing: .08em; color: var(--gold-light); user-select: all; }
+.ka-fehlertext { color: var(--fehler-hell); }
 </style></head>
 <body><div id="app"><p class="wrap">Die App wird geladen …</p></div>
 <noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
@@ -269,10 +281,10 @@ body.mit-ka-leiste .wrap { padding-bottom: 110px; }
 // Einstieg für das Browser-Bundle der Webapp (window.LW)
 const { instanz } = require('./generate');
 const { fmt, parseZahl, gleich } = require('./lib/zahlen');
-const { stelleZusammen, notentabelle } = require('./klassenarbeit');
+const { stelleZusammen, notentabelle, note, kaCode } = require('./klassenarbeit');
 const { klassenarbeitKoerper } = require('./render/klassenarbeit');
 
-module.exports = { instanz, fmt, parseZahl, gleich, stelleZusammen, notentabelle, klassenarbeitKoerper };
+module.exports = { instanz, fmt, parseZahl, gleich, stelleZusammen, notentabelle, note, kaCode, klassenarbeitKoerper };
 
 }, {"./generate":1,"./lib/zahlen":5,"./klassenarbeit":13,"./render/klassenarbeit":14}],
 /* generate.js */ [function (module, exports, require) {
@@ -2094,26 +2106,53 @@ const AFB_ANTEIL = { 1: 0.3, 2: 0.6, 3: 0.1 };
 // Übergreifende Aufgaben höchstens bis zu diesem Anteil der BE
 const UEBERGREIFEND_ANTEIL = 0.3;
 
-// Notenschlüssel zur Orientierung, KEINE verbindliche Thüringer Vorgabe (die legt jede Fachkonferenz selbst fest).
-// Regel: „ausreichend“ ab der Hälfte, „ungenügend“ unter einem Fünftel, 1–4 in gleich großen Abständen.
+// Notenschlüssel der Schule (Klassen 5 bis 10, Tabelle der Eltern vom 08.11.2026): 1 ab 96 %, 2 ab 80 %, 3 ab 64 %,
+// 4 ab 48 %, 5 ab 32 %, darunter 6. Die Grenze in BE ist der Prozentwert der Gesamt-BE, kaufmännisch gerundet.
+// Das reproduziert alle 53 Spalten (8 bis 60 BE) der Schultabelle, ein Test prüft das.
 const NOTENSCHLUESSEL = [
-  { note: 1, wort: 'sehr gut', ab: 0.875 },
-  { note: 2, wort: 'gut', ab: 0.75 },
-  { note: 3, wort: 'befriedigend', ab: 0.625 },
-  { note: 4, wort: 'ausreichend', ab: 0.5 },
-  { note: 5, wort: 'mangelhaft', ab: 0.2 },
-  { note: 6, wort: 'ungenügend', ab: 0 },
+  { note: 1, wort: 'sehr gut', prozent: 96 },
+  { note: 2, wort: 'gut', prozent: 80 },
+  { note: 3, wort: 'befriedigend', prozent: 64 },
+  { note: 4, wort: 'genügend', prozent: 48 },
+  { note: 5, wort: 'mangelhaft', prozent: 32 },
+  { note: 6, wort: 'ungenügend', prozent: 0 },
 ];
 
-// Notentabelle in ganzen BE: [{ note, wort, ab, bis }]
+// Notentabelle in ganzen BE: [{ note, wort, prozent, ab, bis }]
 function notentabelle(gesamt) {
   let bis = gesamt;
-  return NOTENSCHLUESSEL.map(({ note, wort, ab }) => {
-    const abBe = Math.max(0, Math.ceil(ab * gesamt - 1e-9));
-    const zeile = { note, wort, ab: abBe, bis };
-    bis = abBe - 1;
+  return NOTENSCHLUESSEL.map(({ note, wort, prozent }) => {
+    const ab = Math.min(bis, Math.round((prozent * gesamt) / 100));
+    const zeile = { note, wort, prozent, ab, bis };
+    bis = ab - 1;
     return zeile;
   });
+}
+
+// Note zu erreichten BE (auch halbe BE), nach der Notentabelle
+function note(erreicht, gesamt) {
+  const zeile = notentabelle(gesamt).find((z) => erreicht >= z.ab) || notentabelle(gesamt)[5];
+  return { note: zeile.note, wort: zeile.wort };
+}
+
+// ---------- Belohnungscode für die Klassenarbeit (ab Note 3) ----------
+// Die Eltern tragen am PC die erreichten BE ein, die App rechnet die Note und zeigt einen Code MIAU-XXXXXX.
+// 3 Zeichen kennen die Arbeit (Variante + Lernbereiche), 3 Zeichen sind eine Prüfsumme über Kennung und Note.
+// Das Katzenalbum (templates/katze.js, gleiche Rechnung) erkennt daran die Note, ohne die Arbeit zu kennen.
+// Bewusst einfacher Schutz für Kinder, nicht gegen Angreifer.
+const CODE_ZEICHEN = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const CODE_NOTEN = [1, 2, 3];
+function fnv(s) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return h;
+}
+function dreiZeichen(h) { return CODE_ZEICHEN[h & 31] + CODE_ZEICHEN[(h >>> 5) & 31] + CODE_ZEICHEN[(h >>> 10) & 31]; }
+function kaKennung(seed, themen) { return dreiZeichen(fnv(`ka|${seed}|${[...themen].sort().join(',')}`)); }
+function kaCode({ seed, themen, note: n }) {
+  if (!CODE_NOTEN.includes(n)) return null;
+  const k = kaKennung(seed, themen);
+  return `MIAU-${k}${dreiZeichen(fnv(`miau-ka|${k}|${n}`))}`;
 }
 
 // themen: [{ thema, titel, reihenfolge, klassenarbeit: [Aufgaben] }], uebergreifend: [Aufgaben mit themen]
@@ -2181,13 +2220,13 @@ function stelleZusammen({ themen, uebergreifend = [], seed, ziel = ZIEL_BE }) {
   return { seed: String(seed), aufgaben, gesamtBe: summe, themen: beJeThema, afb, dauer: DAUER_MIN, noten: notentabelle(summe) };
 }
 
-module.exports = { stelleZusammen, notentabelle, NOTENSCHLUESSEL, ZIEL_BE, TOLERANZ, DAUER_MIN };
+module.exports = { stelleZusammen, notentabelle, note, kaCode, kaKennung, CODE_NOTEN, NOTENSCHLUESSEL, ZIEL_BE, TOLERANZ, DAUER_MIN };
 
 }, {"./generate":1,"./lib/rng":2}],
 /* klassenarbeit.js */ [function (module, exports, require) {
 // Druck-HTML (Inhalt von <body>) für Klassenarbeit und Lösung. Ohne Dateizugriff: läuft im Build (PDF) und im Browser
 // (Druckseite der Webapp). Kopf wie bei den echten Arbeiten: Name, Datum, BE und Note; auf der Lösung Punkteübersicht
-// und Notentabelle. Die Note wird nicht ausgerechnet, sondern von den Eltern anhand der Tabelle vergeben.
+// und Notentabelle nach dem Schlüssel der Schule. Die Note rechnet erst die App aus, wenn die Eltern am PC die BE eintragen.
 const { aufgabeHtml, esc, WELLE, FACH } = require('./aufgabe');
 
 const SMILEY = '<svg class="smiley" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#000" stroke-width="1.6"/><circle cx="8.5" cy="10" r="1.3"/><circle cx="15.5" cy="10" r="1.3"/><path d="M7.5 14.5 Q12 18.5 16.5 14.5" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -2203,7 +2242,8 @@ function punkteTabelle(ka) {
 function notenTabelle(ka) {
   const zeilen = ka.noten.map((n) => `<tr><td><b>${n.note}</b> (${esc(n.wort)})</td><td>${n.ab === n.bis ? n.ab : `${n.ab} – ${n.bis}`} BE</td></tr>`).join('');
   return `<div class="noten"><table class="noten-tabelle"><tr><th>Note</th><th>BE (von ${ka.gesamtBe})</th></tr>${zeilen}</table>
-<p>Orientierungswerte, keine amtliche Vorgabe: „ausreichend“ ab der Hälfte der BE, „ungenügend“ unter einem Fünftel, dazwischen gleich große Stufen. Gilt an der Schule ein anderer Schlüssel, zählt dieser.</p></div>`;
+<p>Notenschlüssel der Schule (Klassen 5 bis 10): 1 ab 96 %, 2 ab 80 %, 3 ab 64 %, 4 ab 48 %, 5 ab 32 %, darunter 6. Grenzen auf ganze BE gerundet.</p>
+<p>Belohnungscode ab Note 3: In der App unter „Klassenarbeit“ am PC die erreichten BE eintragen.</p></div>`;
 }
 
 function klassenarbeitKoerper(ka, { loesung = false, fach = 'mathematik', klasse = 5 } = {}) {
@@ -2688,6 +2728,20 @@ module.exports = { diagramm, striche, raster, esc };
     komma: '<circle cx="100" cy="150" r="22" fill="' + GOLD + '" stroke="' + GOLD_DUNKEL + '" stroke-width="3"/><text x="100" y="157" text-anchor="middle" font-size="19" font-weight="700" fill="#5a3e00" font-family="system-ui,sans-serif">0,5</text>',
     stern: stern(100, 150, 24, GOLD, GOLD_DUNKEL),
   };
+  // Pokale für die Klassenarbeit (Code der Eltern): Note 1 Gold, 2 Silber, 3 Bronze
+  var POKALE = {
+    1: { titel: 'Gold-Pokal', farbe: GOLD, rand: GOLD_DUNKEL },
+    2: { titel: 'Silber-Pokal', farbe: '#d9dde3', rand: '#5f6773' },
+    3: { titel: 'Bronze-Pokal', farbe: '#d39a62', rand: '#7a4a1f' },
+  };
+  Object.keys(POKALE).forEach(function (n) {
+    var p = POKALE[n];
+    REQUISITEN['pokal' + n] = '<path d="M81 140 Q69 139 70 149 Q72 157 84 154 M119 140 Q131 139 130 149 Q128 157 116 154" fill="none" stroke="' + p.rand + '" stroke-width="3.5" stroke-linecap="round"/>' +
+      '<path d="M80 131 H120 V141 Q120 158 100 160 Q80 158 80 141 Z" fill="' + p.farbe + '" stroke="' + p.rand + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<rect x="95" y="159" width="10" height="7" fill="' + p.farbe + '" stroke="' + p.rand + '" stroke-width="2"/>' +
+      '<rect x="84" y="165" width="32" height="8" rx="2" fill="' + p.farbe + '" stroke="' + p.rand + '" stroke-width="2.5"/>' +
+      '<text x="100" y="151" text-anchor="middle" font-size="15" font-weight="700" fill="' + p.rand + '" font-family="system-ui,sans-serif">' + n + '</text>';
+  });
 
   // ---------- Speicher ----------
   function roh() { try { return JSON.parse(localStorage.getItem(SPEICHER)) || {}; } catch (e) { return {}; } }
@@ -2703,7 +2757,7 @@ module.exports = { diagramm, striche, raster, esc };
       decke: DECKEN[k.decke] ? k.decke : 'aus',
       kopf: teil(KOPF, 'kopf', k.kopf),
       hals: teil(HALS, 'hals', k.hals),
-      frei: frei, gesehen: liste(k.gesehen), codes: liste(k.codes),
+      frei: frei, gesehen: liste(k.gesehen), codes: liste(k.codes), ka: liste(k.ka),
     };
   }
   function ablegen(k) { try { localStorage.setItem(SPEICHER, JSON.stringify(k)); } catch (e) { /* privater Modus */ } }
@@ -2735,6 +2789,8 @@ module.exports = { diagramm, striche, raster, esc };
       if (e.sterne[id] >= 3) ids.push('motiv:' + id + ':3');
       if (e.gold[id]) ids.push('motiv:' + id + ':gold');
     });
+    // Klassenarbeit: k.ka = ['KENNUNG:note', …]
+    k.ka.forEach(function (x) { var n = x.split(':')[1]; if (POKALE[n] && ids.indexOf('ka:' + n) < 0) ids.push('ka:' + n); });
     return ids;
   }
   // Neu Verdientes merken; gibt die neuen ids zurück (für „Neu freigeschaltet!“)
@@ -2886,6 +2942,10 @@ module.exports = { diagramm, striche, raster, esc };
   }
   function beschreibe(id) {
     var p = id.split(':');
+    if (p[0] === 'ka') {
+      var pk = POKALE[p[1]];
+      return { titel: 'Klassenarbeit', art: pk.titel, hinweis: 'Klassenarbeit mit Note ' + p[1] + ' (Code von deinen Eltern)', bild: svg({ requisit: 'pokal' + p[1], stimmung: 'froh', glanz: p[1] === '1' }) };
+    }
     if (p[0] === 'kopf' || p[0] === 'hals') {
       var teil = (p[0] === 'kopf' ? KOPF : HALS)[p[1]];
       var o = { stimmung: 'froh' }; o[p[0]] = p[1];
@@ -2969,9 +3029,27 @@ module.exports = { diagramm, striche, raster, esc };
     for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
     return h.toString(36);
   }
-  // → { ok, ziel: 'fach/thema/V', titel, schon } bzw. { ok: false }
+  // Klassenarbeits-Code (6 Zeichen), gleiche Rechnung wie kaCode in generator/klassenarbeit.js → Note oder 0
+  var CODE_ZEICHEN = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  function fnv(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h; }
+  function dreiZeichen(h) { return CODE_ZEICHEN[h & 31] + CODE_ZEICHEN[(h >>> 5) & 31] + CODE_ZEICHEN[(h >>> 10) & 31]; }
+  function kaNote(s) {
+    if (s.length !== 6) return 0;
+    for (var n = 1; n <= 3; n++) if (dreiZeichen(fnv('miau-ka|' + s.slice(0, 3) + '|' + n)) === s.slice(3)) return n;
+    return 0;
+  }
+  // → { ok, ziel: 'fach/thema/V', titel, schon } bzw. { ok, klassenarbeit: true, note, pokal, schon } bzw. { ok: false }
   function einloesen(code) {
-    var ziel = normCode(code).length === 4 && DATEN.codes[pruefsumme(code)];
+    var s = normCode(code), n = kaNote(s);
+    if (n) {
+      var r0 = roh(), ka = liste(r0.ka), kennung = s.slice(0, 3);
+      var alt = ka.filter(function (x) { return x.split(':')[0] === kennung; })[0];
+      if (!alt) { r0.ka = ka.concat(kennung + ':' + n); ablegen(r0); }
+      var neu0 = aktualisiere();
+      window.dispatchEvent(new Event('katze-geaendert'));
+      return { ok: true, klassenarbeit: true, note: n, pokal: POKALE[n].titel, schon: !!alt, neu: neu0 };
+    }
+    var ziel = s.length === 4 && DATEN.codes[pruefsumme(code)];
     if (!ziel) return { ok: false };
     var r = roh(), codes = liste(r.codes), schon = codes.indexOf(ziel) >= 0;
     if (!schon) { r.codes = codes.concat(ziel); ablegen(r); }
@@ -2989,7 +3067,7 @@ module.exports = { diagramm, striche, raster, esc };
     var meldung = '';
     function platz(id, k) {
       var b = beschreibe(id), frei = k.frei.indexOf(id) >= 0, neu = frei && k.gesehen.indexOf(id) < 0;
-      return '<figure class="kz-platz' + (frei ? '' : ' zu') + (neu ? ' neu' : '') + (/:3$|:gold$/.test(id) ? ' glaenzt' : '') + '" data-id="' + id + '">' + b.bild +
+      return '<figure class="kz-platz' + (frei ? '' : ' zu') + (neu ? ' neu' : '') + (/:3$|:gold$|^ka:1$/.test(id) ? ' glaenzt' : '') + '" data-id="' + id + '">' + b.bild +
         '<figcaption>' + (frei ? '<b>' + esc(b.teil ? b.titel : b.art) + '</b>' : '🔒 ' + (b.teil ? esc(b.titel) + ': ' : '') + esc(b.hinweis)) + '</figcaption></figure>';
     }
     function zeigen() {
@@ -3002,7 +3080,8 @@ module.exports = { diagramm, striche, raster, esc };
       });
       var teile = [];
       [['kopf', KOPF], ['hals', HALS]].forEach(function (p) { Object.keys(p[1]).forEach(function (id) { if (p[1][id].bedingung) teile.push(p[0] + ':' + id); }); });
-      alle = alle.concat(teile);
+      var pokale = Object.keys(POKALE).map(function (n) { return 'ka:' + n; });
+      alle = alle.concat(pokale, teile);
       var gesammelt = alle.filter(function (id) { return k.frei.indexOf(id) >= 0; }).length;
       // Kopfzeile bleibt beim Scrollen oben stehen, damit man jederzeit schließen kann
       inhalt.innerHTML = '<div class="kz-kopfzeile"><h2>📖 Katzenalbum</h2><button type="button" class="kz-x" id="kz-x" aria-label="Album schließen">✕</button></div><p>' + gesammelt + ' von ' + alle.length + ' Bildern gesammelt. Jedes Thema hat drei: geschafft, 3 Sterne und Gold.</p>' +
@@ -3015,6 +3094,7 @@ module.exports = { diagramm, striche, raster, esc };
             return '<h4>' + esc(t.titel) + '</h4><div class="kz-album">' + ['1', '3', 'gold'].map(function (s) { return platz('motiv:' + id + ':' + s, k); }).join('') + '</div>';
           }).join('');
         }).join('') +
+        '<h3>Klassenarbeit</h3><div class="kz-album">' + pokale.map(function (id) { return platz(id, k); }).join('') + '</div>' +
         '<h3>Schätze für den Kleiderschrank</h3><div class="kz-album">' + teile.map(function (id) { return platz(id, k); }).join('') + '</div>' +
         '<button class="lw-knopf leise" id="kz-zu">Schließen</button>';
       inhalt.querySelector('form').addEventListener('submit', function (ev) {
@@ -3022,7 +3102,8 @@ module.exports = { diagramm, striche, raster, esc };
         var feld = inhalt.querySelector('#kz-code');
         if (!feld.value.trim()) return;
         var r = einloesen(feld.value);
-        meldung = !r.ok ? '✗ Diesen Code kenne ich nicht. Schau noch mal genau auf das Lösungsblatt.'
+        meldung = !r.ok ? '✗ Diesen Code kenne ich nicht. Schau noch mal genau hin.'
+          : r.klassenarbeit ? (r.schon ? 'Den Code für diese Klassenarbeit hast du schon eingelöst.' : '✓ Klasse! Note ' + r.note + ' in der Klassenarbeit. Dein ' + esc(r.pokal) + ' ist da!')
           : r.schon ? 'Diesen Code hast du schon eingelöst (' + esc(r.titel) + ', Blatt ' + r.variante + ').'
             : '✓ Super! Volle Punktzahl in „' + esc(r.titel) + '“ (Blatt ' + r.variante + '). Dein Gold-Bild ist da!';
         zeigen();
@@ -3276,11 +3357,75 @@ module.exports = { diagramm, striche, raster, esc };
       '<section class="karte"><h2>Probe am Handy</h2><p>Alle Aufgaben, die am Handy gehen, mit Uhr und ohne Hilfe zwischendurch. Am Ende siehst du, was schon sitzt und was du noch üben solltest.</p>' +
       '<button class="btn btn-gold btn-breit" id="ka-probe" style="margin-top:14px">▶ Probe-Klassenarbeit starten</button>' +
       '<p class="ka-hinweis">Die Probe hat jedes Mal neue Aufgaben, nicht die gedruckte Arbeit.</p></section>' +
+      (amPC() ? kaElternHtml() : '') +
       '<button class="btn btn-ghost btn-breit" id="ka-auswahl">Lernbereiche ändern</button></div>';
     app.querySelector('.zurueck').onclick = uebersicht;
     document.getElementById('ka-auswahl').onclick = uebersicht;
     document.getElementById('ka-neu').onclick = function () { KA.variante = neueVariante(); kaSpeichern(); klassenarbeitSeite(); };
     document.getElementById('ka-probe').onclick = function () { starteKA(themen); };
+    // geöffnete Arbeiten merken, damit die Eltern sie später bewerten können, auch nach „Andere Aufgaben“
+    app.querySelectorAll('a[href^="klassenarbeit.html"]').forEach(function (a) {
+      a.addEventListener('click', function () { kaMerken(themen.map(function (t) { return t.thema; }), KA.variante); });
+    });
+    if (amPC()) kaElternVerbinden();
+  }
+
+  // ---------- Klassenarbeit bewerten (nur für Eltern am PC) ----------
+  // Am Handy des Kindes erscheint das nicht. Die Note folgt dem Notenschlüssel der Schule (generator/klassenarbeit.js),
+  // ab Note 3 gibt es einen Belohnungscode fürs Katzenalbum (Pokal).
+  function amPC() {
+    return !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 700);
+  }
+  function kaMerken(ids, variante) {
+    var alt = Array.isArray(KA.verlauf) ? KA.verlauf : [];
+    KA.verlauf = [{ themen: ids, variante: variante }].concat(alt.filter(function (v) { return !(v.variante === variante && v.themen.join() === ids.join()); })).slice(0, 10);
+    kaSpeichern();
+  }
+  // aktuelle Arbeit zuerst, dann früher geöffnete, deren Lernbereiche es noch gibt
+  function kaArbeiten() {
+    var jetzt = { themen: kaThemen().map(function (t) { return t.thema; }), variante: KA.variante };
+    var liste = [jetzt].concat((Array.isArray(KA.verlauf) ? KA.verlauf : []).filter(function (v) {
+      return v && Array.isArray(v.themen) && v.themen.length && !(v.variante === jetzt.variante && v.themen.join() === jetzt.themen.join());
+    }));
+    return liste.map(function (v) {
+      var themen = v.themen.map(function (id) { return FACH.themen.find(function (t) { return t.thema === id && t.klassenarbeit && t.klassenarbeit.length; }); });
+      if (themen.some(function (t) { return !t; })) return null;
+      var ka = LW.stelleZusammen({ themen: themen, uebergreifend: FACH.uebergreifend || [], seed: v.variante });
+      return { variante: v.variante, ids: v.themen, ka: ka, titel: 'Variante ' + v.variante + ' · ' + themen.map(function (t) { return t.titel; }).join(', ') + ' (' + ka.gesamtBe + ' BE)' };
+    }).filter(Boolean);
+  }
+  function kaElternHtml() {
+    var arbeiten = kaArbeiten();
+    return '<section class="karte ka-eltern" id="ka-eltern"><h2>Für Eltern: Arbeit bewerten</h2>' +
+      '<p>Erreichte BE eintragen. Die App rechnet die Note nach dem Notenschlüssel der Schule. Ab Note 3 gibt es einen Belohnungscode fürs Katzenalbum.</p>' +
+      '<label class="ka-label" for="ka-arbeit">Welche Arbeit? (Die Variante steht unten auf dem Blatt.)</label>' +
+      '<select id="ka-arbeit">' + arbeiten.map(function (a, i) { return '<option value="' + i + '">' + esc(a.titel) + '</option>'; }).join('') + '</select>' +
+      '<label class="ka-label" for="ka-be">Erreichte BE</label>' +
+      '<form class="ka-be-reihe" id="ka-bewerten"><input id="ka-be" inputmode="decimal" autocomplete="off" placeholder="z. B. 35"><span id="ka-von">von ' + arbeiten[0].ka.gesamtBe + '</span>' +
+      '<button class="btn btn-gold" type="submit">Note berechnen</button></form>' +
+      '<div id="ka-bewertung" role="status"></div></section>';
+  }
+  function kaElternVerbinden() {
+    var arbeiten = kaArbeiten();
+    var wahl = document.getElementById('ka-arbeit'), feld = document.getElementById('ka-be'), aus = document.getElementById('ka-bewertung');
+    wahl.onchange = function () { document.getElementById('ka-von').textContent = 'von ' + arbeiten[wahl.value].ka.gesamtBe; aus.innerHTML = ''; };
+    document.getElementById('ka-bewerten').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var a = arbeiten[wahl.value], g = a.ka.gesamtBe;
+      var be = Number(String(feld.value).trim().replace(',', '.'));
+      if (!String(feld.value).trim() || isNaN(be) || be < 0 || be > g || be * 2 !== Math.round(be * 2)) {
+        aus.innerHTML = '<p class="ka-fehlertext">Bitte eine Zahl von 0 bis ' + g + ' eintragen (halbe BE gehen auch, z. B. 35,5).</p>';
+        return;
+      }
+      var n = LW.note(be, g), code = LW.kaCode({ seed: a.variante, themen: a.ids, note: n.note });
+      var pokal = { 1: 'Gold-Pokal', 2: 'Silber-Pokal', 3: 'Bronze-Pokal' }[n.note];
+      aus.innerHTML = '<p class="ka-note">Note <b>' + n.note + '</b> (' + esc(n.wort) + ')</p>' +
+        '<p>' + String(be).replace('.', ',') + ' von ' + g + ' BE = ' + Math.round(100 * be / g) + ' %</p>' +
+        (code
+          ? '<p style="margin-top:10px">Belohnungscode für euer Kind:</p><div class="ka-code" id="ka-code">' + code + '</div>' +
+            '<p class="ka-hinweis">Im Katzenalbum unter „Belohnungscode von deinen Eltern“ eintippen. Er schaltet den ' + pokal + ' frei und gilt nur für diese Arbeit.</p>'
+          : '<p class="ka-hinweis">Einen Belohnungscode gibt es ab Note 3. Die Probe-Klassenarbeit am Handy zeigt, welcher Lernbereich noch Übung braucht.</p>');
+    });
   }
 
   // Probe-Klassenarbeit: jede Teilaufgabe wird eine Übung; keine Herzen, kein Sofort-Feedback, Uhr läuft rückwärts.

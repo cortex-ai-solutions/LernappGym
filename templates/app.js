@@ -200,11 +200,75 @@
       '<section class="karte"><h2>Probe am Handy</h2><p>Alle Aufgaben, die am Handy gehen, mit Uhr und ohne Hilfe zwischendurch. Am Ende siehst du, was schon sitzt und was du noch üben solltest.</p>' +
       '<button class="btn btn-gold btn-breit" id="ka-probe" style="margin-top:14px">▶ Probe-Klassenarbeit starten</button>' +
       '<p class="ka-hinweis">Die Probe hat jedes Mal neue Aufgaben, nicht die gedruckte Arbeit.</p></section>' +
+      (amPC() ? kaElternHtml() : '') +
       '<button class="btn btn-ghost btn-breit" id="ka-auswahl">Lernbereiche ändern</button></div>';
     app.querySelector('.zurueck').onclick = uebersicht;
     document.getElementById('ka-auswahl').onclick = uebersicht;
     document.getElementById('ka-neu').onclick = function () { KA.variante = neueVariante(); kaSpeichern(); klassenarbeitSeite(); };
     document.getElementById('ka-probe').onclick = function () { starteKA(themen); };
+    // geöffnete Arbeiten merken, damit die Eltern sie später bewerten können, auch nach „Andere Aufgaben“
+    app.querySelectorAll('a[href^="klassenarbeit.html"]').forEach(function (a) {
+      a.addEventListener('click', function () { kaMerken(themen.map(function (t) { return t.thema; }), KA.variante); });
+    });
+    if (amPC()) kaElternVerbinden();
+  }
+
+  // ---------- Klassenarbeit bewerten (nur für Eltern am PC) ----------
+  // Am Handy des Kindes erscheint das nicht. Die Note folgt dem Notenschlüssel der Schule (generator/klassenarbeit.js),
+  // ab Note 3 gibt es einen Belohnungscode fürs Katzenalbum (Pokal).
+  function amPC() {
+    return !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches && window.innerWidth >= 700);
+  }
+  function kaMerken(ids, variante) {
+    var alt = Array.isArray(KA.verlauf) ? KA.verlauf : [];
+    KA.verlauf = [{ themen: ids, variante: variante }].concat(alt.filter(function (v) { return !(v.variante === variante && v.themen.join() === ids.join()); })).slice(0, 10);
+    kaSpeichern();
+  }
+  // aktuelle Arbeit zuerst, dann früher geöffnete, deren Lernbereiche es noch gibt
+  function kaArbeiten() {
+    var jetzt = { themen: kaThemen().map(function (t) { return t.thema; }), variante: KA.variante };
+    var liste = [jetzt].concat((Array.isArray(KA.verlauf) ? KA.verlauf : []).filter(function (v) {
+      return v && Array.isArray(v.themen) && v.themen.length && !(v.variante === jetzt.variante && v.themen.join() === jetzt.themen.join());
+    }));
+    return liste.map(function (v) {
+      var themen = v.themen.map(function (id) { return FACH.themen.find(function (t) { return t.thema === id && t.klassenarbeit && t.klassenarbeit.length; }); });
+      if (themen.some(function (t) { return !t; })) return null;
+      var ka = LW.stelleZusammen({ themen: themen, uebergreifend: FACH.uebergreifend || [], seed: v.variante });
+      return { variante: v.variante, ids: v.themen, ka: ka, titel: 'Variante ' + v.variante + ' · ' + themen.map(function (t) { return t.titel; }).join(', ') + ' (' + ka.gesamtBe + ' BE)' };
+    }).filter(Boolean);
+  }
+  function kaElternHtml() {
+    var arbeiten = kaArbeiten();
+    return '<section class="karte ka-eltern" id="ka-eltern"><h2>Für Eltern: Arbeit bewerten</h2>' +
+      '<p>Erreichte BE eintragen. Die App rechnet die Note nach dem Notenschlüssel der Schule. Ab Note 3 gibt es einen Belohnungscode fürs Katzenalbum.</p>' +
+      '<label class="ka-label" for="ka-arbeit">Welche Arbeit? (Die Variante steht unten auf dem Blatt.)</label>' +
+      '<select id="ka-arbeit">' + arbeiten.map(function (a, i) { return '<option value="' + i + '">' + esc(a.titel) + '</option>'; }).join('') + '</select>' +
+      '<label class="ka-label" for="ka-be">Erreichte BE</label>' +
+      '<form class="ka-be-reihe" id="ka-bewerten"><input id="ka-be" inputmode="decimal" autocomplete="off" placeholder="z. B. 35"><span id="ka-von">von ' + arbeiten[0].ka.gesamtBe + '</span>' +
+      '<button class="btn btn-gold" type="submit">Note berechnen</button></form>' +
+      '<div id="ka-bewertung" role="status"></div></section>';
+  }
+  function kaElternVerbinden() {
+    var arbeiten = kaArbeiten();
+    var wahl = document.getElementById('ka-arbeit'), feld = document.getElementById('ka-be'), aus = document.getElementById('ka-bewertung');
+    wahl.onchange = function () { document.getElementById('ka-von').textContent = 'von ' + arbeiten[wahl.value].ka.gesamtBe; aus.innerHTML = ''; };
+    document.getElementById('ka-bewerten').addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var a = arbeiten[wahl.value], g = a.ka.gesamtBe;
+      var be = Number(String(feld.value).trim().replace(',', '.'));
+      if (!String(feld.value).trim() || isNaN(be) || be < 0 || be > g || be * 2 !== Math.round(be * 2)) {
+        aus.innerHTML = '<p class="ka-fehlertext">Bitte eine Zahl von 0 bis ' + g + ' eintragen (halbe BE gehen auch, z. B. 35,5).</p>';
+        return;
+      }
+      var n = LW.note(be, g), code = LW.kaCode({ seed: a.variante, themen: a.ids, note: n.note });
+      var pokal = { 1: 'Gold-Pokal', 2: 'Silber-Pokal', 3: 'Bronze-Pokal' }[n.note];
+      aus.innerHTML = '<p class="ka-note">Note <b>' + n.note + '</b> (' + esc(n.wort) + ')</p>' +
+        '<p>' + String(be).replace('.', ',') + ' von ' + g + ' BE = ' + Math.round(100 * be / g) + ' %</p>' +
+        (code
+          ? '<p style="margin-top:10px">Belohnungscode für euer Kind:</p><div class="ka-code" id="ka-code">' + code + '</div>' +
+            '<p class="ka-hinweis">Im Katzenalbum unter „Belohnungscode von deinen Eltern“ eintippen. Er schaltet den ' + pokal + ' frei und gilt nur für diese Arbeit.</p>'
+          : '<p class="ka-hinweis">Einen Belohnungscode gibt es ab Note 3. Die Probe-Klassenarbeit am Handy zeigt, welcher Lernbereich noch Übung braucht.</p>');
+    });
   }
 
   // Probe-Klassenarbeit: jede Teilaufgabe wird eine Übung; keine Herzen, kein Sofort-Feedback, Uhr läuft rückwärts.

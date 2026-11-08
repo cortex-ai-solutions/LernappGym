@@ -94,6 +94,20 @@
     komma: '<circle cx="100" cy="150" r="22" fill="' + GOLD + '" stroke="' + GOLD_DUNKEL + '" stroke-width="3"/><text x="100" y="157" text-anchor="middle" font-size="19" font-weight="700" fill="#5a3e00" font-family="system-ui,sans-serif">0,5</text>',
     stern: stern(100, 150, 24, GOLD, GOLD_DUNKEL),
   };
+  // Pokale für die Klassenarbeit (Code der Eltern): Note 1 Gold, 2 Silber, 3 Bronze
+  var POKALE = {
+    1: { titel: 'Gold-Pokal', farbe: GOLD, rand: GOLD_DUNKEL },
+    2: { titel: 'Silber-Pokal', farbe: '#d9dde3', rand: '#5f6773' },
+    3: { titel: 'Bronze-Pokal', farbe: '#d39a62', rand: '#7a4a1f' },
+  };
+  Object.keys(POKALE).forEach(function (n) {
+    var p = POKALE[n];
+    REQUISITEN['pokal' + n] = '<path d="M81 140 Q69 139 70 149 Q72 157 84 154 M119 140 Q131 139 130 149 Q128 157 116 154" fill="none" stroke="' + p.rand + '" stroke-width="3.5" stroke-linecap="round"/>' +
+      '<path d="M80 131 H120 V141 Q120 158 100 160 Q80 158 80 141 Z" fill="' + p.farbe + '" stroke="' + p.rand + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<rect x="95" y="159" width="10" height="7" fill="' + p.farbe + '" stroke="' + p.rand + '" stroke-width="2"/>' +
+      '<rect x="84" y="165" width="32" height="8" rx="2" fill="' + p.farbe + '" stroke="' + p.rand + '" stroke-width="2.5"/>' +
+      '<text x="100" y="151" text-anchor="middle" font-size="15" font-weight="700" fill="' + p.rand + '" font-family="system-ui,sans-serif">' + n + '</text>';
+  });
 
   // ---------- Speicher ----------
   function roh() { try { return JSON.parse(localStorage.getItem(SPEICHER)) || {}; } catch (e) { return {}; } }
@@ -109,7 +123,7 @@
       decke: DECKEN[k.decke] ? k.decke : 'aus',
       kopf: teil(KOPF, 'kopf', k.kopf),
       hals: teil(HALS, 'hals', k.hals),
-      frei: frei, gesehen: liste(k.gesehen), codes: liste(k.codes),
+      frei: frei, gesehen: liste(k.gesehen), codes: liste(k.codes), ka: liste(k.ka),
     };
   }
   function ablegen(k) { try { localStorage.setItem(SPEICHER, JSON.stringify(k)); } catch (e) { /* privater Modus */ } }
@@ -141,6 +155,8 @@
       if (e.sterne[id] >= 3) ids.push('motiv:' + id + ':3');
       if (e.gold[id]) ids.push('motiv:' + id + ':gold');
     });
+    // Klassenarbeit: k.ka = ['KENNUNG:note', …]
+    k.ka.forEach(function (x) { var n = x.split(':')[1]; if (POKALE[n] && ids.indexOf('ka:' + n) < 0) ids.push('ka:' + n); });
     return ids;
   }
   // Neu Verdientes merken; gibt die neuen ids zurück (für „Neu freigeschaltet!“)
@@ -292,6 +308,10 @@
   }
   function beschreibe(id) {
     var p = id.split(':');
+    if (p[0] === 'ka') {
+      var pk = POKALE[p[1]];
+      return { titel: 'Klassenarbeit', art: pk.titel, hinweis: 'Klassenarbeit mit Note ' + p[1] + ' (Code von deinen Eltern)', bild: svg({ requisit: 'pokal' + p[1], stimmung: 'froh', glanz: p[1] === '1' }) };
+    }
     if (p[0] === 'kopf' || p[0] === 'hals') {
       var teil = (p[0] === 'kopf' ? KOPF : HALS)[p[1]];
       var o = { stimmung: 'froh' }; o[p[0]] = p[1];
@@ -375,9 +395,27 @@
     for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
     return h.toString(36);
   }
-  // → { ok, ziel: 'fach/thema/V', titel, schon } bzw. { ok: false }
+  // Klassenarbeits-Code (6 Zeichen), gleiche Rechnung wie kaCode in generator/klassenarbeit.js → Note oder 0
+  var CODE_ZEICHEN = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  function fnv(s) { var h = 0x811c9dc5; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h; }
+  function dreiZeichen(h) { return CODE_ZEICHEN[h & 31] + CODE_ZEICHEN[(h >>> 5) & 31] + CODE_ZEICHEN[(h >>> 10) & 31]; }
+  function kaNote(s) {
+    if (s.length !== 6) return 0;
+    for (var n = 1; n <= 3; n++) if (dreiZeichen(fnv('miau-ka|' + s.slice(0, 3) + '|' + n)) === s.slice(3)) return n;
+    return 0;
+  }
+  // → { ok, ziel: 'fach/thema/V', titel, schon } bzw. { ok, klassenarbeit: true, note, pokal, schon } bzw. { ok: false }
   function einloesen(code) {
-    var ziel = normCode(code).length === 4 && DATEN.codes[pruefsumme(code)];
+    var s = normCode(code), n = kaNote(s);
+    if (n) {
+      var r0 = roh(), ka = liste(r0.ka), kennung = s.slice(0, 3);
+      var alt = ka.filter(function (x) { return x.split(':')[0] === kennung; })[0];
+      if (!alt) { r0.ka = ka.concat(kennung + ':' + n); ablegen(r0); }
+      var neu0 = aktualisiere();
+      window.dispatchEvent(new Event('katze-geaendert'));
+      return { ok: true, klassenarbeit: true, note: n, pokal: POKALE[n].titel, schon: !!alt, neu: neu0 };
+    }
+    var ziel = s.length === 4 && DATEN.codes[pruefsumme(code)];
     if (!ziel) return { ok: false };
     var r = roh(), codes = liste(r.codes), schon = codes.indexOf(ziel) >= 0;
     if (!schon) { r.codes = codes.concat(ziel); ablegen(r); }
@@ -395,7 +433,7 @@
     var meldung = '';
     function platz(id, k) {
       var b = beschreibe(id), frei = k.frei.indexOf(id) >= 0, neu = frei && k.gesehen.indexOf(id) < 0;
-      return '<figure class="kz-platz' + (frei ? '' : ' zu') + (neu ? ' neu' : '') + (/:3$|:gold$/.test(id) ? ' glaenzt' : '') + '" data-id="' + id + '">' + b.bild +
+      return '<figure class="kz-platz' + (frei ? '' : ' zu') + (neu ? ' neu' : '') + (/:3$|:gold$|^ka:1$/.test(id) ? ' glaenzt' : '') + '" data-id="' + id + '">' + b.bild +
         '<figcaption>' + (frei ? '<b>' + esc(b.teil ? b.titel : b.art) + '</b>' : '🔒 ' + (b.teil ? esc(b.titel) + ': ' : '') + esc(b.hinweis)) + '</figcaption></figure>';
     }
     function zeigen() {
@@ -408,7 +446,8 @@
       });
       var teile = [];
       [['kopf', KOPF], ['hals', HALS]].forEach(function (p) { Object.keys(p[1]).forEach(function (id) { if (p[1][id].bedingung) teile.push(p[0] + ':' + id); }); });
-      alle = alle.concat(teile);
+      var pokale = Object.keys(POKALE).map(function (n) { return 'ka:' + n; });
+      alle = alle.concat(pokale, teile);
       var gesammelt = alle.filter(function (id) { return k.frei.indexOf(id) >= 0; }).length;
       // Kopfzeile bleibt beim Scrollen oben stehen, damit man jederzeit schließen kann
       inhalt.innerHTML = '<div class="kz-kopfzeile"><h2>📖 Katzenalbum</h2><button type="button" class="kz-x" id="kz-x" aria-label="Album schließen">✕</button></div><p>' + gesammelt + ' von ' + alle.length + ' Bildern gesammelt. Jedes Thema hat drei: geschafft, 3 Sterne und Gold.</p>' +
@@ -421,6 +460,7 @@
             return '<h4>' + esc(t.titel) + '</h4><div class="kz-album">' + ['1', '3', 'gold'].map(function (s) { return platz('motiv:' + id + ':' + s, k); }).join('') + '</div>';
           }).join('');
         }).join('') +
+        '<h3>Klassenarbeit</h3><div class="kz-album">' + pokale.map(function (id) { return platz(id, k); }).join('') + '</div>' +
         '<h3>Schätze für den Kleiderschrank</h3><div class="kz-album">' + teile.map(function (id) { return platz(id, k); }).join('') + '</div>' +
         '<button class="lw-knopf leise" id="kz-zu">Schließen</button>';
       inhalt.querySelector('form').addEventListener('submit', function (ev) {
@@ -428,7 +468,8 @@
         var feld = inhalt.querySelector('#kz-code');
         if (!feld.value.trim()) return;
         var r = einloesen(feld.value);
-        meldung = !r.ok ? '✗ Diesen Code kenne ich nicht. Schau noch mal genau auf das Lösungsblatt.'
+        meldung = !r.ok ? '✗ Diesen Code kenne ich nicht. Schau noch mal genau hin.'
+          : r.klassenarbeit ? (r.schon ? 'Den Code für diese Klassenarbeit hast du schon eingelöst.' : '✓ Klasse! Note ' + r.note + ' in der Klassenarbeit. Dein ' + esc(r.pokal) + ' ist da!')
           : r.schon ? 'Diesen Code hast du schon eingelöst (' + esc(r.titel) + ', Blatt ' + r.variante + ').'
             : '✓ Super! Volle Punktzahl in „' + esc(r.titel) + '“ (Blatt ' + r.variante + '). Dein Gold-Bild ist da!';
         zeigen();

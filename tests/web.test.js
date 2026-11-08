@@ -383,6 +383,7 @@ test('Klassenarbeit: Auswahl, Druckseite und Probe am Handy', { timeout: 120000 
     await page.waitForSelector('#ka-probe');
     await foto(page, '2-klassenarbeit');
     const variante = await page.textContent('.ka-variante');
+    assert.strictEqual(await page.$('#ka-eltern'), null, 'Bewerten gibt es am Handy nicht');
     const [arbeitLink, loesungLink] = await page.$$eval('.karte a.btn', (as) => as.map((a) => a.getAttribute('href')));
     assert.strictEqual(arbeitLink, `klassenarbeit.html#t=runden,zeit,kommazahlen&s=${variante}`);
     assert.strictEqual(loesungLink, `${arbeitLink}&l=1`);
@@ -434,6 +435,55 @@ test('Klassenarbeit: Auswahl, Druckseite und Probe am Handy', { timeout: 120000 
     assert.ok((await page.$$('.ka-fehler li')).length >= 1, 'falsche Antworten werden aufgelistet');
     const protokoll = await page.evaluate(() => JSON.parse(localStorage.getItem('lernwerk_protokoll_v1')));
     assert.strictEqual(protokoll.faecher.mathematik.th.klassenarbeit.n, 1, 'Probe steht im Lernprotokoll');
+
+    // Eltern am PC: gedruckte Arbeit (auch nach „Andere Aufgaben“) auswählen, BE eintragen → Note nach Schulschlüssel + Code
+    const { note, kaCode } = require('../generator/klassenarbeit');
+    const pc = await browser.newContext({ viewport: { width: 1280, height: 900 }, locale: 'de-DE' });
+    await pc.addInitScript(([w, v]) => {
+      if (!localStorage.getItem('lernwerk_klassenarbeit_v1')) localStorage.setItem('lernwerk_klassenarbeit_v1', JSON.stringify({ themen: w, variante: v }));
+      localStorage.setItem('lernwerk_profil', JSON.stringify({ id: 'eltern', name: 'Eltern' }));
+      localStorage.setItem('lernwerk_katze_v1', JSON.stringify({ name: 'Mimi' }));
+    }, [wahl, variante]);
+    const p2 = await pc.newPage();
+    p2.on('pageerror', (e) => fehler.push(e.message));
+    await p2.goto(`${basis}mathe/#klassenarbeit`);
+    await p2.waitForSelector('#ka-eltern');
+    await p2.click('.karte a.btn-gold'); // Arbeit öffnen = gemerkt
+    await p2.waitForSelector('#blatt .aufgabe');
+    await p2.click('.werkzeug a[href="./#klassenarbeit"]');
+    await p2.waitForSelector('#ka-eltern');
+    await p2.click('#ka-neu');
+    await p2.waitForFunction((v) => document.querySelector('.ka-variante').textContent !== v, variante);
+    const optionen = await p2.$$eval('#ka-arbeit option', (os) => os.map((o) => o.textContent));
+    assert.strictEqual(optionen.length, 2, 'aktuelle und gedruckte Arbeit');
+    assert.match(optionen[1], new RegExp(`^Variante ${variante} · `));
+    await p2.selectOption('#ka-arbeit', '1');
+    await p2.fill('#ka-be', 'viel');
+    await p2.click('#ka-bewerten button');
+    assert.match(await p2.textContent('#ka-bewertung'), /Bitte eine Zahl/);
+    const g = erwartet.ka.gesamtBe, be = Math.round(0.89 * g);
+    assert.match(await p2.textContent('#ka-von'), new RegExp(`von ${g}$`));
+    await p2.fill('#ka-be', String(be));
+    await p2.click('#ka-bewerten button');
+    const soll = note(be, g);
+    const code = kaCode({ seed: variante, themen: wahl, note: soll.note });
+    assert.ok(soll.note <= 3 && code, `${be}/${g} BE gibt einen Code`);
+    assert.match(await p2.textContent('.ka-note'), new RegExp(`Note ${soll.note} \\(${soll.wort}\\)`));
+    assert.strictEqual(await p2.textContent('#ka-code'), code);
+    if (fotos) await p2.screenshot({ path: path.join(fotos, '7-eltern-pc.png'), fullPage: true });
+    await p2.fill('#ka-be', String(Math.floor(0.6 * g)));
+    await p2.click('#ka-bewerten button');
+    assert.strictEqual(await p2.$('#ka-code'), null, 'unter Note 3 kein Code');
+    await pc.close();
+
+    // Kind am Handy löst den Code im Katzenalbum ein → Pokal
+    await page.click('#uebersicht');
+    await page.waitForSelector('.katze-karte [data-kz="album"]');
+    await page.click('.katze-karte [data-kz="album"]');
+    await page.fill('#kz-code', code);
+    await page.click('.kz-code button');
+    assert.match(await page.textContent('.kz-meldung'), new RegExp(`Note ${soll.note} in der Klassenarbeit`));
+    assert.ok(await page.$(`.kz-platz[data-id="ka:${soll.note}"]:not(.zu)`), 'Pokal im Album freigeschaltet');
     assert.deepStrictEqual(fehler, [], 'keine JavaScript-Fehler');
   } finally {
     await browser.close();
