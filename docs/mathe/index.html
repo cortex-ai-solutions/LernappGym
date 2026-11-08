@@ -255,6 +255,12 @@ body.mit-ka-leiste .wrap { padding-bottom: 110px; }
 .ka-fehler .richtig { color: var(--ok-hell); font-weight: 600; }
 .ka-fehler .weg { color: var(--text-muted); font-size: 14px; }
 .ka-ergebnis { font-size: 44px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--gold-light); line-height: 1.1; }
+
+/* Katzenalbum: Kopfzeile mit Schließen-Knopf bleibt beim Scrollen oben (Dialog hat 24px Innenabstand oben) */
+.kz-kopfzeile { position: sticky; top: -24px; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -24px -20px 8px; padding: 16px 12px 10px 20px; background: #002B36; border-bottom: 1px solid var(--border); }
+.kz-kopfzeile h2 { margin: 0; }
+.kz-x { flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--border-strong); background: transparent; color: var(--gold-light); font-size: 22px; line-height: 1; }
+.kz-x:hover { background: rgba(200, 168, 76, 0.12); }
 </style></head>
 <body><div id="app"><p class="wrap">Die App wird geladen …</p></div>
 <noscript><p class="wrap">Bitte JavaScript aktivieren.</p></noscript>
@@ -2998,7 +3004,8 @@ module.exports = { diagramm, striche, raster, esc };
       [['kopf', KOPF], ['hals', HALS]].forEach(function (p) { Object.keys(p[1]).forEach(function (id) { if (p[1][id].bedingung) teile.push(p[0] + ':' + id); }); });
       alle = alle.concat(teile);
       var gesammelt = alle.filter(function (id) { return k.frei.indexOf(id) >= 0; }).length;
-      inhalt.innerHTML = '<h2>📖 Katzenalbum</h2><p>' + gesammelt + ' von ' + alle.length + ' Bildern gesammelt. Jedes Thema hat drei: geschafft, 3 Sterne und Gold.</p>' +
+      // Kopfzeile bleibt beim Scrollen oben stehen, damit man jederzeit schließen kann
+      inhalt.innerHTML = '<div class="kz-kopfzeile"><h2>📖 Katzenalbum</h2><button type="button" class="kz-x" id="kz-x" aria-label="Album schließen">✕</button></div><p>' + gesammelt + ' von ' + alle.length + ' Bildern gesammelt. Jedes Thema hat drei: geschafft, 3 Sterne und Gold.</p>' +
         '<form class="kz-code"><label class="kz-label" for="kz-code">🎁 Belohnungscode von deinen Eltern</label>' +
         '<div class="kz-code-reihe"><input id="kz-code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="MIAU-…"><button class="lw-knopf" type="submit">Einlösen</button></div>' +
         '<p class="kz-meldung" role="status">' + meldung + '</p></form>' +
@@ -3021,7 +3028,7 @@ module.exports = { diagramm, striche, raster, esc };
         zeigen();
         if (!r.ok) inhalt.querySelector('#kz-code').value = feld.value;
       });
-      inhalt.querySelector('#kz-zu').onclick = function () { d.remove(); };
+      inhalt.querySelector('#kz-zu').onclick = inhalt.querySelector('#kz-x').onclick = function () { d.remove(); };
       // was jetzt zu sehen war, gilt beim nächsten Öffnen nicht mehr als neu
       var r = roh(); r.gesehen = k.frei.slice(); ablegen(r);
       window.dispatchEvent(new Event('katze-geaendert'));

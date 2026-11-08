@@ -410,7 +410,8 @@
       [['kopf', KOPF], ['hals', HALS]].forEach(function (p) { Object.keys(p[1]).forEach(function (id) { if (p[1][id].bedingung) teile.push(p[0] + ':' + id); }); });
       alle = alle.concat(teile);
       var gesammelt = alle.filter(function (id) { return k.frei.indexOf(id) >= 0; }).length;
-      inhalt.innerHTML = '<h2>📖 Katzenalbum</h2><p>' + gesammelt + ' von ' + alle.length + ' Bildern gesammelt. Jedes Thema hat drei: geschafft, 3 Sterne und Gold.</p>' +
+      // Kopfzeile bleibt beim Scrollen oben stehen, damit man jederzeit schließen kann
+      inhalt.innerHTML = '<div class="kz-kopfzeile"><h2>📖 Katzenalbum</h2><button type="button" class="kz-x" id="kz-x" aria-label="Album schließen">✕</button></div><p>' + gesammelt + ' von ' + alle.length + ' Bildern gesammelt. Jedes Thema hat drei: geschafft, 3 Sterne und Gold.</p>' +
         '<form class="kz-code"><label class="kz-label" for="kz-code">🎁 Belohnungscode von deinen Eltern</label>' +
         '<div class="kz-code-reihe"><input id="kz-code" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="MIAU-…"><button class="lw-knopf" type="submit">Einlösen</button></div>' +
         '<p class="kz-meldung" role="status">' + meldung + '</p></form>' +
@@ -433,7 +434,7 @@
         zeigen();
         if (!r.ok) inhalt.querySelector('#kz-code').value = feld.value;
       });
-      inhalt.querySelector('#kz-zu').onclick = function () { d.remove(); };
+      inhalt.querySelector('#kz-zu').onclick = inhalt.querySelector('#kz-x').onclick = function () { d.remove(); };
       // was jetzt zu sehen war, gilt beim nächsten Öffnen nicht mehr als neu
       var r = roh(); r.gesehen = k.frei.slice(); ablegen(r);
       window.dispatchEvent(new Event('katze-geaendert'));

@@ -168,7 +168,12 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
     assert.match(await page.textContent('.kz-meldung'), /Gold-Bild/);
     assert.ok(await page.$('.kz-platz[data-id="motiv:mathematik/runden:gold"]:not(.zu)'), 'Gold-Bild Runden');
     assert.ok(await page.$('.kz-platz[data-id="kopf:krone"]:not(.zu)'), 'Krone im Album');
-    await page.click('#kz-zu');
+    // ✕ oben bleibt sichtbar, auch wenn das Album ganz nach unten gescrollt ist
+    await page.evaluate(() => { const d = document.querySelector('.lw-dialog'); d.scrollTop = d.scrollHeight; });
+    const x = await page.evaluate(() => document.getElementById('kz-x').getBoundingClientRect().toJSON());
+    assert.ok(x.top >= 0 && x.bottom <= 851 && x.height >= 48, `✕ nicht sichtbar oder zu klein (${x.top}–${x.bottom})`);
+    await page.click('#kz-x');
+    assert.strictEqual(await page.$('.kz-album-dialog'), null, 'Album ist zu');
     assert.doesNotMatch(await page.textContent('#katze-karte [data-kz="album"]'), /neu/, 'nach dem Anschauen nichts mehr neu');
     await page.click('#katze-karte [data-kz="anpassen"]');
     await page.click('.kz-knopf[data-feld="kopf"][data-wert="krone"]');

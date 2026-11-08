@@ -244,3 +244,9 @@ body.mit-ka-leiste .wrap { padding-bottom: 110px; }
 .ka-fehler .richtig { color: var(--ok-hell); font-weight: 600; }
 .ka-fehler .weg { color: var(--text-muted); font-size: 14px; }
 .ka-ergebnis { font-size: 44px; font-weight: 700; font-family: 'Montserrat', sans-serif; color: var(--gold-light); line-height: 1.1; }
+
+/* Katzenalbum: Kopfzeile mit Schließen-Knopf bleibt beim Scrollen oben (Dialog hat 24px Innenabstand oben) */
+.kz-kopfzeile { position: sticky; top: -24px; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -24px -20px 8px; padding: 16px 12px 10px 20px; background: #002B36; border-bottom: 1px solid var(--border); }
+.kz-kopfzeile h2 { margin: 0; }
+.kz-x { flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--border-strong); background: transparent; color: var(--gold-light); font-size: 22px; line-height: 1; }
+.kz-x:hover { background: rgba(200, 168, 76, 0.12); }
