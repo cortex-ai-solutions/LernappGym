@@ -20,7 +20,12 @@ monthlyRunningCost: 0
 - [x] Lernkatze nach Kater Maurice: Feedback, Kleiderschrank, Katzenalbum, Belohnungscode auf den Lösungsblättern
 - [x] Versionsanzeige und „Nach Updates suchen“ auf der Startseite
 - [x] Klassenarbeit: Lernbereiche auf den Karten wählen, Arbeit + Lösung mit Notentabelle drucken, Probe-Klassenarbeit am Handy
+- [x] Notenschlüssel der Schule (Kl. 5–10, 96/80/64/48/32 %) für alle BE 8–60 hinterlegt und getestet
+- [x] Klassenarbeit bewerten am PC (nur Eltern): BE eintragen → Note + Belohnungscode ab Note 3 → Gold-/Silber-/Bronze-Pokal im Katzenalbum
+- [x] Arbeitsblatt-Belohnungscode ab 90 % richtig (Lösungsblatt nennt erlaubte Fehler)
 - [ ] 1-Seiten-Test + Lösung mit Seitenlängenprüfung
+- [ ] README für Nicht-Entwickler
+- [ ] Drucken aus der installierten App (PWA) auf dem Pixel prüfen
 - [x] Mathe-App (PWA, offline) im Cortex-Design: je Aufgabengebiet Üben + Merke + Arbeitsblatt/Lösung
 - [x] GitHub-Repo cortex-ai-solutions/LernappGym angelegt
 - [x] GitHub Pages aktiv (Übergangs-Startseite mit Latein- und Geschichts-App)
