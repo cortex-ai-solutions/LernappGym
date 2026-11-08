@@ -50,7 +50,7 @@
         '<ellipse cx="100" cy="59" rx="48" ry="10" fill="#5a3f8c" stroke="' + LINIE + '" stroke-width="3"/>' + stern(98, 30, 6, '#F0D9A0') + stern(114, 46, 4.5, '#F0D9A0') },
     lorbeer: { titel: 'Lorbeerkranz', icon: '🌿', hinweis: 'Eine Latein-Einheit schaffen', bedingung: function (e) { return e.latein >= 1; },
       rand: '<path d="M46 84 Q46 34 100 38 Q154 34 154 84" fill="none" stroke-width="18"/>', bild: lorbeer() },
-    krone: { titel: 'Krone', icon: '👑', hinweis: 'Belohnungscode für ein Arbeitsblatt mit voller Punktzahl einlösen', bedingung: function (e) { return e.codes >= 1; },
+    krone: { titel: 'Krone', icon: '👑', hinweis: 'Belohnungscode für ein Arbeitsblatt (ab 90 % richtig) einlösen', bedingung: function (e) { return e.codes >= 1; },
       rand: '<path d="M70 54 L70 20 L85 34 L100 14 L115 34 L130 20 L130 54 Z"/>',
       bild: '<path d="M70 54 L70 22 L85 36 L100 16 L115 36 L130 22 L130 54 Z" fill="' + GOLD + '" stroke="' + GOLD_DUNKEL + '" stroke-width="2.5" stroke-linejoin="round"/>' +
         '<circle cx="85" cy="46" r="3.5" fill="#e0607a"/><circle cx="100" cy="44" r="4" fill="#7fb7e6"/><circle cx="115" cy="46" r="3.5" fill="#e0607a"/>' },
@@ -471,7 +471,7 @@
         meldung = !r.ok ? '✗ Diesen Code kenne ich nicht. Schau noch mal genau hin.'
           : r.klassenarbeit ? (r.schon ? 'Den Code für diese Klassenarbeit hast du schon eingelöst.' : '✓ Klasse! Note ' + r.note + ' in der Klassenarbeit. Dein ' + esc(r.pokal) + ' ist da!')
           : r.schon ? 'Diesen Code hast du schon eingelöst (' + esc(r.titel) + ', Blatt ' + r.variante + ').'
-            : '✓ Super! Volle Punktzahl in „' + esc(r.titel) + '“ (Blatt ' + r.variante + '). Dein Gold-Bild ist da!';
+            : '✓ Super! Toll gerechnet in „' + esc(r.titel) + '“ (Blatt ' + r.variante + '). Dein Gold-Bild ist da!';
         zeigen();
         if (!r.ok) inhalt.querySelector('#kz-code').value = feld.value;
       });

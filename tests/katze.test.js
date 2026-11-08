@@ -102,6 +102,11 @@ test('Belohnungscodes: Format, eindeutig je Blatt, Prüfsumme in App und Generat
   assert.ok(['ka:1', 'ka:3'].every((id) => KATZE.lies().frei.includes(id)));
   assert.strictEqual(KATZE.einloesen(ka2.slice(0, -1) + (ka2.endsWith('A') ? 'B' : 'A')).ok, false, 'verfälschter Code');
   for (const n of [1, 2, 3]) assert.match(KATZE.beschreibe(`ka:${n}`).bild, /<\/svg>$/);
+  // Arbeitsblatt-Code ab 90 % richtig: erlaubte Fehler je Anzahl Teilaufgaben
+  const { erlaubteFehler } = require('../generator/render/print');
+  const blatt = (n) => erlaubteFehler(Array.from({ length: n }, () => ({})));
+  for (const [n, f] of [[7, 0], [9, 0], [10, 1], [16, 1], [19, 1], [20, 2], [29, 2], [30, 3]]) assert.strictEqual(blatt(n).fehler, f, `${n} Teilaufgaben`);
+  assert.strictEqual(erlaubteFehler([{ teile: [1, 2, 3] }, {}]).n, 4, 'Teilaufgaben zählen einzeln');
   // derselbe Code ändert sich, wenn sich das Blatt ändert
   assert.notStrictEqual(belohnungscode({ fach: 'm', thema: 't', variante: 'A', aufgaben: [1] }), belohnungscode({ fach: 'm', thema: 't', variante: 'A', aufgaben: [2] }));
 });

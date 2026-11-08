@@ -1,4 +1,4 @@
-// Belohnungscode auf dem Lösungsblatt: Hat das Kind auf dem Papier volle Punktzahl, geben die Eltern den Code weiter.
+// Belohnungscode auf dem Lösungsblatt: Hat das Kind auf dem Papier mindestens 90 % richtig, geben die Eltern den Code weiter.
 // Im Katzenalbum eingetippt, schaltet er das Gold-Bild des Themas frei (templates/katze.js).
 // Der Code hängt an Fach, Thema, Variante und Inhalt des Blatts: Ändert sich das Blatt, ändert sich auch der Code.
 // Die App kennt nur Prüfsummen der Codes, keine Klartexte.

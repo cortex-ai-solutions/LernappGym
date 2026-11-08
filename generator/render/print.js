@@ -23,8 +23,20 @@ function seite({ doc, aufgaben, art, loesung, seed, gesamtBe, code }) {
   return `<!DOCTYPE html><html lang="de"><head><meta charset="utf-8"><title>${esc(doc.titel)}${loesung ? ' – Lösung' : ''}</title>
 <style>${fontFaceCss()}\n${CSS}</style></head>
 <body class="${loesung ? 'loesung' : ''}">${kopfzeile}${namen}${merke}<main>${liste}</main>
-${loesung && code ? `<div class="belohnung"><div><b>Belohnungscode für volle Punktzahl</b><br>Gebt ihn eurem Kind: Im Katzenalbum der App eingetippt, schaltet er ein Gold-Bild frei.</div><span class="code">${esc(code)}</span></div>` : ''}
+${loesung && code ? belohnungHtml(aufgaben, code) : ''}
 <p class="fuss-hinweis">${lehrplan} · Variante ${esc(seed)}</p></body></html>`;
 }
 
-module.exports = { seite, aufgabeHtml };
+// Belohnungscode ab 90 % richtig gelöster Teilaufgaben (Wunsch der Eltern, 08.11.2026)
+const CODE_AB = 0.9;
+function erlaubteFehler(aufgaben) {
+  const n = aufgaben.reduce((s, a) => s + (a.teile ? a.teile.length : 1), 0);
+  return { n, fehler: Math.floor(n * (1 - CODE_AB) + 1e-9) };
+}
+function belohnungHtml(aufgaben, code) {
+  const { n, fehler } = erlaubteFehler(aufgaben);
+  const regel = fehler ? `Bei ${n} Teilaufgaben: höchstens ${fehler} Fehler.` : `Bei ${n} Teilaufgaben heißt das: alles richtig.`;
+  return `<div class="belohnung"><div><b>Belohnungscode ab 90 % richtig</b><br>${regel} Gebt ihn eurem Kind: Im Katzenalbum der App eingetippt, schaltet er ein Gold-Bild frei.</div><span class="code">${esc(code)}</span></div>`;
+}
+
+module.exports = { seite, aufgabeHtml, erlaubteFehler, CODE_AB };
