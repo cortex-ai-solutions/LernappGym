@@ -1,0 +1,227 @@
+fach: mathematik
+klasse: 5
+thema: roemische-zahlen
+titel: "Römische Zahlen"
+icon: "🏛️"
+reihenfolge: 9
+lehrplanbezug:
+  - "2.1.2 Natürliche Zahlen, Querschnittsaufgabe Kulturelle Bildung: Vergleich zu historischen Zahlendarstellungen (z. B. römische Zahlen)"
+  - "2.1.2 Natürliche Zahlen: natürliche Zahlen in unterschiedlichen Darstellungsformen lesen und zwischen Darstellungen wechseln"
+verifiziert: true
+quelle: "Lehrplan Mathematik Gymnasium Thüringen 2026 (Erprobungsfassung), Kap. 2.1.2, Querschnittsaufgaben (KB), S. 16 – siehe curriculum/mathematik.yaml"
+erklaerung: |
+  **Die 7 römischen Zeichen**
+
+  | I | V | X | L | C | D | M |
+  |---|---|---|---|---|---|---|
+  | 1 | 5 | 10 | 50 | 100 | 500 | 1000 |
+
+  **Regel 1 – addieren:** Steht ein kleineres Zeichen **hinter** einem größeren, wird es **addiert**.
+  VI = 5 + 1 = **6** · LX = 50 + 10 = **60** · MDC = 1000 + 500 + 100 = **1600**
+
+  **Regel 2 – höchstens dreimal:** I, X, C und M stehen höchstens dreimal hintereinander. V, L und D stehen nie doppelt.
+  III = 3, aber 4 ist **nicht** IIII.
+
+  **Regel 3 – abziehen:** Steht ein kleineres Zeichen **vor** einem größeren, wird es **abgezogen**. Das gibt es nur 6-mal:
+  IV = 4 · IX = 9 · XL = 40 · XC = 90 · CD = 400 · CM = 900
+
+  **So schreibst du eine Zahl römisch:** Zerlege sie in Tausender, Hunderter, Zehner und Einer.
+  1984 = 1000 + 900 + 80 + 4 = M + CM + LXXX + IV = **MCMLXXXIV**
+
+  **Achtung:** 49 ist **nicht** IL, sondern 40 + 9 = XL + IX = **XLIX**.
+wissenswertes:
+  - "Die Römer kannten keine Null. Ein Zeichen für die Null brauchten sie nicht, weil ihre Zeichen nicht von der Stelle abhängen."
+  - "Die alten Römer haben oft IIII statt IV geschrieben. Auf vielen Uhren steht die 4 bis heute als IIII."
+  - "Zum Rechnen benutzten die Römer ein Rechenbrett mit Steinchen, den Abakus. Das lateinische Wort calculus heißt Steinchen. Daher kommt unser Wort kalkulieren."
+  - "Römische Zahlen siehst du heute noch: bei Königen wie Ludwig XIV., bei Kapiteln in Büchern, an alten Häusern und bei Jahreszahlen im Abspann von Filmen."
+aufgaben:
+  - id: zeichen
+    typ: zuordnung
+    frage: "Ordne jedem römischen Zeichen seinen Wert zu."
+    paare: [["I", "1"], ["V", "5"], ["X", "10"], ["L", "50"], ["C", "100"], ["D", "500"], ["M", "1000"]]
+    be: 2
+    schwierigkeit: 1
+    prioritaet: 1
+  - id: lesen-klein
+    bezeichnung: "Römische Zahlen lesen bis 39"
+    typ: rechnung
+    generator: roemisch-in-zahl
+    parameter: { bereich: [1, 39] }
+    anzahl: 4
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 1
+  - id: schreiben-klein
+    bezeichnung: "Römisch schreiben bis 39"
+    typ: rechnung
+    generator: zahl-in-roemisch
+    parameter: { bereich: [1, 39] }
+    anzahl: 4
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 1
+  - id: keine-null
+    typ: richtig_falsch
+    frage: "Die Römer hatten ein eigenes Zeichen für die Null."
+    loesung: false
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 3
+  - id: abziehen
+    typ: multiple_choice
+    frage: "Was bedeutet das I vor dem X in IX?"
+    optionen: ["Es wird abgezogen: 10 − 1 = 9", "Es wird addiert: 1 + 10 = 11", "Die Zeichen werden malgenommen: 1 · 10 = 10", "Das I steht für eine Null"]
+    loesung: "Es wird abgezogen: 10 − 1 = 9"
+    be: 1
+    schwierigkeit: 1
+    prioritaet: 2
+  - id: lesen-mittel
+    bezeichnung: "Römische Zahlen lesen bis 399"
+    typ: rechnung
+    generator: roemisch-in-zahl
+    parameter: { bereich: [40, 399] }
+    anzahl: 4
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: schreiben-mittel
+    bezeichnung: "Römisch schreiben bis 399"
+    typ: rechnung
+    generator: zahl-in-roemisch
+    parameter: { bereich: [40, 399] }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: schreibweise
+    typ: rechnung
+    generator: roemisch-schreibweise
+    parameter: { bereich: [4, 99] }
+    anzahl: 2
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 2
+  - id: vergleichen
+    typ: rechnung
+    generator: roemisch-vergleichen
+    parameter: { bereich: [1, 199] }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 2
+  - id: jahreszahlen
+    bezeichnung: "Jahreszahlen lesen"
+    typ: rechnung
+    generator: roemisch-in-zahl
+    parameter: { bereich: [1000, 2026], jahr: true }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 3
+    prioritaet: 1
+  - id: rechnen
+    typ: rechnung
+    generator: roemisch-rechnen
+    parameter: { bereich: [1, 50] }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 3
+    prioritaet: 2
+  - id: stellenwert
+    typ: richtig_falsch
+    frage: "In XXX ist jedes X gleich viel wert. In 333 ist jede 3 etwas anderes wert."
+    loesung: true
+    be: 1
+    schwierigkeit: 3
+    prioritaet: 3
+
+# Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
+klassenarbeit:
+  - id: ka-lesen
+    bezeichnung: "Klassenarbeit: Römische Zahlen lesen"
+    typ: rechnung
+    generator: roemisch-in-zahl
+    parameter: { bereich: [1, 3999] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-schreiben
+    bezeichnung: "Klassenarbeit: Zahlen römisch schreiben"
+    typ: rechnung
+    generator: zahl-in-roemisch
+    parameter: { bereich: [1, 3999] }
+    anzahl: 4
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-jahr
+    bezeichnung: "Klassenarbeit: Jahreszahl römisch schreiben"
+    typ: rechnung
+    generator: zahl-in-roemisch
+    parameter: { bereich: [1000, 2026], jahr: true }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-vergleichen
+    bezeichnung: "Klassenarbeit: Römische Zahlen vergleichen"
+    typ: rechnung
+    generator: roemisch-vergleichen
+    parameter: { bereich: [1, 999] }
+    anzahl: 3
+    be: 2
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-schreibweise
+    bezeichnung: "Klassenarbeit: Richtige Schreibweise erkennen"
+    typ: rechnung
+    generator: roemisch-schreibweise
+    parameter: { bereich: [4, 999] }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 2
+    afb: 2
+  - id: ka-fehler
+    bezeichnung: "Klassenarbeit: Fehler bei römischen Zahlen berichtigen"
+    typ: rechnung
+    generator: roemisch-fehler
+    parameter: { bereich: [4, 999] }
+    anzahl: 3
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-rechnen
+    bezeichnung: "Klassenarbeit: Mit römischen Zahlen rechnen"
+    typ: rechnung
+    generator: roemisch-rechnen
+    parameter: { bereich: [1, 100] }
+    anzahl: 3
+    be: 3
+    schwierigkeit: 3
+    afb: 2
+  - id: ka-zehnersystem
+    typ: freitext
+    frage: "Vergleiche die römischen Zahlen mit unserem Zehnersystem. Nenne zwei Unterschiede."
+    optionen:
+      - "Im Zehnersystem hängt der Wert einer Ziffer von ihrer Stelle ab, römische Zeichen haben immer denselben Wert. Außerdem gibt es römisch keine Null."
+      - "Römische Zahlen sind immer kürzer als Zahlen im Zehnersystem."
+      - "Im Zehnersystem gibt es nur sieben Ziffern, römisch gibt es zehn Zeichen."
+      - "Es gibt keinen Unterschied, nur die Zeichen sehen anders aus."
+    loesung: "Im Zehnersystem hängt der Wert einer Ziffer von ihrer Stelle ab, römische Zeichen haben immer denselben Wert. Außerdem gibt es römisch keine Null."
+    erwartung: "Zwei Unterschiede, z. B.: Das Zehnersystem ist ein Stellenwertsystem (in 333 ist jede 3 etwas anderes wert: 300, 30, 3), römische Zeichen haben einen festen Wert, der addiert oder abgezogen wird. Das Zehnersystem hat eine Null, das römische nicht. Römische Zahlen werden oft sehr lang (388 = CCCLXXXVIII). Das Zehnersystem kommt mit 10 Ziffern für alle Zahlen aus."
+    be: 2
+    schwierigkeit: 3
+    afb: 3
+  - id: ka-laenge
+    typ: freitext
+    frage: "Lisa sagt: „Je mehr Zeichen eine römische Zahl hat, desto größer ist sie.“ Hat Lisa recht? Begründe mit einem Beispiel."
+    optionen:
+      - "Nein. XXXVIII (38) hat sieben Zeichen, XL (40) nur zwei – und 40 ist größer."
+      - "Ja, denn jedes Zeichen macht die Zahl größer."
+      - "Ja, aber nur bei Zahlen über 100."
+      - "Nein, denn römische Zahlen haben immer gleich viele Zeichen."
+    loesung: "Nein. XXXVIII (38) hat sieben Zeichen, XL (40) nur zwei – und 40 ist größer."
+    erwartung: "Lisa hat nicht recht. Beispiel: XXXVIII = 38 hat sieben Zeichen, XL = 40 hat nur zwei Zeichen, ist aber größer. Es kommt auf den Wert der Zeichen an, nicht auf ihre Anzahl."
+    be: 2
+    schwierigkeit: 3
+    afb: 3

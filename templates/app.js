@@ -421,6 +421,9 @@
             : '<input id="antwort" class="eingabe" autocomplete="off" inputmode="numeric" placeholder="Zahl eingeben">')
           // Zahlwörter sind lang: mehrzeilig, damit das ganze Wort sichtbar bleibt
           : '<textarea id="antwort" class="eingabe wortfeld" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Als Wort schreiben"></textarea>');
+    } else if (t.eingabe === 'roemisch') {
+      koerper += (f.label ? '<label class="label" for="antwort">' + esc(f.label) + '</label>' : '') +
+        '<input id="antwort" class="eingabe" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Römisch, z. B. XIV">';
     } else if (t.eingabe === 'felder') {
       // 217 min = ∎ h ∎ min: ein Feld je Einheit
       koerper += (f.label ? '<p class="label">' + esc(f.label) + '</p>' : '') + '<div class="felder">' + t.felder.map(function (e, i) {
@@ -553,6 +556,8 @@
       if (b.length > 8 && abstand(a, b) === 1) return { richtig: true, hinweis: 'Fast perfekt! Achte auf die Schreibweise: ' + t.antwort };
       return { richtig: false };
     }
+    // römische Zahl: Groß/klein egal, Leerzeichen egal, aber jedes Zeichen zählt (XIV ≠ XVI)
+    if (t.eingabe === 'roemisch') return { richtig: String(eingabe).toUpperCase().replace(/[^IVXLCDM]/g, '') === t.loesung };
     if (t.eingabe === 'richtig_falsch') return { richtig: (eingabe === 'richtig') === t.loesung };
     return { richtig: String(eingabe) === String(t.loesung) };
   }

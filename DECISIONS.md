@@ -83,3 +83,13 @@ Neueste oben. Format: Datum · Entscheidung · Grund.
   - Im Katzenalbum schaltet der Code einen Pokal frei: Gold für Note 1, Silber für 2, Bronze für 3. Der Code besteht aus 3 Zeichen Kennung der Arbeit (Variante und Lernbereiche) und 3 Zeichen Prüfsumme über Kennung und Note. Die App braucht dafür keine Liste. Je Arbeit lässt sich nur ein Code einlösen.
   - Die Probe am Handy zeigt weiterhin keine Note. Die Arbeitsblatt-Codes bleiben unverändert (volle Punktzahl).
 - Randfall: Eine Arbeit nur aus „Daten und Diagramme“ wird 6 Seiten lang (Lösung 7), weil Zeichenaufgaben viel Platz brauchen. Mit mehreren Lernbereichen sind es etwa 4 Seiten.
+
+## 2026-11-22 – Thema „Römische Zahlen“ und die römische Katze
+
+- **Anlass:** Römische Zahlen sind gerade im Unterricht dran (Angabe der Eltern).
+- **Lehrplanbezug:** Der Lehrplan Mathematik 2026 (Erprobungsfassung) nennt römische Zahlen nicht als eigenes Lernziel. Er nennt sie aber in 2.1.2 „Natürliche Zahlen“ als Querschnittsaufgabe Kulturelle Bildung (S. 16): „Vergleich zu historischen Zahlendarstellungen (z. B. römische, babylonische Zahlen) thematisieren“. Das ist am PDF geprüft, deshalb `verifiziert: true`. Zahlenraum und Regeln legt der Lehrplan nicht fest.
+- **Schreibweise:** die heute übliche mit Subtraktion (IV, IX, XL, XC, CD, CM), höchstens dreimal dasselbe Zeichen, Zahlen 1 bis 3 999. IIII wird nur im Wissenswerten erwähnt (Uhren, alte Römer) und gilt in den Aufgaben als falsch.
+- **Neue Eingabeart `roemisch`:** einzeiliges Feld, Groß- und Kleinschreibung egal, aber **keine Tippfehler-Toleranz**, weil XIV und XVI sich nur um ein Zeichen unterscheiden.
+- **Generatoren** (`generator/tasks/math/roemisch.js`): lesen, schreiben (auch Jahreszahlen), richtige Schreibweise erkennen, vergleichen (die längere Zahl ist nicht immer die größere), rechnen mit römischem Ergebnis, Fehler berichtigen. Die Ablenker sind typische Kinderfehler: nur addiert (XXXXVIIII) oder falsch abgezogen (IL, IC). `tests/roemisch.test.js` prüft alle Zahlen von 1 bis 3 999 und jeden Generator mit 1000 Seeds gegen einen eigenen Parser.
+- **Klassenarbeit:** 22 BE im Pool, AFB III durch den Vergleich mit dem Zehnersystem (Stellenwert, Null) und „mehr Zeichen = größer?“.
+- **Römische Katze (Wunsch der Eltern):** Ein Römerhelm mit rotem Helmbusch wird frei, wenn das Thema einmal geschafft ist. Ein roter Römerumhang mit goldener Fibel kommt bei 3 Sternen dazu. Das Album-Motiv ist eine Steintafel „MMXXVI“. Auf den Album-Bildern dieses Themas trägt die Katze Helm und Umhang (`MOTIV_KOSTUEM`). Alles ist selbst gezeichnetes SVG.

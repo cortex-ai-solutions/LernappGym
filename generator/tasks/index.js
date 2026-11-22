@@ -8,6 +8,7 @@ const MODULE = [
   require('./math/groessen'),
   require('./math/kommazahlen'),
   require('./math/anspruchsvoll'),
+  require('./math/roemisch'),
 ];
 
 const GENERATOREN = {};

@@ -58,7 +58,7 @@ async function beantworte(page, richtig) {
   if (t.eingabe === 'felder') {
     const felder = await page.$$('.felder input');
     for (let i = 0; i < felder.length; i++) await felder[i].fill(richtig ? String(t.loesung[i]) : '999');
-  } else if (t.eingabe === 'zahl' || t.eingabe === 'wort') {
+  } else if (t.eingabe === 'zahl' || t.eingabe === 'wort' || t.eingabe === 'roemisch') {
     // Kommazahlen so eintippen, wie ein Kind es tut: mit Komma
     await page.fill('#antwort', richtig ? String(t.loesung).replace('.', ',') : '999999999');
   } else {
@@ -153,7 +153,10 @@ test('Webapp: alle Mathe-Themen durchspielen, offline nutzbar', { timeout: 18000
     // je Thema „geschafft“, bei Themen ohne Fehler (z. B. nur Zuordnungen) zusätzlich „3 Sterne“ und dann einmal der Ringelschal
     const neuZahl = Number((await page.textContent('#katze-karte [data-kz="album"]')).match(/(\d+) neu/)[1]);
     const dreiSterne = Object.values(stand.themen).filter((t) => t.sterne === 3).length;
-    assert.strictEqual(neuZahl, themen.length + dreiSterne + (dreiSterne ? 1 : 0));
+    // „Römische Zahlen“ geschafft → Römerhelm, mit 3 Sternen zusätzlich der Römerumhang
+    const roemisch = stand.themen['mathematik/roemische-zahlen'];
+    const roemerKatze = roemisch ? 1 + (roemisch.sterne === 3 ? 1 : 0) : 0;
+    assert.strictEqual(neuZahl, themen.length + dreiSterne + (dreiSterne ? 1 : 0) + roemerKatze);
     await page.click('#katze-karte [data-kz="album"]');
     await page.waitForSelector('.kz-album-dialog');
     assert.strictEqual((await page.$$('.kz-album-dialog .kz-platz.neu')).length, neuZahl);

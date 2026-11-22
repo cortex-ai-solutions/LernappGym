@@ -79,6 +79,13 @@ lernbereiche:
           - "Potenzen mit natürlichen Exponenten berechnen"
           - "Quadratzahlen bis 20² wiedergeben"
         schluesselbegriffe: [Potenz, Basis, Exponent, Quadratzahl]
+      - id: roemische-zahlen
+        bezug: "Querschnittsaufgabe Kulturelle Bildung (KB), S. 16: „Geschichte der natürlichen Zahlen, Sieb des Eratosthenes, historische Rechenhilfen, Vergleich zu historischen Zahlendarstellungen (z. B. römische, babylonische Zahlen) thematisieren“"
+        hinweis: "Kein eigenes Lernziel der Sach- und Methodenkompetenz, sondern Querschnittsaufgabe. Umfang (Zahlenraum, Regeln) legt die Lehrkraft fest. Im Unterricht laut Angabe der Eltern vom 22.11.2026."
+        lernziele:
+          - "Römische Zahlzeichen kennen, römische Zahlen lesen und schreiben (übliche Schreibweise mit Subtraktion)"
+          - "Römische Zahldarstellung mit dem Zehnersystem (Stellenwertsystem, Null) vergleichen"
+        schluesselbegriffe: [römische Zahl, Zahlzeichen, Additionsregel, Subtraktionsregel, Stellenwertsystem, Zehnersystem]
       - id: sachaufgaben
         lernziele:
           - "Alltagsprobleme lösen: mehrere Rechenoperationen verknüpfen, Überschlag und Probe, heuristische Mittel (informative Figur, Tabelle, systematisches Probieren), Lösungen prüfen und interpretieren, Lösungswege mit Fachbegriffen präsentieren"

@@ -138,7 +138,7 @@ const { klassenarbeitKoerper } = require('./render/klassenarbeit');
 
 module.exports = { instanz, fmt, parseZahl, gleich, stelleZusammen, notentabelle, note, kaCode, klassenarbeitKoerper };
 
-}, {"./generate":1,"./lib/zahlen":5,"./klassenarbeit":13,"./render/klassenarbeit":14}],
+}, {"./generate":1,"./lib/zahlen":5,"./klassenarbeit":14,"./render/klassenarbeit":15}],
 /* generate.js */ [function (module, exports, require) {
 // Macht aus einer Aufgabe der Inhaltsdatei eine konkrete Aufgabe (Instanz) – für Druck und Webapp gleich:
 // { id, typ, be, schwierigkeit, prioritaet, anweisung, teile: [{ label, text, loesung, antwort, eingabe, optionen? }],
@@ -249,6 +249,7 @@ const MODULE = [
   require('./math/groessen'),
   require('./math/kommazahlen'),
   require('./math/anspruchsvoll'),
+  require('./math/roemisch'),
 ];
 
 const GENERATOREN = {};
@@ -259,7 +260,7 @@ for (const g of MODULE.flat()) {
 
 module.exports = { GENERATOREN };
 
-}, {"./math/runden":4,"./math/zahldarstellung":6,"./math/rechnen":7,"./math/sachaufgaben":8,"./math/diagramm":10,"./math/groessen":9,"./math/kommazahlen":11,"./math/anspruchsvoll":12}],
+}, {"./math/runden":4,"./math/zahldarstellung":6,"./math/rechnen":7,"./math/sachaufgaben":8,"./math/diagramm":10,"./math/groessen":9,"./math/kommazahlen":11,"./math/anspruchsvoll":12,"./math/roemisch":13}],
 /* runden.js */ [function (module, exports, require) {
 const { fmt, runden, STELLEN, STELLEN_NAME } = require('../../lib/zahlen');
 
@@ -1943,6 +1944,234 @@ module.exports = [fehlerFinden, ziffernkarten, vorteilhaft, ueberschlag];
 module.exports.GROESSEN_PAARE = GROESSEN_PAARE;
 
 }, {"../../lib/zahlen":5,"./groessen":9,"./kommazahlen":11}],
+/* roemisch.js */ [function (module, exports, require) {
+// Römische Zahlen (Lehrplan 2.1.2, Querschnittsaufgabe KB: Vergleich zu historischen Zahlendarstellungen).
+// Heute übliche Schreibweise mit Subtraktion (IV, IX, XL, XC, CD, CM), Zahlen von 1 bis 3 999.
+const { fmt } = require('../../lib/zahlen');
+
+const ZEICHEN = [
+  [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'],
+  [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I'],
+];
+const WERT = { I: 1, V: 5, X: 10, L: 50, C: 100, D: 500, M: 1000 };
+
+function roemisch(n) {
+  if (!Number.isInteger(n) || n < 1 || n > 3999) throw new RangeError(`römisch: ${n} liegt nicht zwischen 1 und 3 999`);
+  let s = '';
+  for (const [w, z] of ZEICHEN) while (n >= w) { s += z; n -= w; }
+  return s;
+}
+
+// typische Fehler, die Kinder machen (für Ablenker und „Fehler finden“)
+// 1) nur addieren: 49 = XXXXVIIII
+function nurAddiert(n) {
+  return roemisch(n).replace('CM', 'DCCCC').replace('CD', 'CCCC').replace('XC', 'LXXXX')
+    .replace('XL', 'XXXX').replace('IX', 'VIIII').replace('IV', 'IIII');
+}
+// 2) falsch abgezogen: 49 = IL, 99 = IC, 1990 = MXM (I, X oder C vor jedem größeren Zeichen)
+const FALSCH_ZEICHEN = (() => {
+  const basis = Object.entries(WERT).map(([z, w]) => [w, z]);
+  const paare = [];
+  for (const [wk, k] of basis) for (const [wg, g] of basis) if ('IXC'.includes(k) && wk < wg) paare.push([wg - wk, k + g]);
+  return [...basis, ...paare].sort((a, b) => b[0] - a[0] || a[1].length - b[1].length);
+})();
+function falschAbgezogen(n) {
+  let s = '';
+  for (const [w, z] of FALSCH_ZEICHEN) while (n >= w) { s += z; n -= w; }
+  return s;
+}
+
+// ist s die übliche Schreibweise einer Zahl? (für vertauschte Ablenker: XVI ja, CMLXVX nein)
+function istGueltig(s) {
+  let summe = 0;
+  for (let i = 0; i < s.length; i++) {
+    const w = WERT[s[i]], danach = WERT[s[i + 1]] || 0;
+    summe += w < danach ? -w : w;
+  }
+  return summe >= 1 && summe <= 3999 && roemisch(summe) === s;
+}
+
+function pruefeBereich(p) {
+  const [min, max] = p.bereich || [];
+  if (!Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max > 3999 || min >= max) {
+    throw new Error('bereich: [min, max] mit 1 ≤ min < max ≤ 3 999 erwartet');
+  }
+}
+
+// Zahlen mit 4 oder 9 sind spannender (dort wird abgezogen): mit Wahrscheinlichkeit p bevorzugt
+function zieheZahl(rng, [min, max], spannend = 0.6) {
+  for (let i = 0; i < 20; i++) {
+    const n = rng.int(min, max);
+    if (rng.next() > spannend || /[49]/.test(String(n))) return n;
+  }
+  return rng.int(min, max);
+}
+
+function mehrere(p, rng, baue) {
+  const teile = [];
+  const gesehen = new Set();
+  let versuche = 0;
+  while (teile.length < (p.anzahl || 1)) {
+    const t = baue(rng);
+    if (gesehen.has(t.text) && versuche++ < 50) continue;
+    gesehen.add(t.text);
+    teile.push(t);
+  }
+  return teile;
+}
+
+// XLIV → 44 (oder als Jahreszahl: „Über einer Tür steht MDCCCXCVI.“)
+const inZahl = {
+  name: 'roemisch-in-zahl',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    return {
+      anweisung: p.jahr ? 'Welche Jahreszahl ist das? Schreibe sie mit unseren Ziffern.' : 'Schreibe die römische Zahl mit unseren Ziffern.',
+      teile: mehrere(p, rng, () => {
+        const n = zieheZahl(rng, p.bereich);
+        const r = roemisch(n);
+        return { text: r, loesung: n, antwort: p.jahr ? String(n) : fmt(n), eingabe: 'zahl', pruefung: { n } };
+      }),
+    };
+  },
+};
+
+// 44 → XLIV
+const inRoemisch = {
+  name: 'zahl-in-roemisch',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    return {
+      anweisung: p.jahr ? 'Schreibe die Jahreszahl als römische Zahl.' : 'Schreibe als römische Zahl.',
+      teile: mehrere(p, rng, () => {
+        const n = zieheZahl(rng, p.bereich);
+        const r = roemisch(n);
+        return { text: p.jahr ? String(n) : fmt(n), loesung: r, antwort: r, eingabe: 'roemisch', pruefung: { n } };
+      }),
+    };
+  },
+};
+
+// „Welche Schreibweise für 49 ist richtig?“ – genau eine Option ist die richtige Schreibweise der Zahl
+const richtigeSchreibweise = {
+  name: 'roemisch-schreibweise',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Welche Schreibweise ist richtig?',
+      teile: mehrere(p, rng, () => {
+        const n = zieheZahl(rng, p.bereich, 0.95);
+        const r = roemisch(n);
+        const [min, max] = p.bereich;
+        const kandidaten = [nurAddiert(n), falschAbgezogen(n),
+          // vertauschte Reihenfolge: XIV ↔ XVI
+          r.length >= 2 ? r.slice(0, -2) + r.slice(-1) + r.slice(-2, -1) : null,
+          ...[1, -1, 10, -10, 2].map((d) => (n + d >= 1 && n + d <= 3999 && n + d >= min - 10 && n + d <= max + 10 ? roemisch(n + d) : null))];
+        kandidaten[2] = kandidaten[2] && istGueltig(kandidaten[2]) ? kandidaten[2] : null;
+        const ablenker = [...new Set(kandidaten.filter((k) => k && k !== r))].slice(0, 3);
+        return {
+          text: `Die Zahl ${fmt(n)}`,
+          loesung: r,
+          antwort: r,
+          eingabe: 'wahl',
+          optionen: rng.shuffle([r, ...ablenker]),
+          pruefung: { n },
+        };
+      }),
+    };
+  },
+};
+
+// XXXVIII ∎ XL – die längere Zahl ist nicht immer die größere
+const vergleichen = {
+  name: 'roemisch-vergleichen',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    const [min, max] = p.bereich;
+    return {
+      anweisung: 'Setze <, > oder = ein.',
+      teile: mehrere(p, rng, () => {
+        for (;;) {
+          const a = zieheZahl(rng, p.bereich);
+          const b = rng.next() < 0.1 ? a : a + rng.pick([-1, 1]) * rng.int(1, Math.max(2, Math.round((max - min) / 8)));
+          if (b < min || b > max) continue;
+          const zeichen = a < b ? '<' : a > b ? '>' : '=';
+          return {
+            text: `${roemisch(a)} ∎ ${roemisch(b)}`,
+            loesung: zeichen,
+            antwort: `${roemisch(a)} ${zeichen} ${roemisch(b)}`,
+            eingabe: 'wahl',
+            optionen: ['<', '>', '='],
+            pruefung: { a, b },
+          };
+        }
+      }),
+    };
+  },
+};
+
+// XII + IX = XXI – Ergebnis wieder römisch
+const rechnen = {
+  name: 'roemisch-rechnen',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    const [min, max] = p.bereich;
+    return {
+      anweisung: 'Rechne. Schreibe das Ergebnis als römische Zahl.',
+      teile: mehrere(p, rng, () => {
+        for (;;) {
+          const a = rng.int(min, max);
+          const b = rng.int(min, max);
+          const plus = rng.next() < 0.5;
+          const e = plus ? a + b : a - b;
+          if (e < 1 || e > max || (!plus && b >= a)) continue;
+          return {
+            text: `${roemisch(a)} ${plus ? '+' : '−'} ${roemisch(b)} = ∎`,
+            loesung: roemisch(e),
+            antwort: roemisch(e),
+            eingabe: 'roemisch',
+            breit: true,
+            pruefung: { a, b, op: plus ? '+' : '-' },
+          };
+        }
+      }),
+    };
+  },
+};
+
+// Fehler finden: „Tim schreibt 49 = IL.“ → richtig: XLIX
+const NAMEN = ['Tim', 'Lea', 'Ben', 'Mia', 'Paul', 'Emma', 'Noah', 'Lina'];
+const fehler = {
+  name: 'roemisch-fehler',
+  pruefe: pruefeBereich,
+  erzeuge(p, rng) {
+    return {
+      anweisung: 'Hier hat sich jemand verschrieben. Schreibe die Zahl richtig als römische Zahl.',
+      teile: mehrere(p, rng, () => {
+        for (;;) {
+          const n = zieheZahl(rng, p.bereich, 1);
+          const r = roemisch(n);
+          const falsch = rng.next() < 0.5 ? falschAbgezogen(n) : nurAddiert(n);
+          if (falsch === r) continue;
+          return {
+            text: `${rng.pick(NAMEN)} schreibt: ${fmt(n)} = ${falsch}`,
+            loesung: r,
+            antwort: r,
+            eingabe: 'roemisch',
+            pruefung: { n, falsch },
+          };
+        }
+      }),
+    };
+  },
+};
+
+module.exports = [inZahl, inRoemisch, richtigeSchreibweise, vergleichen, rechnen, fehler];
+module.exports.roemisch = roemisch;
+module.exports.nurAddiert = nurAddiert;
+module.exports.falschAbgezogen = falschAbgezogen;
+
+}, {"../../lib/zahlen":5}],
 /* klassenarbeit.js */ [function (module, exports, require) {
 // Klassenarbeit aus mehreren Lernbereichen zusammenstellen (läuft im Build und im Browser, ohne Dateizugriff).
 // Grundlage: die Abschnitte "klassenarbeit:" der gewählten Themen und die übergreifenden Aufgaben (_uebergreifend.yaml).
@@ -2114,7 +2343,7 @@ function klassenarbeitKoerper(ka, { loesung = false, fach = 'mathematik', klasse
 
 module.exports = { klassenarbeitKoerper, AFB_NAME };
 
-}, {"./aufgabe":15}],
+}, {"./aufgabe":16}],
 /* aufgabe.js */ [function (module, exports, require) {
 // Eine Aufgabe (Instanz aus generate.js) als Druck-HTML: je nach Eingabeart Schreiblinie, Kästchen, Ankreuzfeld,
 // Kästchenraster oder Diagramm. Im Lösungsmodus stehen die Antworten an derselben Stelle wie die leeren Felder.
@@ -2208,7 +2437,7 @@ function aufgabeHtml(a, nr, { loesung, mitBe }) {
 
 module.exports = { aufgabeHtml, teilHtml, zahlenMono, esc, WELLE, FACH };
 
-}, {"./svg":16,"../lib/zahlen":5}],
+}, {"./svg":17,"../lib/zahlen":5}],
 /* svg.js */ [function (module, exports, require) {
 // Schwarz-Weiß-taugliche SVG-Grafiken für den Druck: Diagramme, Strichlisten, Kästchenraster.
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -2299,7 +2528,7 @@ module.exports = { diagramm, striche, raster, esc };
   }
   window["LW"] = load(0);
 })();</script>
-<script>window.KA_DATEN = {"themen":[{"thema":"grosse-zahlen","titel":"Große Zahlen lesen und schreiben","reihenfolge":1,"klassenarbeit":[{"id":"ka-in-ziffern","bezeichnung":"Klassenarbeit: Zahl in Ziffern (bis Milliarden)","typ":"eingabe","generator":"zahl-in-ziffern","parameter":{"bereich":[10000000,999999999999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-in-worten","bezeichnung":"Klassenarbeit: Zahl in Worten (Millionen)","typ":"freitext","generator":"zahl-in-worten","parameter":{"bereich":[1000000,99999999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-stellenwert","bezeichnung":"Klassenarbeit: Stellenwert großer Zahlen","typ":"multiple_choice","generator":"stellenwert","parameter":{"bereich":[10000000,999999999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vergleichen","bezeichnung":"Klassenarbeit: Große Zahlen vergleichen","typ":"multiple_choice","generator":"vergleichen","parameter":{"bereich":[1000000,999999999]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vorgaenger-nachfolger","bezeichnung":"Klassenarbeit: Vorgänger und Nachfolger","typ":"eingabe","generator":"vorgaenger-nachfolger","parameter":{"bereich":[1000000,999999999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":2},{"id":"ka-ziffernkarten","bezeichnung":"Klassenarbeit: Ziffernkarten","typ":"rechnung","generator":"ziffernkarten","be":3,"schwierigkeit":3,"afb":2},{"id":"ka-mehr-ziffern","typ":"freitext","frage":"Lea sagt: „Von zwei natürlichen Zahlen ist die Zahl mit mehr Ziffern immer die größere.“ Hat Lea recht? Begründe mit einem Beispiel.","optionen":["Ja. Bei mehr Ziffern ist eine höhere Stelle besetzt, zum Beispiel ist 10 000 größer als 9 999.","Nein. 9 999 ist größer als 10 000, weil 9 die größte Ziffer ist.","Nein. Es kommt nur auf die erste Ziffer an.","Ja, aber nur bei geraden Zahlen."],"loesung":"Ja. Bei mehr Ziffern ist eine höhere Stelle besetzt, zum Beispiel ist 10 000 größer als 9 999.","erwartung":"Lea hat recht (natürliche Zahlen, keine Null vorn). Eine Zahl mit mehr Ziffern hat eine höhere Stelle besetzt. Beispiel: 10 000 hat 5 Ziffern und ist größer als 9 999 mit 4 Ziffern.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"runden","titel":"Natürliche Zahlen runden","reihenfolge":2,"klassenarbeit":[{"id":"ka-runden-reihe","bezeichnung":"Klassenarbeit: Eine Zahl auf alle Stellen runden","typ":"rechnung","generator":"runden-reihe","parameter":{"stellen":["zehner","hunderter","tausender","zehntausender","hunderttausender"],"ziffern":[7]},"be":3,"schwierigkeit":2,"afb":1},{"id":"ka-runden-gross","bezeichnung":"Klassenarbeit: Große Zahlen runden","typ":"rechnung","generator":"runden","parameter":{"stellen":["tausender","zehntausender","hunderttausender"],"ziffern":[7,8]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-runden-uebertrag","bezeichnung":"Klassenarbeit: Runden mit Übertrag","typ":"rechnung","generator":"runden","parameter":{"stellen":["hunderter","tausender"],"ziffern":[6,7],"uebertrag":true},"anzahl":3,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-rueckwaerts","bezeichnung":"Klassenarbeit: Rückwärts denken beim Runden","typ":"rechnung","generator":"runden-rueckwaerts","parameter":{"stellen":["hunderter","tausender"]},"anzahl":2,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler beim Runden finden","typ":"rechnung","generator":"fehler-finden","parameter":{"art":"runden"},"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-welche-zahl","typ":"multiple_choice","frage":"Welche Zahl ergibt auf Tausender gerundet 48 000?","optionen":["47 499","47 500","48 500","48 501"],"loesung":"47 500","be":1,"schwierigkeit":2,"afb":2},{"id":"ka-zweimal-runden","typ":"freitext","frage":"Max rundet 3 462 zuerst auf Hunderter und das Ergebnis dann auf Tausender. Er erhält 4 000. Direkt auf Tausender gerundet ergibt sich aber 3 000. Erkläre, woran das liegt.","optionen":["Max hat zweimal gerundet. Man rundet nur einmal und schaut dabei auf die Hunderterziffer 4.","Max hätte auf die Einerziffer schauen müssen.","Beide Ergebnisse sind richtig.","Beim Runden auf Tausender rundet man immer ab."],"loesung":"Max hat zweimal gerundet. Man rundet nur einmal und schaut dabei auf die Hunderterziffer 4.","erwartung":"Beim ersten Runden wird 3 462 zu 3 500, beim zweiten 3 500 zu 4 000. So wird zweimal aufgerundet. Richtig ist, nur einmal zu runden: Für Tausender entscheidet die Hunderterziffer 4, also wird auf 3 000 abgerundet.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"grundrechenarten","titel":"Rechnen mit natürlichen Zahlen","reihenfolge":3,"klassenarbeit":[{"id":"ka-kopfrechnen","bezeichnung":"Klassenarbeit: Kopfrechnen mit größeren Zahlen","typ":"rechnung","generator":"kopfrechnen","parameter":{"operationen":["+","-","*",":"],"bereich":[12,300],"faktor":[11,25]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-platzhalter","bezeichnung":"Klassenarbeit: Platzhalteraufgaben","typ":"rechnung","generator":"platzhalter","parameter":{"operationen":["+","-","*",":"],"bereich":[12,300],"faktor":[11,25]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":2},{"id":"ka-fachbegriffe","bezeichnung":"Klassenarbeit: Fachbegriffe (Summe, Differenz, Produkt, Quotient)","typ":"rechnung","generator":"fachbegriffe","parameter":{"operationen":["+","-","*",":"],"bereich":[12,250],"faktor":[11,20]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vorteilhaft","bezeichnung":"Klassenarbeit: Vorteilhaft rechnen","typ":"rechnung","generator":"vorteilhaft","anzahl":3,"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-verkettet","bezeichnung":"Klassenarbeit: Rechnen mit Fachbegriffen","typ":"rechnung","generator":"verkettet","parameter":{"operationen":["+","-"],"bereich":[20,120]},"anzahl":2,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-probe","typ":"multiple_choice","frage":"Jonas hat 1 008 : 12 = 84 gerechnet. Mit welcher Rechnung kann er die Probe machen?","optionen":["84 · 12","1 008 · 12","84 + 12","1 008 − 84"],"loesung":"84 · 12","be":1,"schwierigkeit":2,"afb":2},{"id":"ka-durch-null","typ":"freitext","frage":"0 : 7 = 0 ist richtig. Aber 7 : 0 kann man nicht ausrechnen. Erkläre, warum.","optionen":["Die Probe müsste ? · 0 = 7 sein. Jede Zahl mal 0 ergibt aber 0, nie 7.","7 : 0 = 7, weil sich durch 0 nichts ändert.","7 : 0 = 0, weil man 0 Teile bekommt.","Weil 7 eine ungerade Zahl ist."],"loesung":"Die Probe müsste ? · 0 = 7 sein. Jede Zahl mal 0 ergibt aber 0, nie 7.","erwartung":"Zur Division gehört die Umkehraufgabe: 7 : 0 = ? müsste ? · 0 = 7 bedeuten. Jede Zahl mal 0 ergibt 0, nie 7. Deshalb kann man nicht durch 0 teilen.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"sachaufgaben","titel":"Sachaufgaben lösen","reihenfolge":4,"klassenarbeit":[{"id":"ka-tierbeine","bezeichnung":"Klassenarbeit: Sachaufgabe Tierbeine","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["tierbeine"]},"be":2,"schwierigkeit":1,"afb":1},{"id":"ka-rueckgeld","bezeichnung":"Klassenarbeit: Sachaufgabe Rückgeld","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["rueckgeld"]},"be":3,"schwierigkeit":2,"afb":1},{"id":"ka-klassenfahrt","bezeichnung":"Klassenarbeit: Sachaufgabe Klassenfahrt","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["klassenfahrt"]},"be":4,"schwierigkeit":3,"afb":2},{"id":"ka-mitglieder","bezeichnung":"Klassenarbeit: Sachaufgabe Mitglieder (rückwärts rechnen)","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["mitglieder"]},"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-fahrkarten","bezeichnung":"Klassenarbeit: Sachaufgabe Fahrkarten","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["fahrkarten"]},"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-sparen","bezeichnung":"Klassenarbeit: Sachaufgabe Sparen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["sparen"]},"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-rest-deuten","typ":"freitext","frage":"143 Kinder fahren ins Schullandheim. In einen Bus passen 30 Kinder. Paul rechnet 143 : 30 = 4 Rest 23 und sagt: „4 Busse reichen.“ Hat Paul recht? Begründe.","optionen":["Nein. 23 Kinder bleiben übrig, für sie braucht man noch einen Bus. Es sind 5 Busse nötig.","Ja. Der Rest wird beim Teilen immer weggelassen.","Nein. Man braucht 6 Busse, weil man immer zwei Busse dazunimmt.","Ja. 4 Busse mit je 30 Kindern sind 143 Kinder."],"loesung":"Nein. 23 Kinder bleiben übrig, für sie braucht man noch einen Bus. Es sind 5 Busse nötig.","erwartung":"Paul hat nicht recht. In 4 Busse passen nur 4 · 30 = 120 Kinder. Die übrigen 23 Kinder brauchen einen weiteren Bus, also sind 5 Busse nötig.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"daten-diagramme","titel":"Daten erfassen und darstellen","reihenfolge":5,"klassenarbeit":[{"id":"ka-saeulen-zeichnen","bezeichnung":"Klassenarbeit: Säulendiagramm zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"saeule","quelle":"strichliste","kategorien":5,"max":12},"be":5,"schwierigkeit":2,"afb":1},{"id":"ka-balken-zeichnen","bezeichnung":"Klassenarbeit: Balkendiagramm zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"balken","quelle":"tabelle","kategorien":6,"max":14},"be":5,"schwierigkeit":2,"afb":1},{"id":"ka-ablesen","bezeichnung":"Klassenarbeit: Diagramm ablesen und vergleichen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"saeule","kategorien":6},"anzahl":4,"be":4,"schwierigkeit":2,"afb":2},{"id":"ka-ablesen-balken","bezeichnung":"Klassenarbeit: Balkendiagramm ablesen und vergleichen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"balken","kategorien":5},"anzahl":3,"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-strichliste","typ":"multiple_choice","frage":"Bei einer Umfrage wurde „Fahrrad“ 23-mal genannt. Wie sieht die Strichliste dafür aus?","optionen":["4 Fünferpäckchen und 3 einzelne Striche","3 Fünferpäckchen und 4 einzelne Striche","2 Fünferpäckchen und 3 einzelne Striche","4 Fünferpäckchen und 2 einzelne Striche"],"loesung":"4 Fünferpäckchen und 3 einzelne Striche","be":1,"schwierigkeit":1,"afb":1},{"id":"ka-rangliste","typ":"multiple_choice","frage":"Die Häufigkeiten einer Umfrage sind: Hund 7, Katze 12, Pferd 3, Hamster 9. Welche Rangliste (von der häufigsten zur seltensten Nennung) stimmt?","optionen":["Katze, Hamster, Hund, Pferd","Hund, Katze, Pferd, Hamster","Katze, Hund, Hamster, Pferd","Pferd, Hund, Hamster, Katze"],"loesung":"Katze, Hamster, Hund, Pferd","be":1,"schwierigkeit":1,"afb":1},{"id":"ka-irrefuehrend","typ":"freitext","frage":"Zwei Klassen haben Kastanien gesammelt: die 5a 42 kg, die 5b 48 kg. In einem Säulendiagramm beginnt die Achse erst bei 40 kg. Dadurch ist die Säule der 5b viermal so hoch wie die der 5a. Was ist an diesem Diagramm irreführend?","optionen":["Die Achse beginnt nicht bei 0. So sieht der Unterschied viel größer aus, als er ist: 48 kg sind nicht viermal so viel wie 42 kg.","Nichts, die 5b hat wirklich viermal so viel gesammelt.","Die Säulen müssten waagerecht liegen.","Die Säule der 5a müsste höher sein als die der 5b."],"loesung":"Die Achse beginnt nicht bei 0. So sieht der Unterschied viel größer aus, als er ist: 48 kg sind nicht viermal so viel wie 42 kg.","erwartung":"Die Achse beginnt bei 40 kg statt bei 0. Die 5a hat nur 6 kg weniger gesammelt (48 − 42 = 6), die Säulen täuschen aber einen viermal so großen Wert vor. Richtig wäre eine Achse ab 0.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"laengen-massen","titel":"Längen und Massen umrechnen","reihenfolge":6,"klassenarbeit":[{"id":"ka-laenge-komma","bezeichnung":"Klassenarbeit: Längen umrechnen mit Komma","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"laenge","modus":"komma"},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-gemischt","bezeichnung":"Klassenarbeit: Längen und Massen gemischt umrechnen","typ":"rechnung","generator":"umrechnen","parameter":{"groessen":["laenge","masse"],"modus":"gemischt","komma":true},"anzahl":4,"be":2,"schwierigkeit":2,"afb":2},{"id":"ka-vergleichen","bezeichnung":"Klassenarbeit: Längen und Massen vergleichen","typ":"rechnung","generator":"groessen-vergleichen","parameter":{"groessen":["laenge","masse"]},"anzahl":4,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler beim Umrechnen finden","typ":"rechnung","generator":"fehler-finden","parameter":{"art":"groessen","einheiten":["m","km","kg","t","cm"]},"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-bretter","bezeichnung":"Klassenarbeit: Sachaufgabe Bretter sägen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["bretter"]},"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-pakete","bezeichnung":"Klassenarbeit: Sachaufgabe Paket (Massen)","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["pakete"]},"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-ordnen","typ":"multiple_choice","frage":"Ordne die Strecken vom kürzesten zum längsten: 2,3 km; 2 080 m; 210 000 cm; 2 250 000 mm. Welche Reihenfolge stimmt?","optionen":["2 080 m \u003c 210 000 cm \u003c 2 250 000 mm \u003c 2,3 km","2,3 km \u003c 2 080 m \u003c 210 000 cm \u003c 2 250 000 mm","210 000 cm \u003c 2 080 m \u003c 2,3 km \u003c 2 250 000 mm","2 080 m \u003c 2,3 km \u003c 210 000 cm \u003c 2 250 000 mm"],"loesung":"2 080 m \u003c 210 000 cm \u003c 2 250 000 mm \u003c 2,3 km","be":2,"schwierigkeit":3,"afb":2},{"id":"ka-komma-schreibweise","typ":"freitext","frage":"Warum darf man 4 m 7 cm nicht als 4,7 m schreiben? Begründe und gib die richtige Schreibweise an.","optionen":["7 cm sind 7 Hundertstel Meter. Richtig ist 4,07 m. 4,7 m wären 4 m 70 cm.","Weil man Meter nie mit Komma schreibt.","4,7 m ist richtig, man darf es so schreiben.","Weil 1 m = 1 000 cm sind."],"loesung":"7 cm sind 7 Hundertstel Meter. Richtig ist 4,07 m. 4,7 m wären 4 m 70 cm.","erwartung":"1 m = 100 cm, also ist 1 cm ein Hundertstel Meter. 7 cm stehen an der Hundertstelstelle: 4 m 7 cm = 4,07 m. 4,7 m wären 4 m 70 cm.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"zeit","titel":"Zeit umrechnen","reihenfolge":7,"klassenarbeit":[{"id":"ka-gemischt","bezeichnung":"Klassenarbeit: Zeit gemischt umrechnen","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"zeit","einheiten":["s","min","h"],"modus":"gemischt"},"anzahl":3,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-zerlegen","bezeichnung":"Klassenarbeit: Zeitangaben zerlegen","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"zeit","einheiten":["s","min","h"],"modus":"zerlegen"},"anzahl":3,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vergleichen","bezeichnung":"Klassenarbeit: Zeitspannen vergleichen","typ":"rechnung","generator":"groessen-vergleichen","parameter":{"groesse":"zeit","einheiten":["s","min","h"]},"anzahl":3,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler beim Umrechnen der Zeit finden","typ":"rechnung","generator":"fehler-finden","parameter":{"art":"groessen","einheiten":["h","min"]},"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-umstieg","bezeichnung":"Klassenarbeit: Sachaufgabe Zugfahrt mit Umsteigen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["umstieg"]},"be":4,"schwierigkeit":3,"afb":2},{"id":"ka-training","bezeichnung":"Klassenarbeit: Sachaufgabe Trainingszeit","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["training"]},"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-kein-komma","typ":"freitext","frage":"Ole sagt: „2 h 30 min sind 2,30 h.“ Erkläre, warum das falsch ist.","optionen":["Eine Stunde hat 60 Minuten, nicht 100. Die Kommaschreibweise passt nur zu den Umrechnungszahlen 10, 100 und 1 000.","Es müsste 2,03 h heißen.","Es ist richtig, die 30 Minuten stehen hinter dem Komma.","Man darf Stunden und Minuten nie zusammen aufschreiben."],"loesung":"Eine Stunde hat 60 Minuten, nicht 100. Die Kommaschreibweise passt nur zu den Umrechnungszahlen 10, 100 und 1 000.","erwartung":"Bei der Zeit ist die Umrechnungszahl 60 (1 h = 60 min). Hinter dem Komma stehen aber Zehntel und Hundertstel. 30 min sind eine halbe Stunde, nicht 30 Hundertstel Stunden.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"kommazahlen","titel":"Kommazahlen: Komma verschieben und rechnen","reihenfolge":8,"klassenarbeit":[{"id":"ka-verschieben","bezeichnung":"Klassenarbeit: Komma verschieben","typ":"rechnung","generator":"komma-verschieben","parameter":{"operationen":["*",":"]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-welcher-faktor","bezeichnung":"Klassenarbeit: Welche Zahl fehlt? (10, 100, 1 000)","typ":"rechnung","generator":"komma-verschieben","parameter":{"modus":"platzhalter"},"anzahl":3,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-plus-minus","bezeichnung":"Klassenarbeit: Kommazahlen plus und minus","typ":"rechnung","generator":"komma-rechnen","parameter":{"operationen":["+","-"]},"anzahl":3,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-mal-geteilt","bezeichnung":"Klassenarbeit: Kommazahlen mal und geteilt","typ":"rechnung","generator":"komma-rechnen","parameter":{"operationen":["*",":"],"maxGanz":9},"anzahl":2,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler beim Komma verschieben finden","typ":"rechnung","generator":"fehler-finden","parameter":{"art":"komma"},"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-preisvergleich","bezeichnung":"Klassenarbeit: Sachaufgabe Preisvergleich","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["preisvergleich"]},"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-einkauf","bezeichnung":"Klassenarbeit: Sachaufgabe Einkauf","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["einkauf"]},"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-groesser","typ":"freitext","frage":"Tim sagt: „0,45 ist größer als 0,5, weil 45 größer als 5 ist.“ Hat Tim recht? Begründe.","optionen":["Nein. 0,5 = 0,50. 50 Hundertstel sind mehr als 45 Hundertstel, also ist 0,5 größer.","Ja. Die Zahl mit mehr Ziffern nach dem Komma ist größer.","Ja. 45 ist größer als 5.","Nein. 0,45 und 0,5 sind gleich groß."],"loesung":"Nein. 0,5 = 0,50. 50 Hundertstel sind mehr als 45 Hundertstel, also ist 0,5 größer.","erwartung":"Tim hat nicht recht. Man vergleicht Stelle für Stelle: Zehntel 5 bei 0,5 gegen 4 bei 0,45. Oder: 0,5 = 0,50, und 50 Hundertstel sind mehr als 45 Hundertstel.","be":2,"schwierigkeit":3,"afb":3}]}],"uebergreifend":[{"id":"einwohner","bezeichnung":"Klassenarbeit: Einwohnerzahlen runden und vergleichen","themen":["grosse-zahlen","runden"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["einwohner"]},"be":5,"schwierigkeit":3,"afb":2},{"id":"ueberschlag","bezeichnung":"Klassenarbeit: Überschlag und genaue Rechnung","themen":["runden","grundrechenarten"],"typ":"rechnung","generator":"ueberschlag","be":3,"schwierigkeit":3,"afb":2},{"id":"ausflug","bezeichnung":"Klassenarbeit: Zugfahrt in den Zoo (Zeit und Geld)","themen":["zeit","kommazahlen"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["ausflug"]},"be":5,"schwierigkeit":3,"afb":2},{"id":"porto","bezeichnung":"Klassenarbeit: Paket wiegen und Porto bestimmen","themen":["laengen-massen","kommazahlen"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["porto"]},"be":4,"schwierigkeit":3,"afb":2},{"id":"laufen","bezeichnung":"Klassenarbeit: Runden laufen (Länge und Zeit)","themen":["laengen-massen","zeit"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["laufen"]},"be":4,"schwierigkeit":3,"afb":2},{"id":"monatskarten","bezeichnung":"Klassenarbeit: Diagramm ablesen und weiterrechnen","themen":["daten-diagramme","grundrechenarten"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["monatskarten"]},"be":4,"schwierigkeit":3,"afb":2}]};</script>
+<script>window.KA_DATEN = {"themen":[{"thema":"grosse-zahlen","titel":"Große Zahlen lesen und schreiben","reihenfolge":1,"klassenarbeit":[{"id":"ka-in-ziffern","bezeichnung":"Klassenarbeit: Zahl in Ziffern (bis Milliarden)","typ":"eingabe","generator":"zahl-in-ziffern","parameter":{"bereich":[10000000,999999999999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-in-worten","bezeichnung":"Klassenarbeit: Zahl in Worten (Millionen)","typ":"freitext","generator":"zahl-in-worten","parameter":{"bereich":[1000000,99999999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-stellenwert","bezeichnung":"Klassenarbeit: Stellenwert großer Zahlen","typ":"multiple_choice","generator":"stellenwert","parameter":{"bereich":[10000000,999999999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vergleichen","bezeichnung":"Klassenarbeit: Große Zahlen vergleichen","typ":"multiple_choice","generator":"vergleichen","parameter":{"bereich":[1000000,999999999]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vorgaenger-nachfolger","bezeichnung":"Klassenarbeit: Vorgänger und Nachfolger","typ":"eingabe","generator":"vorgaenger-nachfolger","parameter":{"bereich":[1000000,999999999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":2},{"id":"ka-ziffernkarten","bezeichnung":"Klassenarbeit: Ziffernkarten","typ":"rechnung","generator":"ziffernkarten","be":3,"schwierigkeit":3,"afb":2},{"id":"ka-mehr-ziffern","typ":"freitext","frage":"Lea sagt: „Von zwei natürlichen Zahlen ist die Zahl mit mehr Ziffern immer die größere.“ Hat Lea recht? Begründe mit einem Beispiel.","optionen":["Ja. Bei mehr Ziffern ist eine höhere Stelle besetzt, zum Beispiel ist 10 000 größer als 9 999.","Nein. 9 999 ist größer als 10 000, weil 9 die größte Ziffer ist.","Nein. Es kommt nur auf die erste Ziffer an.","Ja, aber nur bei geraden Zahlen."],"loesung":"Ja. Bei mehr Ziffern ist eine höhere Stelle besetzt, zum Beispiel ist 10 000 größer als 9 999.","erwartung":"Lea hat recht (natürliche Zahlen, keine Null vorn). Eine Zahl mit mehr Ziffern hat eine höhere Stelle besetzt. Beispiel: 10 000 hat 5 Ziffern und ist größer als 9 999 mit 4 Ziffern.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"runden","titel":"Natürliche Zahlen runden","reihenfolge":2,"klassenarbeit":[{"id":"ka-runden-reihe","bezeichnung":"Klassenarbeit: Eine Zahl auf alle Stellen runden","typ":"rechnung","generator":"runden-reihe","parameter":{"stellen":["zehner","hunderter","tausender","zehntausender","hunderttausender"],"ziffern":[7]},"be":3,"schwierigkeit":2,"afb":1},{"id":"ka-runden-gross","bezeichnung":"Klassenarbeit: Große Zahlen runden","typ":"rechnung","generator":"runden","parameter":{"stellen":["tausender","zehntausender","hunderttausender"],"ziffern":[7,8]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-runden-uebertrag","bezeichnung":"Klassenarbeit: Runden mit Übertrag","typ":"rechnung","generator":"runden","parameter":{"stellen":["hunderter","tausender"],"ziffern":[6,7],"uebertrag":true},"anzahl":3,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-rueckwaerts","bezeichnung":"Klassenarbeit: Rückwärts denken beim Runden","typ":"rechnung","generator":"runden-rueckwaerts","parameter":{"stellen":["hunderter","tausender"]},"anzahl":2,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler beim Runden finden","typ":"rechnung","generator":"fehler-finden","parameter":{"art":"runden"},"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-welche-zahl","typ":"multiple_choice","frage":"Welche Zahl ergibt auf Tausender gerundet 48 000?","optionen":["47 499","47 500","48 500","48 501"],"loesung":"47 500","be":1,"schwierigkeit":2,"afb":2},{"id":"ka-zweimal-runden","typ":"freitext","frage":"Max rundet 3 462 zuerst auf Hunderter und das Ergebnis dann auf Tausender. Er erhält 4 000. Direkt auf Tausender gerundet ergibt sich aber 3 000. Erkläre, woran das liegt.","optionen":["Max hat zweimal gerundet. Man rundet nur einmal und schaut dabei auf die Hunderterziffer 4.","Max hätte auf die Einerziffer schauen müssen.","Beide Ergebnisse sind richtig.","Beim Runden auf Tausender rundet man immer ab."],"loesung":"Max hat zweimal gerundet. Man rundet nur einmal und schaut dabei auf die Hunderterziffer 4.","erwartung":"Beim ersten Runden wird 3 462 zu 3 500, beim zweiten 3 500 zu 4 000. So wird zweimal aufgerundet. Richtig ist, nur einmal zu runden: Für Tausender entscheidet die Hunderterziffer 4, also wird auf 3 000 abgerundet.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"grundrechenarten","titel":"Rechnen mit natürlichen Zahlen","reihenfolge":3,"klassenarbeit":[{"id":"ka-kopfrechnen","bezeichnung":"Klassenarbeit: Kopfrechnen mit größeren Zahlen","typ":"rechnung","generator":"kopfrechnen","parameter":{"operationen":["+","-","*",":"],"bereich":[12,300],"faktor":[11,25]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-platzhalter","bezeichnung":"Klassenarbeit: Platzhalteraufgaben","typ":"rechnung","generator":"platzhalter","parameter":{"operationen":["+","-","*",":"],"bereich":[12,300],"faktor":[11,25]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":2},{"id":"ka-fachbegriffe","bezeichnung":"Klassenarbeit: Fachbegriffe (Summe, Differenz, Produkt, Quotient)","typ":"rechnung","generator":"fachbegriffe","parameter":{"operationen":["+","-","*",":"],"bereich":[12,250],"faktor":[11,20]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vorteilhaft","bezeichnung":"Klassenarbeit: Vorteilhaft rechnen","typ":"rechnung","generator":"vorteilhaft","anzahl":3,"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-verkettet","bezeichnung":"Klassenarbeit: Rechnen mit Fachbegriffen","typ":"rechnung","generator":"verkettet","parameter":{"operationen":["+","-"],"bereich":[20,120]},"anzahl":2,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-probe","typ":"multiple_choice","frage":"Jonas hat 1 008 : 12 = 84 gerechnet. Mit welcher Rechnung kann er die Probe machen?","optionen":["84 · 12","1 008 · 12","84 + 12","1 008 − 84"],"loesung":"84 · 12","be":1,"schwierigkeit":2,"afb":2},{"id":"ka-durch-null","typ":"freitext","frage":"0 : 7 = 0 ist richtig. Aber 7 : 0 kann man nicht ausrechnen. Erkläre, warum.","optionen":["Die Probe müsste ? · 0 = 7 sein. Jede Zahl mal 0 ergibt aber 0, nie 7.","7 : 0 = 7, weil sich durch 0 nichts ändert.","7 : 0 = 0, weil man 0 Teile bekommt.","Weil 7 eine ungerade Zahl ist."],"loesung":"Die Probe müsste ? · 0 = 7 sein. Jede Zahl mal 0 ergibt aber 0, nie 7.","erwartung":"Zur Division gehört die Umkehraufgabe: 7 : 0 = ? müsste ? · 0 = 7 bedeuten. Jede Zahl mal 0 ergibt 0, nie 7. Deshalb kann man nicht durch 0 teilen.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"sachaufgaben","titel":"Sachaufgaben lösen","reihenfolge":4,"klassenarbeit":[{"id":"ka-tierbeine","bezeichnung":"Klassenarbeit: Sachaufgabe Tierbeine","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["tierbeine"]},"be":2,"schwierigkeit":1,"afb":1},{"id":"ka-rueckgeld","bezeichnung":"Klassenarbeit: Sachaufgabe Rückgeld","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["rueckgeld"]},"be":3,"schwierigkeit":2,"afb":1},{"id":"ka-klassenfahrt","bezeichnung":"Klassenarbeit: Sachaufgabe Klassenfahrt","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["klassenfahrt"]},"be":4,"schwierigkeit":3,"afb":2},{"id":"ka-mitglieder","bezeichnung":"Klassenarbeit: Sachaufgabe Mitglieder (rückwärts rechnen)","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["mitglieder"]},"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-fahrkarten","bezeichnung":"Klassenarbeit: Sachaufgabe Fahrkarten","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["fahrkarten"]},"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-sparen","bezeichnung":"Klassenarbeit: Sachaufgabe Sparen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["sparen"]},"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-rest-deuten","typ":"freitext","frage":"143 Kinder fahren ins Schullandheim. In einen Bus passen 30 Kinder. Paul rechnet 143 : 30 = 4 Rest 23 und sagt: „4 Busse reichen.“ Hat Paul recht? Begründe.","optionen":["Nein. 23 Kinder bleiben übrig, für sie braucht man noch einen Bus. Es sind 5 Busse nötig.","Ja. Der Rest wird beim Teilen immer weggelassen.","Nein. Man braucht 6 Busse, weil man immer zwei Busse dazunimmt.","Ja. 4 Busse mit je 30 Kindern sind 143 Kinder."],"loesung":"Nein. 23 Kinder bleiben übrig, für sie braucht man noch einen Bus. Es sind 5 Busse nötig.","erwartung":"Paul hat nicht recht. In 4 Busse passen nur 4 · 30 = 120 Kinder. Die übrigen 23 Kinder brauchen einen weiteren Bus, also sind 5 Busse nötig.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"daten-diagramme","titel":"Daten erfassen und darstellen","reihenfolge":5,"klassenarbeit":[{"id":"ka-saeulen-zeichnen","bezeichnung":"Klassenarbeit: Säulendiagramm zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"saeule","quelle":"strichliste","kategorien":5,"max":12},"be":5,"schwierigkeit":2,"afb":1},{"id":"ka-balken-zeichnen","bezeichnung":"Klassenarbeit: Balkendiagramm zeichnen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"zeichnen","art":"balken","quelle":"tabelle","kategorien":6,"max":14},"be":5,"schwierigkeit":2,"afb":1},{"id":"ka-ablesen","bezeichnung":"Klassenarbeit: Diagramm ablesen und vergleichen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"saeule","kategorien":6},"anzahl":4,"be":4,"schwierigkeit":2,"afb":2},{"id":"ka-ablesen-balken","bezeichnung":"Klassenarbeit: Balkendiagramm ablesen und vergleichen","typ":"diagramm","generator":"diagramm","parameter":{"modus":"ablesen","art":"balken","kategorien":5},"anzahl":3,"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-strichliste","typ":"multiple_choice","frage":"Bei einer Umfrage wurde „Fahrrad“ 23-mal genannt. Wie sieht die Strichliste dafür aus?","optionen":["4 Fünferpäckchen und 3 einzelne Striche","3 Fünferpäckchen und 4 einzelne Striche","2 Fünferpäckchen und 3 einzelne Striche","4 Fünferpäckchen und 2 einzelne Striche"],"loesung":"4 Fünferpäckchen und 3 einzelne Striche","be":1,"schwierigkeit":1,"afb":1},{"id":"ka-rangliste","typ":"multiple_choice","frage":"Die Häufigkeiten einer Umfrage sind: Hund 7, Katze 12, Pferd 3, Hamster 9. Welche Rangliste (von der häufigsten zur seltensten Nennung) stimmt?","optionen":["Katze, Hamster, Hund, Pferd","Hund, Katze, Pferd, Hamster","Katze, Hund, Hamster, Pferd","Pferd, Hund, Hamster, Katze"],"loesung":"Katze, Hamster, Hund, Pferd","be":1,"schwierigkeit":1,"afb":1},{"id":"ka-irrefuehrend","typ":"freitext","frage":"Zwei Klassen haben Kastanien gesammelt: die 5a 42 kg, die 5b 48 kg. In einem Säulendiagramm beginnt die Achse erst bei 40 kg. Dadurch ist die Säule der 5b viermal so hoch wie die der 5a. Was ist an diesem Diagramm irreführend?","optionen":["Die Achse beginnt nicht bei 0. So sieht der Unterschied viel größer aus, als er ist: 48 kg sind nicht viermal so viel wie 42 kg.","Nichts, die 5b hat wirklich viermal so viel gesammelt.","Die Säulen müssten waagerecht liegen.","Die Säule der 5a müsste höher sein als die der 5b."],"loesung":"Die Achse beginnt nicht bei 0. So sieht der Unterschied viel größer aus, als er ist: 48 kg sind nicht viermal so viel wie 42 kg.","erwartung":"Die Achse beginnt bei 40 kg statt bei 0. Die 5a hat nur 6 kg weniger gesammelt (48 − 42 = 6), die Säulen täuschen aber einen viermal so großen Wert vor. Richtig wäre eine Achse ab 0.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"laengen-massen","titel":"Längen und Massen umrechnen","reihenfolge":6,"klassenarbeit":[{"id":"ka-laenge-komma","bezeichnung":"Klassenarbeit: Längen umrechnen mit Komma","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"laenge","modus":"komma"},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-gemischt","bezeichnung":"Klassenarbeit: Längen und Massen gemischt umrechnen","typ":"rechnung","generator":"umrechnen","parameter":{"groessen":["laenge","masse"],"modus":"gemischt","komma":true},"anzahl":4,"be":2,"schwierigkeit":2,"afb":2},{"id":"ka-vergleichen","bezeichnung":"Klassenarbeit: Längen und Massen vergleichen","typ":"rechnung","generator":"groessen-vergleichen","parameter":{"groessen":["laenge","masse"]},"anzahl":4,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler beim Umrechnen finden","typ":"rechnung","generator":"fehler-finden","parameter":{"art":"groessen","einheiten":["m","km","kg","t","cm"]},"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-bretter","bezeichnung":"Klassenarbeit: Sachaufgabe Bretter sägen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["bretter"]},"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-pakete","bezeichnung":"Klassenarbeit: Sachaufgabe Paket (Massen)","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["pakete"]},"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-ordnen","typ":"multiple_choice","frage":"Ordne die Strecken vom kürzesten zum längsten: 2,3 km; 2 080 m; 210 000 cm; 2 250 000 mm. Welche Reihenfolge stimmt?","optionen":["2 080 m \u003c 210 000 cm \u003c 2 250 000 mm \u003c 2,3 km","2,3 km \u003c 2 080 m \u003c 210 000 cm \u003c 2 250 000 mm","210 000 cm \u003c 2 080 m \u003c 2,3 km \u003c 2 250 000 mm","2 080 m \u003c 2,3 km \u003c 210 000 cm \u003c 2 250 000 mm"],"loesung":"2 080 m \u003c 210 000 cm \u003c 2 250 000 mm \u003c 2,3 km","be":2,"schwierigkeit":3,"afb":2},{"id":"ka-komma-schreibweise","typ":"freitext","frage":"Warum darf man 4 m 7 cm nicht als 4,7 m schreiben? Begründe und gib die richtige Schreibweise an.","optionen":["7 cm sind 7 Hundertstel Meter. Richtig ist 4,07 m. 4,7 m wären 4 m 70 cm.","Weil man Meter nie mit Komma schreibt.","4,7 m ist richtig, man darf es so schreiben.","Weil 1 m = 1 000 cm sind."],"loesung":"7 cm sind 7 Hundertstel Meter. Richtig ist 4,07 m. 4,7 m wären 4 m 70 cm.","erwartung":"1 m = 100 cm, also ist 1 cm ein Hundertstel Meter. 7 cm stehen an der Hundertstelstelle: 4 m 7 cm = 4,07 m. 4,7 m wären 4 m 70 cm.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"zeit","titel":"Zeit umrechnen","reihenfolge":7,"klassenarbeit":[{"id":"ka-gemischt","bezeichnung":"Klassenarbeit: Zeit gemischt umrechnen","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"zeit","einheiten":["s","min","h"],"modus":"gemischt"},"anzahl":3,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-zerlegen","bezeichnung":"Klassenarbeit: Zeitangaben zerlegen","typ":"rechnung","generator":"umrechnen","parameter":{"groesse":"zeit","einheiten":["s","min","h"],"modus":"zerlegen"},"anzahl":3,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vergleichen","bezeichnung":"Klassenarbeit: Zeitspannen vergleichen","typ":"rechnung","generator":"groessen-vergleichen","parameter":{"groesse":"zeit","einheiten":["s","min","h"]},"anzahl":3,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler beim Umrechnen der Zeit finden","typ":"rechnung","generator":"fehler-finden","parameter":{"art":"groessen","einheiten":["h","min"]},"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-umstieg","bezeichnung":"Klassenarbeit: Sachaufgabe Zugfahrt mit Umsteigen","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["umstieg"]},"be":4,"schwierigkeit":3,"afb":2},{"id":"ka-training","bezeichnung":"Klassenarbeit: Sachaufgabe Trainingszeit","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["training"]},"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-kein-komma","typ":"freitext","frage":"Ole sagt: „2 h 30 min sind 2,30 h.“ Erkläre, warum das falsch ist.","optionen":["Eine Stunde hat 60 Minuten, nicht 100. Die Kommaschreibweise passt nur zu den Umrechnungszahlen 10, 100 und 1 000.","Es müsste 2,03 h heißen.","Es ist richtig, die 30 Minuten stehen hinter dem Komma.","Man darf Stunden und Minuten nie zusammen aufschreiben."],"loesung":"Eine Stunde hat 60 Minuten, nicht 100. Die Kommaschreibweise passt nur zu den Umrechnungszahlen 10, 100 und 1 000.","erwartung":"Bei der Zeit ist die Umrechnungszahl 60 (1 h = 60 min). Hinter dem Komma stehen aber Zehntel und Hundertstel. 30 min sind eine halbe Stunde, nicht 30 Hundertstel Stunden.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"kommazahlen","titel":"Kommazahlen: Komma verschieben und rechnen","reihenfolge":8,"klassenarbeit":[{"id":"ka-verschieben","bezeichnung":"Klassenarbeit: Komma verschieben","typ":"rechnung","generator":"komma-verschieben","parameter":{"operationen":["*",":"]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-welcher-faktor","bezeichnung":"Klassenarbeit: Welche Zahl fehlt? (10, 100, 1 000)","typ":"rechnung","generator":"komma-verschieben","parameter":{"modus":"platzhalter"},"anzahl":3,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-plus-minus","bezeichnung":"Klassenarbeit: Kommazahlen plus und minus","typ":"rechnung","generator":"komma-rechnen","parameter":{"operationen":["+","-"]},"anzahl":3,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-mal-geteilt","bezeichnung":"Klassenarbeit: Kommazahlen mal und geteilt","typ":"rechnung","generator":"komma-rechnen","parameter":{"operationen":["*",":"],"maxGanz":9},"anzahl":2,"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler beim Komma verschieben finden","typ":"rechnung","generator":"fehler-finden","parameter":{"art":"komma"},"be":2,"schwierigkeit":3,"afb":2},{"id":"ka-preisvergleich","bezeichnung":"Klassenarbeit: Sachaufgabe Preisvergleich","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["preisvergleich"]},"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-einkauf","bezeichnung":"Klassenarbeit: Sachaufgabe Einkauf","typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["einkauf"]},"be":3,"schwierigkeit":2,"afb":2},{"id":"ka-groesser","typ":"freitext","frage":"Tim sagt: „0,45 ist größer als 0,5, weil 45 größer als 5 ist.“ Hat Tim recht? Begründe.","optionen":["Nein. 0,5 = 0,50. 50 Hundertstel sind mehr als 45 Hundertstel, also ist 0,5 größer.","Ja. Die Zahl mit mehr Ziffern nach dem Komma ist größer.","Ja. 45 ist größer als 5.","Nein. 0,45 und 0,5 sind gleich groß."],"loesung":"Nein. 0,5 = 0,50. 50 Hundertstel sind mehr als 45 Hundertstel, also ist 0,5 größer.","erwartung":"Tim hat nicht recht. Man vergleicht Stelle für Stelle: Zehntel 5 bei 0,5 gegen 4 bei 0,45. Oder: 0,5 = 0,50, und 50 Hundertstel sind mehr als 45 Hundertstel.","be":2,"schwierigkeit":3,"afb":3}]},{"thema":"roemische-zahlen","titel":"Römische Zahlen","reihenfolge":9,"klassenarbeit":[{"id":"ka-lesen","bezeichnung":"Klassenarbeit: Römische Zahlen lesen","typ":"rechnung","generator":"roemisch-in-zahl","parameter":{"bereich":[1,3999]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-schreiben","bezeichnung":"Klassenarbeit: Zahlen römisch schreiben","typ":"rechnung","generator":"zahl-in-roemisch","parameter":{"bereich":[1,3999]},"anzahl":4,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-jahr","bezeichnung":"Klassenarbeit: Jahreszahl römisch schreiben","typ":"rechnung","generator":"zahl-in-roemisch","parameter":{"bereich":[1000,2026],"jahr":true},"anzahl":2,"be":2,"schwierigkeit":2,"afb":1},{"id":"ka-vergleichen","bezeichnung":"Klassenarbeit: Römische Zahlen vergleichen","typ":"rechnung","generator":"roemisch-vergleichen","parameter":{"bereich":[1,999]},"anzahl":3,"be":2,"schwierigkeit":2,"afb":2},{"id":"ka-schreibweise","bezeichnung":"Klassenarbeit: Richtige Schreibweise erkennen","typ":"rechnung","generator":"roemisch-schreibweise","parameter":{"bereich":[4,999]},"anzahl":2,"be":2,"schwierigkeit":2,"afb":2},{"id":"ka-fehler","bezeichnung":"Klassenarbeit: Fehler bei römischen Zahlen berichtigen","typ":"rechnung","generator":"roemisch-fehler","parameter":{"bereich":[4,999]},"anzahl":3,"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-rechnen","bezeichnung":"Klassenarbeit: Mit römischen Zahlen rechnen","typ":"rechnung","generator":"roemisch-rechnen","parameter":{"bereich":[1,100]},"anzahl":3,"be":3,"schwierigkeit":3,"afb":2},{"id":"ka-zehnersystem","typ":"freitext","frage":"Vergleiche die römischen Zahlen mit unserem Zehnersystem. Nenne zwei Unterschiede.","optionen":["Im Zehnersystem hängt der Wert einer Ziffer von ihrer Stelle ab, römische Zeichen haben immer denselben Wert. Außerdem gibt es römisch keine Null.","Römische Zahlen sind immer kürzer als Zahlen im Zehnersystem.","Im Zehnersystem gibt es nur sieben Ziffern, römisch gibt es zehn Zeichen.","Es gibt keinen Unterschied, nur die Zeichen sehen anders aus."],"loesung":"Im Zehnersystem hängt der Wert einer Ziffer von ihrer Stelle ab, römische Zeichen haben immer denselben Wert. Außerdem gibt es römisch keine Null.","erwartung":"Zwei Unterschiede, z. B.: Das Zehnersystem ist ein Stellenwertsystem (in 333 ist jede 3 etwas anderes wert: 300, 30, 3), römische Zeichen haben einen festen Wert, der addiert oder abgezogen wird. Das Zehnersystem hat eine Null, das römische nicht. Römische Zahlen werden oft sehr lang (388 = CCCLXXXVIII). Das Zehnersystem kommt mit 10 Ziffern für alle Zahlen aus.","be":2,"schwierigkeit":3,"afb":3},{"id":"ka-laenge","typ":"freitext","frage":"Lisa sagt: „Je mehr Zeichen eine römische Zahl hat, desto größer ist sie.“ Hat Lisa recht? Begründe mit einem Beispiel.","optionen":["Nein. XXXVIII (38) hat sieben Zeichen, XL (40) nur zwei – und 40 ist größer.","Ja, denn jedes Zeichen macht die Zahl größer.","Ja, aber nur bei Zahlen über 100.","Nein, denn römische Zahlen haben immer gleich viele Zeichen."],"loesung":"Nein. XXXVIII (38) hat sieben Zeichen, XL (40) nur zwei – und 40 ist größer.","erwartung":"Lisa hat nicht recht. Beispiel: XXXVIII = 38 hat sieben Zeichen, XL = 40 hat nur zwei Zeichen, ist aber größer. Es kommt auf den Wert der Zeichen an, nicht auf ihre Anzahl.","be":2,"schwierigkeit":3,"afb":3}]}],"uebergreifend":[{"id":"einwohner","bezeichnung":"Klassenarbeit: Einwohnerzahlen runden und vergleichen","themen":["grosse-zahlen","runden"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["einwohner"]},"be":5,"schwierigkeit":3,"afb":2},{"id":"ueberschlag","bezeichnung":"Klassenarbeit: Überschlag und genaue Rechnung","themen":["runden","grundrechenarten"],"typ":"rechnung","generator":"ueberschlag","be":3,"schwierigkeit":3,"afb":2},{"id":"ausflug","bezeichnung":"Klassenarbeit: Zugfahrt in den Zoo (Zeit und Geld)","themen":["zeit","kommazahlen"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["ausflug"]},"be":5,"schwierigkeit":3,"afb":2},{"id":"porto","bezeichnung":"Klassenarbeit: Paket wiegen und Porto bestimmen","themen":["laengen-massen","kommazahlen"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["porto"]},"be":4,"schwierigkeit":3,"afb":2},{"id":"laufen","bezeichnung":"Klassenarbeit: Runden laufen (Länge und Zeit)","themen":["laengen-massen","zeit"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["laufen"]},"be":4,"schwierigkeit":3,"afb":2},{"id":"monatskarten","bezeichnung":"Klassenarbeit: Diagramm ablesen und weiterrechnen","themen":["daten-diagramme","grundrechenarten"],"typ":"rechnung","generator":"sachaufgabe","parameter":{"vorlagen":["monatskarten"]},"be":4,"schwierigkeit":3,"afb":2}]};</script>
 <script>
 (function () {
   var p = {};

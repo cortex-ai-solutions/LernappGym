@@ -50,6 +50,8 @@
         '<ellipse cx="100" cy="59" rx="48" ry="10" fill="#5a3f8c" stroke="' + LINIE + '" stroke-width="3"/>' + stern(98, 30, 6, '#F0D9A0') + stern(114, 46, 4.5, '#F0D9A0') },
     lorbeer: { titel: 'Lorbeerkranz', icon: '🌿', hinweis: 'Eine Latein-Einheit schaffen', bedingung: function (e) { return e.latein >= 1; },
       rand: '<path d="M46 84 Q46 34 100 38 Q154 34 154 84" fill="none" stroke-width="18"/>', bild: lorbeer() },
+    roemerhelm: { titel: 'Römerhelm', icon: '🏛️', hinweis: '„Römische Zahlen“ einmal schaffen', bedingung: function (e) { return e.sterne['mathematik/roemische-zahlen'] >= 1; },
+      rand: '<path d="M50 72 Q50 20 100 18 Q150 20 150 72 Z"/><path d="M64 37 Q100 -36 136 37 Z"/>', bild: roemerhelm() },
     krone: { titel: 'Krone', icon: '👑', hinweis: 'Belohnungscode für ein Arbeitsblatt (ab 90 % richtig) einlösen', bedingung: function (e) { return e.codes >= 1; },
       rand: '<path d="M70 54 L70 20 L85 34 L100 14 L115 34 L130 20 L130 54 Z"/>',
       bild: '<path d="M70 54 L70 22 L85 36 L100 16 L115 36 L130 22 L130 54 Z" fill="' + GOLD + '" stroke="' + GOLD_DUNKEL + '" stroke-width="2.5" stroke-linejoin="round"/>' +
@@ -67,13 +69,21 @@
         '<circle cx="100" cy="139" r="7.5" fill="' + GOLD + '" stroke="' + GOLD_DUNKEL + '" stroke-width="2"/><path d="M96 141 h8" stroke="' + GOLD_DUNKEL + '" stroke-width="2" stroke-linecap="round"/>' },
     schal: { titel: 'Ringelschal', icon: '🧣', hinweis: '3 Sterne in einem Thema', bedingung: function (e) { return e.dreiSterne >= 1; },
       rand: '<path d="' + BAND + '"/><path d="M106 134 L116 132 L126 162 L112 166 Z"/>', bild: schal() },
+    umhang: { titel: 'Römerumhang', icon: '🦅', hinweis: '3 Sterne bei „Römische Zahlen“', bedingung: function (e) { return e.sterne['mathematik/roemische-zahlen'] >= 3; },
+      rand: '<path d="' + BAND + '"/><path d="M62 128 L50 168 L72 164 L76 134 Z"/>',
+      bild: '<path d="M62 128 L50 168 Q60 172 72 164 L76 134 Z" fill="#b8322a" stroke="' + LINIE + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+        '<path d="M60 140 L56 164 M68 138 L65 166" stroke="#8a2119" stroke-width="2" stroke-linecap="round"/>' +
+        '<path d="' + BAND + '" fill="#b8322a" stroke="' + LINIE + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+        '<circle cx="72" cy="131" r="7" fill="' + GOLD + '" stroke="' + GOLD_DUNKEL + '" stroke-width="2.2"/><circle cx="72" cy="131" r="2.6" fill="' + GOLD_DUNKEL + '"/>' },
   };
   // Album: ein Requisit je Thema. Kommt ein Thema dazu, hier ein Motiv eintragen (ein Test prüft das).
   var MOTIV = {
     'mathematik/grosse-zahlen': 'schild', 'mathematik/runden': 'zielscheibe', 'mathematik/grundrechenarten': 'tafel',
     'mathematik/sachaufgaben': 'buch', 'mathematik/daten-diagramme': 'diagramm', 'mathematik/laengen-massen': 'lineal',
-    'mathematik/zeit': 'uhr', 'mathematik/kommazahlen': 'komma',
+    'mathematik/zeit': 'uhr', 'mathematik/kommazahlen': 'komma', 'mathematik/roemische-zahlen': 'steintafel',
   };
+  // Verkleidung der Katze auf den Album-Bildern eines Themas (optional): die „römische Katze“
+  var MOTIV_KOSTUEM = { 'mathematik/roemische-zahlen': { kopf: 'roemerhelm', hals: 'umhang' } };
   var REQUISITEN = {
     herz: '<path d="M100 172 C76 156 78 136 92 138 C97 139 100 144 100 147 C100 144 103 139 108 138 C122 136 124 156 100 172 Z" fill="#e0607a" stroke="' + LINIE + '" stroke-width="2.5" stroke-linejoin="round"/>',
     schild: '<rect x="58" y="134" width="84" height="32" rx="6" fill="#f6eedf" stroke="' + GOLD_DUNKEL + '" stroke-width="3"/><text x="100" y="155.5" text-anchor="middle" font-size="13" font-weight="700" fill="#5a3e00" font-family="system-ui,sans-serif">1 000 000</text>',
@@ -92,6 +102,10 @@
     uhr: '<circle cx="100" cy="150" r="22" fill="#f6eedf" stroke="' + GOLD_DUNKEL + '" stroke-width="3"/><path d="M100 131 v4 M100 165 v4 M81 150 h4 M115 150 h4" stroke="' + GOLD_DUNKEL + '" stroke-width="2.2" stroke-linecap="round"/>' +
       '<path d="M100 150 V136 M100 150 L110 155" stroke="' + LINIE + '" stroke-width="2.6" stroke-linecap="round"/><circle cx="100" cy="150" r="2.5" fill="' + LINIE + '"/>',
     komma: '<circle cx="100" cy="150" r="22" fill="' + GOLD + '" stroke="' + GOLD_DUNKEL + '" stroke-width="3"/><text x="100" y="157" text-anchor="middle" font-size="19" font-weight="700" fill="#5a3e00" font-family="system-ui,sans-serif">0,5</text>',
+    // Steintafel mit der Jahreszahl 2026 in römischen Zahlen
+    steintafel: '<rect x="58" y="132" width="84" height="36" rx="5" fill="#d8d2c6" stroke="#6b6458" stroke-width="3"/>' +
+      '<path d="M64 140 h6 M130 160 h6 M66 162 l5 -3" stroke="#a9a193" stroke-width="1.6" stroke-linecap="round"/>' +
+      '<text x="100" y="156" text-anchor="middle" font-size="16" font-weight="700" letter-spacing="1" fill="#3d372f" font-family="Georgia,serif">MMXXVI</text>',
     stern: stern(100, 150, 24, GOLD, GOLD_DUNKEL),
   };
   // Pokale für die Klassenarbeit (Code der Eltern): Note 1 Gold, 2 Silber, 3 Bronze
@@ -228,7 +242,7 @@
     return '<svg class="katze" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><g' + kl + '>' + s.join('') + '</g></svg>';
   }
   var SCHWANZ = 'M140 162 C180 162 184 120 164 106';
-  var BREIT = ['schild', 'tafel', 'buch', 'diagramm']; // Pfoten halten diese Requisiten von unten an den Ecken
+  var BREIT = ['schild', 'tafel', 'buch', 'diagramm', 'steintafel']; // Pfoten halten diese Requisiten von unten an den Ecken
   var OHREN = '<path d="M54 72 L49 30 Q50 22 58 26 L88 45 Z"/><path d="M146 72 L151 30 Q150 22 142 26 L112 45 Z"/>';
   // Kuscheldecke mit flauschigem Rand: kleine Bögen entlang einer flachen Kurve
   var DECKE = (function () {
@@ -272,6 +286,20 @@
       b += '<ellipse cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" rx="8" ry="3.8" transform="rotate(' + dreh + ' ' + x.toFixed(1) + ' ' + y.toFixed(1) + ')" fill="#7fa650" stroke="#3f5f2a" stroke-width="1.5"/>';
     }
     return b;
+  }
+  // Römerhelm (eigene Zeichnung): Metallkappe mit Goldrand, Wangenklappen und rotem Helmbusch
+  function roemerhelm() {
+    var busch = '<path d="M66 36 Q100 -32 134 36 Q100 10 66 36 Z" fill="#c0392b" stroke="' + LINIE + '" stroke-width="2.5" stroke-linejoin="round"/>';
+    for (var i = 1; i <= 7; i++) {
+      var t = i / 8, x = 66 + 68 * t, oben = 36 - 136 * t * (1 - t), unten = 36 - 52 * t * (1 - t);
+      busch += '<path d="M' + x.toFixed(1) + ' ' + (oben + 3).toFixed(1) + ' L' + x.toFixed(1) + ' ' + (unten - 2).toFixed(1) + '" stroke="#8a2119" stroke-width="1.6" stroke-linecap="round"/>';
+    }
+    return busch +
+      '<path d="M54 66 Q54 24 100 22 Q146 24 146 66 Z" fill="#b9bec7" stroke="' + LINIE + '" stroke-width="3" stroke-linejoin="round"/>' +
+      '<path d="M100 24 V60" stroke="#8d939d" stroke-width="3"/><path d="M70 40 Q78 32 88 30" fill="none" stroke="#e6e9ee" stroke-width="3" stroke-linecap="round"/>' +
+      '<path d="M55 64 L52 84 Q58 88 64 80 L66 66 Z M145 64 L148 84 Q142 88 136 80 L134 66 Z" fill="#b9bec7" stroke="' + LINIE + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<rect x="50" y="58" width="100" height="11" rx="5.5" fill="' + GOLD + '" stroke="' + GOLD_DUNKEL + '" stroke-width="2.5"/>' +
+      '<circle cx="70" cy="63.5" r="2" fill="' + GOLD_DUNKEL + '"/><circle cx="100" cy="63.5" r="2" fill="' + GOLD_DUNKEL + '"/><circle cx="130" cy="63.5" r="2" fill="' + GOLD_DUNKEL + '"/>';
   }
   function schal() {
     var b = '<path d="' + BAND + '" fill="#e0607a" stroke="' + LINIE + '" stroke-width="2.5" stroke-linejoin="round"/>';
@@ -317,10 +345,10 @@
       var o = { stimmung: 'froh' }; o[p[0]] = p[1];
       return { titel: teil.titel, art: p[0] === 'kopf' ? 'Für den Kopf' : 'Für den Hals', hinweis: teil.hinweis, bild: svg(o), teil: true };
     }
-    var t = thema(p[1]), req = MOTIV[p[1]] || 'stern';
-    if (p[2] === 'gold') return { titel: t.titel, art: 'Gold-Bild', hinweis: 'Belohnungscode für ein Blatt „' + t.titel + '“', bild: svg({ requisit: req, stimmung: 'froh', glanz: true, kopf: 'krone' }) };
-    if (p[2] === '3') return { titel: t.titel, art: '3 Sterne', hinweis: '3 Sterne in „' + t.titel + '“', bild: svg({ requisit: req, stimmung: 'froh', glanz: true }) };
-    return { titel: t.titel, art: 'Geschafft', hinweis: '„' + t.titel + '“ einmal schaffen', bild: svg({ requisit: req }) };
+    var t = thema(p[1]), req = MOTIV[p[1]] || 'stern', kostuem = MOTIV_KOSTUEM[p[1]] || {};
+    if (p[2] === 'gold') return { titel: t.titel, art: 'Gold-Bild', hinweis: 'Belohnungscode für ein Blatt „' + t.titel + '“', bild: svg({ requisit: req, stimmung: 'froh', glanz: true, kopf: 'krone', hals: kostuem.hals }) };
+    if (p[2] === '3') return { titel: t.titel, art: '3 Sterne', hinweis: '3 Sterne in „' + t.titel + '“', bild: svg({ requisit: req, stimmung: 'froh', glanz: true, kopf: kostuem.kopf, hals: kostuem.hals }) };
+    return { titel: t.titel, art: 'Geschafft', hinweis: '„' + t.titel + '“ einmal schaffen', bild: svg({ requisit: req, kopf: kostuem.kopf }) };
   }
 
   // ---------- Sprüche ----------

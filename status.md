@@ -4,7 +4,7 @@
 ## Meta
 id: lernapp-gym-1793297694589
 status: dev
-lastUpdate: 2026-11-08
+lastUpdate: 2026-11-22
 monthlyRevenue: 0
 monthlyRunningCost: 0
 
@@ -23,6 +23,7 @@ monthlyRunningCost: 0
 - [x] Notenschlüssel der Schule (Kl. 5–10, 96/80/64/48/32 %) für alle BE 8–60 hinterlegt und getestet
 - [x] Klassenarbeit bewerten am PC (nur Eltern): BE eintragen → Note + Belohnungscode ab Note 3 → Gold-/Silber-/Bronze-Pokal im Katzenalbum
 - [x] Arbeitsblatt-Belohnungscode ab 90 % richtig (Lösungsblatt nennt erlaubte Fehler)
+- [x] Neues Thema Römische Zahlen (Lehrplan 2.1.2, Querschnittsaufgabe KB) mit römischer Katze: Römerhelm und Römerumhang
 - [ ] 1-Seiten-Test + Lösung mit Seitenlängenprüfung
 - [ ] README für Nicht-Entwickler
 - [ ] Drucken aus der installierten App (PWA) auf dem Pixel prüfen
@@ -40,8 +41,8 @@ Technologie: Node.js, YAML-Inhalte, Playwright (PDF), Vanilla-JS-PWA
 Fächer: Mathematik (im Aufbau), Latein + Geschichte (Bestands-Apps)
 Repo: https://github.com/cortex-ai-solutions/LernappGym
 URL: https://cortex-ai-solutions.github.io/LernappGym/
-Mathe-Themen: 8 (Kl. 5, Lehrplan 2.1.1, 2.1.2, 2.1.3, 2.1.5)
-Tests: 38 (Klassenarbeit über alle 255 Auswahlen, Notenschlüssel der Schule, Bewerten am PC mit Code, Katzen-Motive und Belohnungscodes, 10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test, Update-Test, Elternbericht über zwei Geräte)
+Mathe-Themen: 9 (Kl. 5, Lehrplan 2.1.1, 2.1.2, 2.1.3, 2.1.5)
+Tests: 41 (Römische Zahlen 1–3 999 und 1000 Seeds je Generator, Klassenarbeit über alle 511 Auswahlen, Notenschlüssel der Schule, Bewerten am PC mit Code, Katzen-Motive und Belohnungscodes, 10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test, Update-Test, Elternbericht über zwei Geräte)
 Mathe-App: https://cortex-ai-solutions.github.io/LernappGym/mathe/
 
 ## Notizen
