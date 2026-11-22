@@ -9,3 +9,4 @@
 - [x] **Notenschlüssel der Schule** eingetragen (08.11.2026, Tabelle Klassen 5 bis 10: 96/80/64/48/32 %, gerundet)
 - [ ] Echte Klassenarbeit der Schule als Vorlage für Umfang und Niveau (sobald vorhanden, nur lokal in `Materialien/`)
 - [ ] Drucken aus der installierten App auf den Pixel-Handys prüfen (`window.print()` in der PWA)
+- [ ] **Römische Zahlen (seit 22.11.2026):** Mit der Lehrkraft bzw. dem Heft abgleichen, bis zu welcher Zahl geübt wird (aktuell 1–3 999) und ob nur die Schreibweise mit Subtraktion (IV, IX …) gilt. Der Lehrplan legt das nicht fest.
