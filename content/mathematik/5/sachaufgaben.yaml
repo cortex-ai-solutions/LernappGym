@@ -66,6 +66,14 @@ aufgaben:
     schwierigkeit: 3
     prioritaet: 1
 
+  - id: zunahme
+    bezeichnung: "Sachaufgabe gleichmäßige Zunahme"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [zunahme] }
+    be: 3
+    schwierigkeit: 3
+    prioritaet: 2
 # Klassenarbeit: "be" gilt für die ganze Aufgabe (mit Rechnung und Antwortsatz), "afb" ist der Anforderungsbereich I–III
 klassenarbeit:
   - id: ka-tierbeine
@@ -127,5 +135,13 @@ klassenarbeit:
     loesung: "Nein. 23 Kinder bleiben übrig, für sie braucht man noch einen Bus. Es sind 5 Busse nötig."
     erwartung: "Paul hat nicht recht. In 4 Busse passen nur 4 · 30 = 120 Kinder. Die übrigen 23 Kinder brauchen einen weiteren Bus, also sind 5 Busse nötig."
     be: 2
+    schwierigkeit: 3
+    afb: 3
+  - id: ka-zunahme
+    bezeichnung: "Klassenarbeit: Sachaufgabe gleichmäßige Zunahme"
+    typ: rechnung
+    generator: sachaufgabe
+    parameter: { vorlagen: [zunahme] }
+    be: 3
     schwierigkeit: 3
     afb: 3

@@ -4,7 +4,7 @@
 ## Meta
 id: lernapp-gym-1793297694589
 status: dev
-lastUpdate: 2026-11-22
+lastUpdate: 2026-11-23
 monthlyRevenue: 0
 monthlyRunningCost: 0
 
@@ -24,6 +24,8 @@ monthlyRunningCost: 0
 - [x] Klassenarbeit bewerten am PC (nur Eltern): BE eintragen → Note + Belohnungscode ab Note 3 → Gold-/Silber-/Bronze-Pokal im Katzenalbum
 - [x] Arbeitsblatt-Belohnungscode ab 90 % richtig (Lösungsblatt nennt erlaubte Fehler)
 - [x] Neues Thema Römische Zahlen (Lehrplan 2.1.2, Querschnittsaufgabe KB) mit römischer Katze: Römerhelm und Römerumhang
+- [x] Abgleich mit der echten Klassenarbeit: 60 min, 55 BE, AFB ca. 55/35/10, Hinweise und Bewertungsregeln der Schule; neue Aufgaben (Größen mit verschiedenen Einheiten, Ausreißer, Zahlenrätsel, gleichmäßige Zunahme, Runden rückwärts als Paar)
+- [ ] Neues Thema Maßstab (Lehrbuch 1.10), danach Zahlenstrahl
 - [ ] 1-Seiten-Test + Lösung mit Seitenlängenprüfung
 - [ ] README für Nicht-Entwickler
 - [ ] Drucken aus der installierten App (PWA) auf dem Pixel prüfen
@@ -32,7 +34,7 @@ monthlyRunningCost: 0
 - [x] GitHub Pages aktiv (Übergangs-Startseite mit Latein- und Geschichts-App)
 
 ## Offene Punkte
-🟡 [Mittel] Lehrbuch Mathematik und Lehrwerk Latein klären
+🟡 [Mittel] Lehrwerk Latein klären (Mathe: Fundamente der Mathematik 5, geklärt)
 🟢 [Niedrig] Latein- und Geschichts-App (legacy/) in das neue Inhaltsformat migrieren
 🟢 [Niedrig] Lernkatze auch in Latein und Geschichte
 
@@ -42,7 +44,7 @@ Fächer: Mathematik (im Aufbau), Latein + Geschichte (Bestands-Apps)
 Repo: https://github.com/cortex-ai-solutions/LernappGym
 URL: https://cortex-ai-solutions.github.io/LernappGym/
 Mathe-Themen: 9 (Kl. 5, Lehrplan 2.1.1, 2.1.2, 2.1.3, 2.1.5)
-Tests: 41 (Römische Zahlen 1–3 999 und 1000 Seeds je Generator, Klassenarbeit über alle 511 Auswahlen, Notenschlüssel der Schule, Bewerten am PC mit Code, Katzen-Motive und Belohnungscodes, 10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test, Update-Test, Elternbericht über zwei Geräte)
+Tests: 46 (Römische Zahlen 1–3 999 und 1000 Seeds je Generator, Klassenarbeit über alle 511 Auswahlen, Notenschlüssel der Schule, Bewerten am PC mit Code, Katzen-Motive und Belohnungscodes, 10 mit je 1000 Zufalls-Seeds, PDF-Test, Mobil-/Offline-Test, Update-Test, Elternbericht über zwei Geräte)
 Mathe-App: https://cortex-ai-solutions.github.io/LernappGym/mathe/
 
 ## Notizen

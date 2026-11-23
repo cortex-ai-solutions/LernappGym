@@ -83,6 +83,15 @@ aufgaben:
     schwierigkeit: 3
     prioritaet: 3
 
+  - id: zahlenraetsel
+    bezeichnung: "Zahlenrätsel"
+    typ: rechnung
+    generator: zahlenraetsel
+    parameter: {}
+    anzahl: 3
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 2
 # Klassenarbeit: anspruchsvollere Aufgaben. "be" gilt hier für die ganze Aufgabe, "afb" ist der Anforderungsbereich
 # (I Reproduzieren, II Zusammenhänge herstellen, III Verallgemeinern und Reflektieren).
 klassenarbeit:
@@ -151,3 +160,12 @@ klassenarbeit:
     be: 2
     schwierigkeit: 3
     afb: 3
+  - id: ka-zahlenraetsel
+    bezeichnung: "Klassenarbeit: Zahlenrätsel"
+    typ: rechnung
+    generator: zahlenraetsel
+    parameter: {}
+    anzahl: 2
+    be: 2
+    schwierigkeit: 2
+    afb: 1

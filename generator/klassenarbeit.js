@@ -4,11 +4,12 @@
 const { instanz } = require('./generate');
 const { makeRng, hashString } = require('./lib/rng');
 
-const DAUER_MIN = 45;
-const ZIEL_BE = 40;
+// Umfang wie die echte Klassenarbeit der Klasse (13.11.2026): 60 Minuten, 55 BE, kein Taschenrechner
+const DAUER_MIN = 60;
+const ZIEL_BE = 55;
 const TOLERANZ = 3;
-// Anteile der Anforderungsbereiche I/II/III, wie in Fachschafts-Leistungskonzepten der Sek. I üblich (ca. 30/60/10)
-const AFB_ANTEIL = { 1: 0.3, 2: 0.6, 3: 0.1 };
+// Anteile der Anforderungsbereiche I/II/III nach dem Erwartungshorizont der Lehrkraft (32/18/5 BE ≈ 58/33/9 %)
+const AFB_ANTEIL = { 1: 0.55, 2: 0.35, 3: 0.1 };
 // Übergreifende Aufgaben höchstens bis zu diesem Anteil der BE
 const UEBERGREIFEND_ANTEIL = 0.3;
 

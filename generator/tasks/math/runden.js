@@ -89,14 +89,18 @@ const rundenRueckwaerts = {
       const stelle = rng.pick(p.stellen);
       const f = 10 ** STELLEN[stelle];
       const gerundet = rng.int(2, 99) * f;
-      const groesste = rng.next() < 0.5;
-      const loesung = groesste ? gerundet + f / 2 - 1 : gerundet - f / 2;
-      const text = `Nenne die ${groesste ? 'größte' : 'kleinste'} Zahl, die auf ${STELLEN_NAME[stelle]} gerundet ${fmt(gerundet)} ergibt.`;
-      if (gesehen.has(text)) continue;
-      gesehen.add(text);
-      teile.push({ text, loesung, antwort: fmt(loesung), eingabe: 'zahl', pruefung: { gerundet, stelle, groesste } });
+      if (p.paar && gesehen.has(`${stelle}|${gerundet}`)) continue;
+      gesehen.add(`${stelle}|${gerundet}`);
+      // paar: wie in der Klassenarbeit kleinste UND größte Zahl zur selben gerundeten Zahl
+      for (const groesste of p.paar ? [false, true] : [rng.next() < 0.5]) {
+        const loesung = groesste ? gerundet + f / 2 - 1 : gerundet - f / 2;
+        const text = `Nenne die ${groesste ? 'größte' : 'kleinste'} Zahl, die auf ${STELLEN_NAME[stelle]} gerundet ${fmt(gerundet)} ergibt.`;
+        if (gesehen.has(text)) continue;
+        gesehen.add(text);
+        teile.push({ text, loesung, antwort: fmt(loesung), eingabe: 'zahl', pruefung: { gerundet, stelle, groesste } });
+      }
     }
-    return { anweisung: 'Denk rückwärts!', teile };
+    return { anweisung: p.paar ? 'Denk rückwärts! Eine Zahl wurde gerundet. Welche Zahlen können es gewesen sein?' : 'Denk rückwärts!', teile };
   },
 };
 

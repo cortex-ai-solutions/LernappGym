@@ -182,7 +182,149 @@ const vergleichen = {
   },
 };
 
-module.exports = [umrechnen, vergleichen];
+// ---------- Mit Größen rechnen (gemischte Einheiten) ----------
+// modus ganz:  7 kg + 39 mg = ∎ mg, 85 t − 30 kg = ∎ kg (Ergebnis in der kleineren Einheit, wie in der Klassenarbeit)
+// modus komma: 2,7 m − 6 dm = ∎ m, 2,5 km + 380 m = ∎ km (Ergebnis in Kommaschreibweise der größeren Einheit)
+// modus mal:   5 · 2,6 cm = ∎ cm, 3,6 m : 4 = ∎ m (Kommazahl mal/durch natürliche Zahl)
+const RECHNEN_MODI = ['ganz', 'komma', 'mal'];
+const MINUS = '−';
+function pruefeRechnen(p) {
+  const groessen = p.groessen || [p.groesse];
+  if (!groessen.length || groessen.some((g) => !['laenge', 'masse'].includes(g))) throw new Error('groessen: nur laenge und masse');
+  if (p.modus && !RECHNEN_MODI.includes(p.modus)) throw new Error(`modus: unbekannt "${p.modus}"`);
+  for (const g of groessen) if (einheitenVon(g, p).length < 2) throw new Error(`${g}: zu wenige Einheiten`);
+}
+const einheitenVon = (g, p) => (p.einheiten || STANDARD[g]).filter((e) => e in GROESSEN[g]);
+
+function rechnenTeil(p, rng) {
+  const g = rng.pick(p.groessen || [p.groesse]);
+  const tab = GROESSEN[g];
+  const liste = einheitenVon(g, p);
+  const modus = p.modus || 'ganz';
+
+  if (modus === 'mal') {
+    const u = rng.pick(liste.filter((e) => e !== 'mm' && e !== 'mg'));
+    const d = rng.int(1, 2);
+    const z = 10 ** d;
+    const n = rng.int(2, 9);
+    let q;
+    do q = rng.int(z + 1, 9 * z); while (q % 10 === 0);
+    const mal = rng.next() < 0.5;
+    // mal: a · n; geteilt: (q · n) : n = q – gerechnet in Zehnteln bzw. Hundertsteln
+    const a = mal ? q : q * n;
+    const e = mal ? q * n : q;
+    const links = mal ? `${n} · ${gr(a / z, u)}` : `${gr(a / z, u)} : ${n}`;
+    return { text: `${links} = ∎ ${u}`, loesung: e / z, antwort: `${links} = ${gr(e / z, u)}`, eingabe: 'zahl', komma: true, breit: true,
+      pruefung: { groesse: g, einheit: u, a: (a / z) * tab[u], n, op: mal ? '·' : ':', ergebnis: (e / z) * tab[u] } };
+  }
+
+  if (modus === 'komma') {
+    const paar = rng.pick(paare(g, { ...p, modus: 'komma' }));
+    const { klein, gross, f } = paar;
+    const d = rng.int(1, Math.min(2, stellen(f)));
+    const z = 10 ** d;
+    for (;;) {
+      let A;
+      do A = rng.int(z + 1, 30 * z); while (A % 10 === 0);
+      const a = (A * f) / z; // in "klein"
+      const b = f >= 100 && rng.next() < 0.5 ? rng.int(11, 99) * (f / 100) : rng.int(1, 9) * (f / 10);
+      const plus = rng.next() < 0.5;
+      const r = plus ? a + b : a - b;
+      if (r <= 0 || r % f === 0) continue;
+      const text = `${gr(a / f, gross)} ${plus ? '+' : MINUS} ${gr(b, klein)} = ∎ ${gross}`;
+      return { text, loesung: r / f, antwort: `${gr(a / f, gross)} ${plus ? '+' : MINUS} ${gr(b, klein)} = ${gr(r / f, gross)}`, eingabe: 'zahl', komma: true, breit: true,
+        pruefung: { groesse: g, a: a * tab[klein], b: b * tab[klein], op: plus ? '+' : '-', ergebnis: r * tab[klein] } };
+    }
+  }
+
+  // ganz: zwei verschiedene Einheiten, Ergebnis in der kleineren
+  const moeglich = [];
+  for (let i = 0; i < liste.length; i++) for (let j = i + 1; j < liste.length; j++) {
+    const f = tab[liste[j]] / tab[liste[i]];
+    if (f <= 1e6) moeglich.push({ klein: liste[i], gross: liste[j], f });
+  }
+  const { klein, gross, f } = rng.pick(moeglich);
+  // große Umrechnungszahlen (kg → mg, km → cm) nur mit kleinen Maßzahlen, sonst werden die Ergebnisse unübersichtlich
+  const a = rng.int(2, f >= 100000 ? 9 : f >= 1000 ? 99 : 30);
+  const b = rng.int(1, Math.min(f - 1, 999));
+  const plus = rng.next() < 0.5;
+  const r = plus ? a * f + b : a * f - b;
+  const links = plus && rng.next() < 0.3 ? `${gr(b, klein)} + ${gr(a, gross)}` : `${gr(a, gross)} ${plus ? '+' : MINUS} ${gr(b, klein)}`;
+  return { text: `${links} = ∎ ${klein}`, loesung: r, antwort: `${links} = ${gr(r, klein)}`, eingabe: 'zahl', breit: true,
+    pruefung: { groesse: g, a: a * f * tab[klein], b: b * tab[klein], op: plus ? '+' : '-', ergebnis: r * tab[klein] } };
+}
+
+const RECHNEN_ANWEISUNG = {
+  ganz: 'Berechne. Rechne zuerst in die kleinere Einheit um.',
+  komma: 'Berechne. Gib das Ergebnis in der angegebenen Einheit an.',
+  mal: 'Berechne.',
+};
+const groessenRechnen = {
+  name: 'groessen-rechnen',
+  pruefe: pruefeRechnen,
+  erzeuge(p, rng) {
+    return { anweisung: RECHNEN_ANWEISUNG[p.modus || 'ganz'], teile: mehrere(p, rng, () => rechnenTeil(p, rng)) };
+  },
+};
+
+// ---------- Welche Angabe gehört nicht dazu? ----------
+// Drei Schreibweisen derselben Größe (6 kg 45 g, 6 045 g, 6,045 kg) und eine mit typischem Fehler (6,45 kg).
+const nichtZahlen = (x) => Math.round(x * 1000) / 1000;
+function schreibweisen(basis, g, p) {
+  const tab = GROESSEN[g];
+  const liste = einheitenVon(g, p);
+  const r = [];
+  for (const u of liste) {
+    const v = basis / tab[u];
+    if (nichtZahlen(v) === v && v >= 0.01 && v < 100000) r.push(gr(v, u));
+  }
+  for (const { klein, gross, f } of paare(g, { ...p, modus: 'komma' })) {
+    const w = basis / tab[klein];
+    if (!Number.isInteger(w)) continue;
+    const ganz = Math.floor(w / f), rest = w % f;
+    if (ganz > 0 && rest > 0) r.push(`${gr(ganz, gross)} ${gr(rest, klein)}`);
+  }
+  return [...new Set(r)];
+}
+const ausreisser = {
+  name: 'groessen-ausreisser',
+  pruefe(p) { pruefeRechnen({ ...p, modus: 'ganz' }); },
+  erzeuge(p, rng) {
+    const teile = [];
+    const gesehen = new Set();
+    while (teile.length < (p.anzahl || 1)) {
+      const t = einAusreisser(p, rng);
+      if (gesehen.has(t.pruefung.basis)) continue;
+      gesehen.add(t.pruefung.basis);
+      teile.push(t);
+    }
+    return { anweisung: 'Drei Angaben sind gleich groß. Welche Angabe gehört nicht dazu?', teile };
+  },
+};
+function einAusreisser(p, rng) {
+        for (;;) {
+          const g = rng.pick(p.groessen || [p.groesse]);
+          const tab = GROESSEN[g];
+          const { klein, gross, f } = rng.pick(paare(g, { ...p, modus: 'komma' }));
+          const ganz = rng.int(1, 20);
+          // Rest mit „Lücke“, damit der Komma-Fehler greift: 45 g von 1000 g (0,045 kg), 5 cm von 100 cm
+          const rest = rng.int(1, f >= 1000 ? 99 : f - 1);
+          const basis = (ganz * f + rest) * tab[klein];
+          const gleich = schreibweisen(basis, g, p);
+          if (gleich.length < 3) continue;
+          // typische Fehler: Rest direkt hinters Komma (6 kg 45 g → 6,45 kg), Komma um eine Stelle verschoben
+          const fehlerWerte = [ganz * tab[gross] + (rest * tab[gross]) / 10 ** String(rest).length, basis * 10, basis / 10];
+          const falsch = [];
+          for (const w of fehlerWerte) if (w !== basis && Number.isInteger(w)) falsch.push(...schreibweisen(w, g, p));
+          const kandidaten = [...new Set(falsch)].filter((s) => !gleich.includes(s));
+          if (!kandidaten.length) continue;
+          const fehler = rng.pick(kandidaten);
+          const optionen = rng.shuffle([...rng.shuffle(gleich).slice(0, 3), fehler]);
+          return { text: '', loesung: fehler, antwort: fehler, eingabe: 'wahl', optionen, pruefung: { groesse: g, basis } };
+        }
+}
+
+module.exports = [umrechnen, vergleichen, groessenRechnen, ausreisser];
 module.exports.GROESSEN = GROESSEN;
 module.exports.euro = euro;
 module.exports.gr = gr;

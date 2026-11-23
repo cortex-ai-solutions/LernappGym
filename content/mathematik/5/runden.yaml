@@ -14,6 +14,8 @@ erklaerung: |
   - Alle Ziffern rechts von der Rundungsstelle werden zu **0**.
 
   Beispiel: 34 761 auf Hunderter → die Zehnerziffer ist 6 → aufrunden → **34 800**
+  **Rückwärts denken:** Welche Zahlen ergeben auf Hunderter gerundet 6 400? Die **kleinste** ist **6 350** (sie wird aufgerundet), die **größte** ist **6 449** (sie wird abgerundet). 6 450 ergäbe schon 6 500.
+
 wissenswertes:
   - "Das Zeichen ≈ bedeutet „ungefähr gleich“. Man schreibt zum Beispiel 34 761 ≈ 34 800."
   - "Auch Zeitungen runden: Wenn dort „rund 2 Millionen Besucher“ steht, waren es nicht genau 2 000 000."
@@ -70,8 +72,8 @@ aufgaben:
   - id: rueckwaerts
     typ: rechnung
     generator: runden-rueckwaerts
-    parameter: { stellen: [zehner, hunderter, tausender] }
-    anzahl: 2
+    parameter: { stellen: [zehner, hunderter, tausender], paar: true }
+    anzahl: 4
     be: 1
     schwierigkeit: 3
     prioritaet: 2
@@ -108,7 +110,7 @@ klassenarbeit:
     bezeichnung: "Klassenarbeit: Rückwärts denken beim Runden"
     typ: rechnung
     generator: runden-rueckwaerts
-    parameter: { stellen: [hunderter, tausender] }
+    parameter: { stellen: [hunderter, tausender], paar: true }
     anzahl: 2
     be: 2
     schwierigkeit: 3

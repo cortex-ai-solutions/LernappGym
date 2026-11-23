@@ -296,6 +296,48 @@ const VORLAGEN = {
     ],
   },
 
+  // Gleichmäßige Zunahme in mehreren Schritten: „hat sich in 15 Jahren verdoppelt … wie viele vor 5 Jahren?“
+  // Gezogen wird die Zunahme pro Jahr, daraus folgen ganze Zahlen für jeden Zwischenschritt.
+  zunahme: {
+    ziehe: (rng) => {
+      for (;;) {
+        const sache = rng.pick([
+          { wer: 'Das Dorf Wiesengrund', was: 'Einwohner', einheit: 'Einwohner' },
+          { wer: 'Der Sportverein Blau-Weiß', was: 'Mitglieder', einheit: 'Mitglieder' },
+          { wer: 'Die Grundschule am Bach', was: 'Schülerinnen und Schüler', einheit: 'Kinder' },
+          { wer: 'Der Schachclub Springer', was: 'Mitglieder', einheit: 'Mitglieder' },
+        ]);
+        const faktor = rng.pick([2, 2, 3]);
+        const jahre = rng.pick([10, 12, 15, 20]);
+        const k = rng.pick([2, 3, 4, 5].filter((x) => jahre % x === 0 && x < jahre));
+        const proJahr = rng.int(3, 40);
+        const zunahme = proJahr * jahre;
+        if (zunahme % (faktor - 1)) continue;
+        const frueher = zunahme / (faktor - 1);
+        const jetzt = frueher * faktor;
+        if (jetzt < 120 || jetzt > 3000) continue;
+        return { ...sache, faktor, jahre, k, jetzt, rueckwaerts: rng.next() < 0.7 };
+      }
+    },
+    loese: ({ faktor, jahre, k, jetzt, rueckwaerts }) => {
+      const frueher = jetzt / faktor;
+      const zunahmeK = ((jetzt - frueher) / jahre) * k;
+      return { frueher, zunahmeK, ergebnis: rueckwaerts ? jetzt - zunahmeK : jetzt + zunahmeK };
+    },
+    text: ({ wer, was, faktor, jahre, k, jetzt, rueckwaerts }) =>
+      `${wer} hat heute ${fmt(jetzt)} ${was}. In den letzten ${jahre} Jahren hat sich die Zahl ${faktor === 2 ? 'verdoppelt' : 'verdreifacht'}. Die Zunahme war jedes Jahr gleich groß. ` +
+      (rueckwaerts ? `Ermittle rechnerisch, wie viele ${was} es vor ${k} Jahren waren.` : `Ermittle rechnerisch, wie viele ${was} es in ${k} Jahren sein werden, wenn es so weitergeht.`),
+    weg: ({ faktor, jahre, k, jetzt, rueckwaerts }, l) =>
+      `vor ${jahre} Jahren: ${fmt(jetzt)} : ${faktor} = ${fmt(l.frueher)}; Zunahme in ${jahre} Jahren: ${fmt(jetzt)} − ${fmt(l.frueher)} = ${fmt(jetzt - l.frueher)}; ` +
+      `in ${k} Jahren: ${fmt(jetzt - l.frueher)} : ${jahre / k} = ${fmt(l.zunahmeK)}; ${fmt(jetzt)} ${rueckwaerts ? '−' : '+'} ${fmt(l.zunahmeK)} = ${fmt(l.ergebnis)}`,
+    satz: ({ was, k, rueckwaerts }, l) => (rueckwaerts ? `Vor ${k} Jahren waren es ${fmt(l.ergebnis)} ${was}.` : `In ${k} Jahren werden es ${fmt(l.ergebnis)} ${was} sein.`),
+    teile: (l, { jahre, k, rueckwaerts, einheit }) => [
+      { text: `vor ${jahre} Jahren (${einheit})`, loesung: l.frueher },
+      { text: `Zunahme in ${k} Jahren (${einheit})`, loesung: l.zunahmeK },
+      { text: `${rueckwaerts ? `vor ${k} Jahren` : `in ${k} Jahren`} (${einheit})`, loesung: l.ergebnis },
+    ],
+  },
+
   // ---------- übergreifend: verbinden zwei Lernbereiche ----------
 
   einwohner: {

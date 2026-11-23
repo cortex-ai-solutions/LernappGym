@@ -24,11 +24,13 @@ function klassenarbeitKoerper(ka, { loesung = false, fach = 'mathematik', klasse
   const kopf = `<header class="kopf"><div><div class="fach">${FACH[fach] || fach} · Klasse ${klasse}${loesung ? ' · Lösung und Bewertung' : ''}</div><h1>Klassenarbeit</h1></div><div class="marke">${WELLE}LERNWERK</div></header>`;
   const themen = `<p class="ka-info"><b>Lernbereiche:</b> ${ka.themen.map((t) => esc(t.titel)).join(' · ')}</p>`;
   const namen = loesung ? '' : `<div class="namenszeile"><span>Name:</span><span class="kurz">Datum:</span><span class="punkte">BE: ____ / ${ka.gesamtBe}</span><span class="punkte note">Note:</span></div>
-<p class="ka-info">Arbeitszeit: ${ka.dauer} Minuten · Hilfsmittel: Lineal, Geodreieck · kein Taschenrechner · Schreibe deine Rechenwege auf.</p>`;
+<p class="ka-info">Arbeitszeit: ${ka.dauer} Minuten · Hilfsmittel: Lineal, Geodreieck, Füller, Bleistift nur für Zeichnungen · kein Taschenrechner</p>
+<p class="ka-info"><b>Hinweise:</b> Schreibe deine Rechenwege nachvollziehbar hier auf das Blatt, nicht nur aufs Schmierblatt. Gib Ergebnisse von Größen immer mit Einheit an. Antworte bei Sachaufgaben mit einem Antwortsatz.</p>`;
   const liste = ka.aufgaben.map((a, i) => aufgabeHtml(a, i + 1, { loesung, mitBe: true })).join('');
   const schluss = loesung
     ? `<section class="bewertung"><h2>Bewertung</h2>${punkteTabelle(ka)}${notenTabelle(ka)}
-<p class="ka-info">Anforderungsbereiche: I Reproduzieren ${ka.afb[0]} BE · II Zusammenhänge herstellen ${ka.afb[1]} BE · III Verallgemeinern und Reflektieren ${ka.afb[2]} BE. Für richtige Teilschritte mit Folgefehler können Teil-BE vergeben werden.</p></section>`
+<p class="ka-info">Anforderungsbereiche: I Reproduzieren ${ka.afb[0]} BE · II Zusammenhänge herstellen ${ka.afb[1]} BE · III Verallgemeinern und Reflektieren ${ka.afb[2]} BE. Für richtige Teilschritte können Teil-BE vergeben werden.</p>
+<p class="ka-info"><b>Bewertungsregeln wie in der Schule:</b> Folgefehler werden nur einmal bewertet. Fehlt bei einer Größe die Einheit, gibt es 0,5 BE Abzug je Teilaufgabe.</p></section>`
     : `<p class="viel-erfolg">Viel Erfolg! ${SMILEY}</p>`;
   return `${kopf}${themen}${namen}<main>${liste}</main>${schluss}
 <p class="fuss-hinweis">Lehrplan Mathematik Gymnasium Thüringen, Klassenstufen 5/6 · eigene Aufgaben · Variante ${esc(ka.seed)}</p>`;

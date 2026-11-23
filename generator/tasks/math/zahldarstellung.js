@@ -162,4 +162,39 @@ const vorgaengerNachfolger = {
   },
 };
 
-module.exports = [inZiffern, inWorten, stellenwert, vergleichen, vorgaengerNachfolger];
+// Zahlenrätsel wie in der Klassenarbeit: „die kleinste Zahl mit fünf Ziffern“, „die größte Zahl, in der jede
+// Ziffer von 1 bis 9 genau einmal vorkommt“. pruefung beschreibt die Bedingung, damit ein Test per Durchprobieren prüft.
+const STELLIG = { 3: 'dreistellige', 4: 'vierstellige', 5: 'fünfstellige', 6: 'sechsstellige', 7: 'siebenstellige', 8: 'achtstellige', 9: 'neunstellige' };
+const ZIFFERN_BIS = { 4: 'vier', 5: 'fünf', 6: 'sechs', 7: 'sieben', 8: 'acht', 9: 'neun' };
+const RAETSEL = {
+  'kleinste-n': (n) => ({ text: `die kleinste ${STELLIG[n]} Zahl`, loesung: 10 ** (n - 1) }),
+  'groesste-n': (n) => ({ text: `die größte ${STELLIG[n]} Zahl`, loesung: 10 ** n - 1 }),
+  'kleinste-verschieden': (n) => ({ text: `die kleinste ${STELLIG[n]} Zahl, in der keine Ziffer doppelt vorkommt`, loesung: Number('1023456789'.slice(0, n)) }),
+  'groesste-verschieden': (n) => ({ text: `die größte ${STELLIG[n]} Zahl, in der keine Ziffer doppelt vorkommt`, loesung: Number('9876543210'.slice(0, n)) }),
+  'groesste-1-bis-k': (k) => ({ text: `die größte Zahl, in der jede Ziffer von 1 bis ${k} genau einmal vorkommt (und sonst keine)`, loesung: Number('987654321'.slice(9 - k)) }),
+  'kleinste-1-bis-k': (k) => ({ text: `die kleinste Zahl, in der jede Ziffer von 1 bis ${k} genau einmal vorkommt (und sonst keine)`, loesung: Number('123456789'.slice(0, k)) }),
+  'kleinste-ungerade': (n) => ({ text: `die kleinste ungerade ${STELLIG[n]} Zahl`, loesung: 10 ** (n - 1) + 1 }),
+  'groesste-gerade': (n) => ({ text: `die größte gerade ${STELLIG[n]} Zahl`, loesung: 10 ** n - 2 }),
+  'vorgaenger-kleinste': (n) => ({ text: `der Vorgänger der kleinsten ${STELLIG[n]}n Zahl`, loesung: 10 ** (n - 1) - 1 }),
+};
+const zahlenraetsel = {
+  name: 'zahlenraetsel',
+  pruefe(p) {
+    for (const a of p.arten || []) if (!RAETSEL[a]) throw new Error(`arten: unbekannt "${a}"`);
+  },
+  erzeuge(p, rng) {
+    const arten = p.arten || Object.keys(RAETSEL);
+    return {
+      anweisung: 'Schreibe die Zahl in Ziffern.',
+      teile: mehrere(p, rng, () => {
+        const art = rng.pick(arten);
+        const n = rng.int(4, 9);
+        const { text, loesung } = RAETSEL[art](n);
+        return { text: text[0].toUpperCase() + text.slice(1), loesung, antwort: fmt(loesung), eingabe: 'zahl', voll: true, pruefung: { art, n } };
+      }),
+    };
+  },
+};
+
+module.exports = [inZiffern, inWorten, stellenwert, vergleichen, vorgaengerNachfolger, zahlenraetsel];
+module.exports.RAETSEL = RAETSEL;

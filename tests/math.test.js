@@ -246,6 +246,18 @@ test(`Sachaufgaben: ${SEEDS} Seeds je Vorlage, Probe am Sachverhalt`, () => {
       const zahlen = (re) => [...inst.anweisung.matchAll(re)].map((m) => m.slice(1).map((x) => parseZahl(x)));
       const uhrzeiten = () => [...inst.anweisung.matchAll(/(\d+):(\d\d) Uhr/g)].map((m) => Number(m[1]) * 60 + Number(m[2]));
       switch (vorlage) {
+        case 'zunahme': {
+          // Text zurücklesen und Schritt für Schritt nachrechnen: gleich große Zunahme pro Jahr
+          const [jetzt] = zahlen(/heute ([\d ]+) /g)[0];
+          const jahre = Number(inst.anweisung.match(/letzten (\d+) Jahren/)[1]);
+          const faktor = inst.anweisung.includes('verdoppelt') ? 2 : 3;
+          const k = Number(inst.anweisung.match(/(?:vor|in) (\d+) Jahren (?:waren|sein)/)[1]);
+          const frueher = jetzt / faktor;
+          const proJahr = (jetzt - frueher) / jahre;
+          assert.ok(Number.isInteger(frueher) && Number.isInteger(proJahr), inst.anweisung);
+          assert.deepStrictEqual(l, [frueher, proJahr * k, inst.anweisung.includes('weitergeht') ? jetzt + proJahr * k : jetzt - proJahr * k]);
+          break;
+        }
         case 'klassenfahrt':
           assert.ok([20, 25, 30].includes(d.kinder), 'Divisor wie in der Grundschule');
           assert.strictEqual(l[0], d.bus / d.kinder + d.naechte * d.nacht + d.eintritt);
@@ -560,5 +572,97 @@ test('Alle Mathe-Themen: 200 Seeds ohne Fehler, Auswahlaufgaben korrekt', () => 
         }
       }
     }
+  }
+});
+
+// ---------- neu nach der Klassenarbeit vom 13.11.2026 ----------
+
+test('Handrechnungen aus der Klassenarbeit (Erwartungshorizont)', () => {
+  const { gr } = require('../generator/tasks/math/groessen');
+  const g = (z, e) => groesseWert(gr(z, e));
+  assert.strictEqual(g(7, 'kg') + g(39, 'mg'), g(7000039, 'mg'));
+  assert.strictEqual(g(9, 'dm') + g(2, 'mm'), g(902, 'mm'));
+  assert.strictEqual(g(85, 't') - g(30, 'kg'), g(84970, 'kg'));
+  assert.strictEqual(g(7, 'cm') - g(3, 'mm'), g(67, 'mm'));
+  // Einwohner: verdoppelt in 15 Jahren auf 630, vor 5 Jahren 525
+  assert.deepStrictEqual(VORLAGEN.zunahme.loese({ faktor: 2, jahre: 15, k: 5, jetzt: 630, rueckwaerts: true }), { frueher: 315, zunahmeK: 105, ergebnis: 525 });
+  const { RAETSEL } = require('../generator/tasks/math/zahldarstellung');
+  assert.strictEqual(RAETSEL['kleinste-n'](5).loesung, 10000);
+  assert.strictEqual(RAETSEL['groesste-1-bis-k'](9).loesung, 987654321);
+});
+
+test(`Mit Größen rechnen: ${SEEDS} Seeds je Modus, Text zurückgelesen und nachgerechnet`, () => {
+  for (const modus of ['ganz', 'komma', 'mal']) {
+    for (const einheiten of [undefined, ['mg', 'g', 'kg', 't', 'mm', 'cm', 'dm', 'm', 'km']]) {
+      for (let s = 0; s < SEEDS; s++) {
+        for (const t of erzeuge('groessen-rechnen', { groessen: ['laenge', 'masse'], modus, einheiten }, 4, s).teile) {
+          const [links, ziel] = t.text.split(' = ∎ ');
+          const m = links.match(/^(.+?) ([+−·:]) (.+)$/);
+          assert.ok(m, t.text);
+          let soll;
+          if (m[2] === '·') soll = Number(m[1]) * groesseWert(m[3]);
+          else if (m[2] === ':') soll = groesseWert(m[1]) / Number(m[3]);
+          else soll = m[2] === '+' ? groesseWert(m[1]) + groesseWert(m[3]) : groesseWert(m[1]) - groesseWert(m[3]);
+          soll = Math.round(soll * 1000) / 1000;
+          assert.ok(soll > 0, t.text);
+          assert.strictEqual(groesseWert(`${fmt(t.loesung)} ${ziel}`), soll, `${t.text} → ${t.loesung}`);
+          assert.ok(nachkommastellen(t.loesung) <= 3, t.text);
+          if (!Number.isInteger(t.loesung)) assert.ok(t.komma, `${t.text}: Kommazahl ohne komma`);
+          if (modus === 'ganz') assert.ok(Number.isInteger(t.loesung), t.text);
+        }
+      }
+    }
+  }
+});
+
+test(`Welche Angabe gehört nicht dazu: ${SEEDS} Seeds, genau eine Angabe weicht ab`, () => {
+  for (let s = 0; s < SEEDS; s++) {
+    for (const t of erzeuge('groessen-ausreisser', { groessen: ['laenge', 'masse'] }, 2, s).teile) {
+      assert.strictEqual(t.optionen.length, 4);
+      assert.strictEqual(new Set(t.optionen).size, 4, `${t.optionen}`);
+      const werte = t.optionen.map(groesseWert);
+      const anders = t.optionen.filter((o, i) => werte.filter((w) => w === werte[i]).length === 1);
+      assert.deepStrictEqual(anders, [t.loesung], `${t.optionen.join(' | ')}`);
+      assert.strictEqual(werte.filter((w) => w === t.pruefung.basis).length, 3, `${t.optionen.join(' | ')}`);
+    }
+  }
+});
+
+test(`Zahlenrätsel: ${SEEDS} Seeds, Lösung durch Bedingung und Nachbarn geprüft`, () => {
+  const ziffern = (x) => String(x).split('');
+  const BED = {
+    'kleinste-n': (x, n) => String(x).length === n,
+    'groesste-n': (x, n) => String(x).length === n,
+    'kleinste-verschieden': (x, n) => String(x).length === n && new Set(ziffern(x)).size === n,
+    'groesste-verschieden': (x, n) => String(x).length === n && new Set(ziffern(x)).size === n,
+    'groesste-1-bis-k': (x, k) => ziffern(x).sort().join('') === '123456789'.slice(0, k),
+    'kleinste-1-bis-k': (x, k) => ziffern(x).sort().join('') === '123456789'.slice(0, k),
+    'kleinste-ungerade': (x, n) => String(x).length === n && x % 2 === 1,
+    'groesste-gerade': (x, n) => String(x).length === n && x % 2 === 0,
+  };
+  for (let s = 0; s < SEEDS; s++) {
+    for (const t of erzeuge('zahlenraetsel', {}, 4, s).teile) {
+      const { art, n } = t.pruefung;
+      if (art === 'vorgaenger-kleinste') { assert.strictEqual(t.loesung + 1, 10 ** (n - 1)); continue; }
+      const ok = (x) => BED[art](x, n);
+      assert.ok(ok(t.loesung), t.text);
+      // kein besserer Kandidat in der Nähe (bei kleinen Zahlen alle durchprobiert)
+      const kleinste = art.startsWith('kleinste');
+      const grenze = kleinste ? 10 ** (n - 1) : 10 ** n - 1;
+      const bis = n <= 5 ? Math.abs(t.loesung - grenze) : Math.min(Math.abs(t.loesung - grenze), 2000);
+      for (let i = 1; i <= bis; i++) assert.ok(!ok(t.loesung + (kleinste ? -i : i)), `${t.text}: ${t.loesung + (kleinste ? -i : i)} wäre ${kleinste ? 'kleiner' : 'größer'}`);
+    }
+  }
+});
+
+test('Runden rückwärts als Paar: kleinste und größte Zahl zur selben gerundeten Zahl', () => {
+  for (let s = 0; s < SEEDS; s++) {
+    const teile = erzeuge('runden-rueckwaerts', { stellen: ['hunderter', 'tausender'], paar: true }, 2, s).teile;
+    assert.strictEqual(teile.length, 2);
+    assert.deepStrictEqual(teile.map((t) => t.pruefung.groesste), [false, true]);
+    assert.strictEqual(teile[0].pruefung.gerundet, teile[1].pruefung.gerundet);
+    const k = K[teile[0].pruefung.stelle];
+    for (const t of teile) assert.strictEqual(rundenRef(t.loesung, k), t.pruefung.gerundet);
+    assert.strictEqual(rundenRef(teile[0].loesung - 1, k) !== teile[0].pruefung.gerundet && rundenRef(teile[1].loesung + 1, k) !== teile[1].pruefung.gerundet, true);
   }
 });

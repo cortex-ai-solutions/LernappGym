@@ -31,6 +31,8 @@ erklaerung: |
   **Geteilt durch eine einstellige Zahl:** Das Komma im Ergebnis setzt du, sobald du beim Teilen über das Komma kommst: 9,6 : 3 = **3,2**
 
   **Vergleichen:** Stelle für Stelle von links. 3,5 > 3,45, denn 5 Zehntel sind mehr als 4 Zehntel. Endnullen ändern nichts: 2,1 = 2,10.
+  **Größen mit Komma:** Auch hier erst in dieselbe Einheit umrechnen. 2,7 m − 6 dm = 2,7 m − 0,6 m = **2,1 m** · 5 · 2,6 cm = **13 cm** · 3,6 m : 4 = **0,9 m**
+
 wissenswertes:
   - "In England und den USA schreibt man einen Punkt statt eines Kommas: 3.5 statt 3,5."
   - "Preise sind Kommazahlen: 2,49 € sind 2 Euro und 49 Cent."
@@ -125,6 +127,33 @@ aufgaben:
     schwierigkeit: 3
     prioritaet: 1
 
+  - id: groessen-plus-minus
+    bezeichnung: "Größen mit Komma addieren und subtrahieren"
+    typ: rechnung
+    generator: groessen-rechnen
+    parameter: { groessen: [laenge, masse], modus: komma }
+    anzahl: 4
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: groessen-mal-geteilt
+    bezeichnung: "Größen mit Komma mal und geteilt"
+    typ: rechnung
+    generator: groessen-rechnen
+    parameter: { groessen: [laenge, masse], modus: mal }
+    anzahl: 3
+    be: 1
+    schwierigkeit: 3
+    prioritaet: 1
+  - id: gehoert-nicht-dazu
+    bezeichnung: "Welche Angabe gehört nicht dazu?"
+    typ: rechnung
+    generator: groessen-ausreisser
+    parameter: { groessen: [laenge, masse] }
+    anzahl: 2
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 2
 # Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
 klassenarbeit:
   - id: ka-verschieben
@@ -200,3 +229,21 @@ klassenarbeit:
     be: 2
     schwierigkeit: 3
     afb: 3
+  - id: ka-groessen-plus-minus
+    bezeichnung: "Klassenarbeit: Größen mit Komma addieren und subtrahieren"
+    typ: rechnung
+    generator: groessen-rechnen
+    parameter: { groessen: [laenge, masse], modus: komma }
+    anzahl: 4
+    be: 4
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-groessen-mal-geteilt
+    bezeichnung: "Klassenarbeit: Größen mit Komma mal und geteilt"
+    typ: rechnung
+    generator: groessen-rechnen
+    parameter: { groessen: [laenge, masse], modus: mal }
+    anzahl: 3
+    be: 3
+    schwierigkeit: 3
+    afb: 2

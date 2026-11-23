@@ -23,6 +23,9 @@ erklaerung: |
   - **In die größere Einheit:** durch die Umrechnungszahl. 4 500 g = 4 500 : 1 000 kg = **4,5 kg**
 
   **Kommaschreibweise:** 3,25 m = 3 m 25 cm = **325 cm**. Bei kg/g und km/m gehören **drei** Stellen hinter das Komma: 2 kg 50 g = 2,050 kg = **2,05 kg**.
+  **Rechnen mit verschiedenen Einheiten:** Erst in **dieselbe** Einheit umrechnen, dann rechnen.
+  9 dm + 2 mm = 900 mm + 2 mm = **902 mm** · 7 kg + 39 mg = 7 000 000 mg + 39 mg = **7 000 039 mg**
+
 wissenswertes:
   - "Ein Blatt Papier ist ungefähr 0,1 mm dick. 10 Blätter zusammen sind also etwa 1 mm dick."
   - "Ein Blauwal kann mehr als 100 t wiegen – so viel wie rund 20 Elefanten."
@@ -126,6 +129,24 @@ aufgaben:
     schwierigkeit: 3
     prioritaet: 2
 
+  - id: rechnen-gemischt
+    bezeichnung: "Mit Größen rechnen (verschiedene Einheiten)"
+    typ: rechnung
+    generator: groessen-rechnen
+    parameter: { groessen: [laenge, masse], modus: ganz, einheiten: [mg, g, kg, t, mm, cm, dm, m, km] }
+    anzahl: 4
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 1
+  - id: gehoert-nicht-dazu
+    bezeichnung: "Welche Angabe gehört nicht dazu?"
+    typ: rechnung
+    generator: groessen-ausreisser
+    parameter: { groessen: [laenge, masse] }
+    anzahl: 2
+    be: 1
+    schwierigkeit: 2
+    prioritaet: 1
 # Klassenarbeit: "be" gilt für die ganze Aufgabe, "afb" ist der Anforderungsbereich I–III
 klassenarbeit:
   - id: ka-laenge-komma
@@ -204,3 +225,21 @@ klassenarbeit:
     be: 2
     schwierigkeit: 3
     afb: 3
+  - id: ka-rechnen-gemischt
+    bezeichnung: "Klassenarbeit: Mit Größen rechnen"
+    typ: rechnung
+    generator: groessen-rechnen
+    parameter: { groessen: [laenge, masse], modus: ganz, einheiten: [mg, g, kg, t, mm, cm, dm, m, km] }
+    anzahl: 4
+    be: 4
+    schwierigkeit: 2
+    afb: 1
+  - id: ka-gehoert-nicht-dazu
+    bezeichnung: "Klassenarbeit: Welche Angabe gehört nicht dazu?"
+    typ: rechnung
+    generator: groessen-ausreisser
+    parameter: { groessen: [laenge, masse] }
+    anzahl: 2
+    be: 2
+    schwierigkeit: 2
+    afb: 1

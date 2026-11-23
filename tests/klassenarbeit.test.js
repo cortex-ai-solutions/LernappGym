@@ -49,7 +49,8 @@ test(`Zusammenstellung: alle ${2 ** themen.length - 1} Auswahlen × 3 Varianten`
   }
   const summe = anteil.reduce((a, b) => a + b, 0);
   const prozent = anteil.map((x) => Math.round((100 * x) / summe));
-  assert.ok(prozent[0] >= 20 && prozent[0] <= 40 && prozent[1] >= 50 && prozent[2] >= 5 && prozent[2] <= 15, `AFB-Anteile ${prozent.join('/')} %`);
+  // Zielwert nach dem Erwartungshorizont der Lehrkraft: etwa 58/33/9 %
+  assert.ok(prozent[0] >= 45 && prozent[0] <= 65 && prozent[1] >= 25 && prozent[1] <= 45 && prozent[2] >= 5 && prozent[2] <= 15, `AFB-Anteile ${prozent.join('/')} %`);
 });
 
 test('Klassenarbeitsaufgaben: 100 Seeds ohne Fehler, Bezeichnung für den Elternbericht', () => {
@@ -119,14 +120,14 @@ test('Druck-HTML: Arbeit mit Namenszeile und Platz, Lösung mit Antworten, Punkt
   }
 });
 
-test('PDF: Klassenarbeiten in A4 mit höchstens 6 Seiten, Lösung höchstens 7 Seiten', async () => {
+test('PDF: Klassenarbeiten in A4 mit höchstens 8 Seiten, Lösung höchstens 9 Seiten (55 BE)', async () => {
   try {
     const faelle = [['runden', 'zeit', 'kommazahlen'], themen.map((t) => t.thema), ['daten-diagramme'], ['grosse-zahlen', 'sachaufgaben']];
     for (const [i, auswahl] of faelle.entries()) {
       const { arbeit, loesung } = klassenarbeitHtml({ themen: auswahl, seed: `P${i}` });
       for (const [art, html] of [['Arbeit', arbeit], ['Lösung', loesung]]) {
         const { pdf, seiten } = await htmlZuPdf(html);
-        assert.ok(seiten >= 2 && seiten <= (art === 'Arbeit' ? 6 : 7), `${auswahl.join(',')}: ${art} hat ${seiten} Seiten`);
+        assert.ok(seiten >= 2 && seiten <= (art === 'Arbeit' ? 8 : 9), `${auswahl.join(',')}: ${art} hat ${seiten} Seiten`);
         for (const [, b, h] of pdf.toString('latin1').matchAll(/\/MediaBox\s*\[\s*0\s+0\s+([\d.]+)\s+([\d.]+)\s*\]/g)) {
           assert.ok(Math.abs(b - 595) < 1 && Math.abs(h - 842) < 1, `Seitenformat ${b} × ${h}`);
         }
